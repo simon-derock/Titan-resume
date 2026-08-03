@@ -43,7 +43,8 @@ live model dependencies.
 
 The Milestone 0 foundation is complete. The deterministic domain layer now has
 immutable policy, evidence, bullet, entry, and versioned resume-content models;
-rendering and artifact validation are not yet implemented.
+safe LaTeX text escaping is implemented, while template rendering and artifact
+validation are not yet implemented.
 
 ## Implementation Status
 
@@ -54,12 +55,14 @@ rendering and artifact validation are not yet implemented.
   that are missing or not allowed for resume use.
 - `ResumeContent` is strict, template-locked, versioned, renderer-independent,
   and recursively checked for unavailable evidence references.
+- Candidate-controlled LaTeX reserved characters and command prefixes are
+  escaped deterministically before template rendering.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local test, lint, type, and memory gates pass: 20 tests with 99.22%
+The complete local test, lint, type, and memory gates pass: 22 tests with 99.24%
 branch-aware coverage.
 
 ## Known Issues
@@ -75,8 +78,9 @@ satisfy its real-compiler exit criterion.
 
 ## Next Exact Action
 
-Write and observe the failing security test that requires the renderer to escape
-all LaTeX-reserved characters in candidate-controlled text.
+Write and observe the failing integration test that renders structured resume
+content through the locked `resume_v1` Jinja2 template without exposing raw
+candidate LaTeX.
 
 ## Files Changed Recently
 
@@ -92,8 +96,8 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 20
-- Measured line and branch coverage: 99.22%
+- Tests passing: 22
+- Measured line and branch coverage: 99.24%
 - Live model calls: 0
 - Compiled resume fixtures: 0
 
@@ -109,6 +113,8 @@ No prompts exist yet.
   immutable evidence records and allowlisted cross-reference validation.
 - 2026-08-03: Locked resume content to the `resume_v1` structured schema so raw
   LaTeX and unversioned or ungrounded nested content cannot enter rendering.
+- 2026-08-03: Implemented character-wise LaTeX escaping so injected commands are
+  rendered as literal text rather than executable template source.
 
 ## Session Log
 
