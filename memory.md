@@ -44,7 +44,8 @@ live model dependencies.
 The Milestone 0 foundation is complete. The deterministic domain layer now has
 immutable policy, evidence, bullet, entry, and versioned resume-content models;
 safe LaTeX escaping and locked-template rendering are implemented, while PDF
-compilation and artifact validation are not yet implemented.
+compilation has a restricted subprocess wrapper; real PDF artifact validation is
+not yet implemented.
 
 ## Implementation Status
 
@@ -59,12 +60,15 @@ compilation and artifact validation are not yet implemented.
   escaped deterministically before template rendering.
 - `LatexRenderer` uses a sandboxed, strict Jinja2 environment and the versioned
   `resume_v1` template with deterministic element markers.
+- `LatexCompiler` uses fixed list arguments, explicitly disables shell escape,
+  enforces a timeout, and returns typed success, compile, timeout, or unavailable
+  engine results through an injectable process runner.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local test, lint, type, and memory gates pass: 23 tests with 99.35%
+The complete local test, lint, type, and memory gates pass: 29 tests with 99.49%
 branch-aware coverage.
 
 ## Known Issues
@@ -75,13 +79,13 @@ branch-aware coverage.
 
 ## Current Blocker
 
-No blocker for Milestone 0. A LaTeX engine is required before Milestone 1 can
-satisfy its real-compiler exit criterion.
+Real compiler integration is blocked until a LaTeX engine is installed. The
+restricted compiler behavior itself is covered with deterministic runners.
 
 ## Next Exact Action
 
-Write and observe the failing compiler test requiring invalid TeX to return a
-structured failure without shell escape or an unbounded subprocess.
+Install a local `pdflatex` engine, then write and observe the real compiler
+integration test for the locked fixture before adding PDF validation.
 
 ## Files Changed Recently
 
@@ -97,8 +101,8 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 23
-- Measured line and branch coverage: 99.35%
+- Tests passing: 29
+- Measured line and branch coverage: 99.49%
 - Live model calls: 0
 - Compiled resume fixtures: 0
 
@@ -118,6 +122,8 @@ No prompts exist yet.
   rendered as literal text rather than executable template source.
 - 2026-08-03: Added the versioned single-column A4 template and strict sandboxed
   renderer; template inputs remain structured and element-addressable.
+- 2026-08-03: Added restricted LaTeX compilation with explicit shell-escape
+  denial, bounded execution, injectable process calls, and typed failure modes.
 
 ## Session Log
 

@@ -74,6 +74,21 @@ class ResumeHeader(BaseModel):
     portfolio: str | None = None
 
 
+class CompileResult(BaseModel):
+    """Serializable outcome from the restricted LaTeX subprocess."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    success: bool
+    exit_code: int | None
+    pdf_path: str | None
+    log: str
+    timed_out: bool = False
+    error_type: (
+        Literal["compilation_error", "timeout", "compiler_unavailable"] | None
+    ) = None
+
+
 class ResumeEntry(BaseModel):
     """A role, project, or education entry containing grounded bullets."""
 
