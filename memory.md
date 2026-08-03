@@ -42,7 +42,7 @@ live model dependencies.
 ## Current Architecture
 
 The Milestone 0 foundation is complete. The deterministic domain layer now has
-immutable resume policy, evidence-record, and evidence-grounded bullet models;
+immutable policy, evidence, bullet, entry, and versioned resume-content models;
 rendering and artifact validation are not yet implemented.
 
 ## Implementation Status
@@ -52,13 +52,15 @@ rendering and artifact validation are not yet implemented.
 - `Settings` rejects an empty Telegram admin allowlist.
 - Resume bullets require evidence IDs, and cross-record validation rejects IDs
   that are missing or not allowed for resume use.
+- `ResumeContent` is strict, template-locked, versioned, renderer-independent,
+  and recursively checked for unavailable evidence references.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes: 14 tests, 100% measured coverage,
-Ruff lint and format checks, strict mypy, and `memory-check`.
+The complete local test, lint, type, and memory gates pass: 20 tests with 99.22%
+branch-aware coverage.
 
 ## Known Issues
 
@@ -73,8 +75,8 @@ satisfy its real-compiler exit criterion.
 
 ## Next Exact Action
 
-Write and observe a failing contract test for strict, versioned `ResumeContent`
-that contains only evidence-grounded bullets.
+Write and observe the failing security test that requires the renderer to escape
+all LaTeX-reserved characters in candidate-controlled text.
 
 ## Files Changed Recently
 
@@ -90,8 +92,8 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 14
-- Measured line and branch coverage: 100%
+- Tests passing: 20
+- Measured line and branch coverage: 99.22%
 - Live model calls: 0
 - Compiled resume fixtures: 0
 
@@ -105,6 +107,8 @@ No prompts exist yet.
   commit sequence with professional commit messages.
 - 2026-08-03: Completed Milestone 0 and began the deterministic slice with
   immutable evidence records and allowlisted cross-reference validation.
+- 2026-08-03: Locked resume content to the `resume_v1` structured schema so raw
+  LaTeX and unversioned or ungrounded nested content cannot enter rendering.
 
 ## Session Log
 
