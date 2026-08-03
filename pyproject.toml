@@ -1,0 +1,68 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "titan-resume"
+version = "0.1.0"
+description = "TITAN — Self-Correcting AI Resume Compiler"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "jinja2>=3.1,<4",
+    "pydantic>=2.10,<3",
+    "pydantic-settings>=2.7,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "coverage[toml]>=7.6,<8",
+    "hypothesis>=6.120,<7",
+    "mypy>=1.14,<2",
+    "pytest>=8.3,<10",
+    "pytest-cov>=6,<7",
+    "ruff>=0.9,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "unit: fast isolated tests",
+    "contract: external-boundary contract tests",
+    "integration: component integration tests",
+    "compiler: tests requiring a real LaTeX compiler",
+    "graph: graph state and routing tests",
+    "regression: golden-behavior regression tests",
+    "security: security policy tests",
+    "visual: rendered-document visual tests",
+    "slow: deliberately slow tests",
+    "live_llm: tests using a live language model",
+    "live_vision: tests using a live vision model",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+extend-exclude = ["TITAN_PLAN.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["app"]
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 90
