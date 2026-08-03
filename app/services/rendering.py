@@ -162,3 +162,48 @@ def _process_log(stdout: str | bytes | None, stderr: str | bytes | None) -> str:
         return value or ""
 
     return "\n".join(part for part in (as_text(stdout), as_text(stderr)) if part)
+
+
+class ScreenshotRenderError(RuntimeError):
+    """Raised when the deterministic PDF rasterizer cannot create a preview."""
+
+
+class PdfScreenshotRenderer:
+    """Render the first PDF page to a high-resolution PNG preview."""
+
+    def __init__(
+        self,
+        *,
+        runner: ProcessRunner | None = None,
+        executable: str = "pdftoppm",
+        dpi: int = 200,
+        timeout_seconds: float = 30.0,
+    ) -> None:
+        self._runner = runner or SubprocessRunner()
+        self._executable = executable
+        self._dpi = dpi
+        self._timeout_seconds = timeout_seconds
+
+    def render_first_page(self, pdf_path: Path, output_path: Path) -> Path:
+        output_prefix = output_path.with_suffix("")
+        command = (
+            self._executable,
+            "-f",
+            "1",
+            "-l",
+            "1",
+            "-singlefile",
+            "-png",
+            "-r",
+            str(self._dpi),
+            str(pdf_path),
+            str(output_prefix),
+        )
+        process = self._runner.run(
+            command,
+            cwd=pdf_path.parent,
+            timeout_seconds=self._timeout_seconds,
+        )
+        if process.returncode != 0 or not output_path.is_file():
+            raise ScreenshotRenderError(_process_log(process.stdout, process.stderr))
+        return output_path
