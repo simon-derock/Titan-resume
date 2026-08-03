@@ -72,29 +72,27 @@ not yet implemented.
 
 ## Test Status
 
-The previous complete gate passed 29 tests with 99.49% branch-aware coverage.
-The new Tectonic command-policy unit test passes; the real compiler test is RED
-because its required support bundle has not yet been cached.
+The complete local gate passes 31 tests with 99.50% branch-aware coverage,
+including a real cache-only Tectonic compile of the locked template.
 
 ## Known Issues
 
 - System TeX installation was unavailable without an interactive sudo password;
   a hash-verified workspace-local Tectonic engine is installed instead.
-- Tectonic's support bundle is not cached yet, so the real compiler integration
-  test fails safely in cache-only mode.
+- CI does not yet provision the pinned Tectonic binary and support cache, so the
+  real compiler test is skipped when that engine is absent.
 - PDF validation, screenshot rendering, and geometry reporting are not
   implemented.
 
 ## Current Blocker
 
-Real compiler integration is blocked until Tectonic's support bundle is fetched
-once into the ignored workspace cache. Restricted compilation correctly refuses
-network access at runtime.
+No blocker for the one-page validator. Reproducible compiler provisioning in CI
+remains required before Milestone 1 can close.
 
 ## Next Exact Action
 
-Warm `.tools/tectonic-cache` from the official Tectonic bundle, then rerun
-`tests/integration/test_real_compiler.py` and diagnose any template failure.
+Write and observe the failing page-validator test requiring a two-page PDF to be
+rejected with a structured `page_overflow` issue.
 
 ## Files Changed Recently
 
@@ -110,11 +108,11 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 30
-- Tests failing: 1 real compiler integration (support cache absent)
-- Measured line and branch coverage: 99.49%
+- Tests passing: 31
+- Tests failing: 0
+- Measured line and branch coverage: 99.50%
 - Live model calls: 0
-- Compiled resume fixtures: 0
+- Compiled resume fixtures: 1
 
 ## Decision Log
 
@@ -137,6 +135,9 @@ No prompts exist yet.
 - 2026-08-03: Chose hash-verified, workspace-local Tectonic after system TeX
   installation required unavailable sudo credentials; runtime compilation stays
   untrusted and cache-only.
+- 2026-08-03: Warmed the ignored Tectonic support cache once from the official
+  bundle and verified that cache-only compilation produces a real locked-template
+  PDF.
 
 ## Session Log
 
@@ -145,3 +146,5 @@ No prompts exist yet.
   cycles, and established the initial CI contract.
 - 2026-08-03: Pushed the Milestone 0 red/green history to `origin/main`; added and
   verified the first Milestone 1 evidence-grounding increment.
+- 2026-08-03: Verified the first real LaTeX artifact through Tectonic 0.16.9 with
+  untrusted execution and no runtime network access.
