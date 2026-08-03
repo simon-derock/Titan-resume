@@ -1,6 +1,7 @@
 """Deterministic quality gates for compiled resume artifacts."""
 
 import re
+import subprocess
 from pathlib import Path
 from typing import Protocol
 
@@ -16,11 +17,30 @@ class PdfInfoReader(Protocol):
 PAGE_COUNT_PATTERN = re.compile(r"(?m)^Pages:\s*(\d+)\s*$")
 
 
+class SubprocessPdfInfoReader:
+    """Read PDF metadata with fixed arguments and no command shell."""
+
+    def __init__(self, *, executable: str = "pdfinfo", timeout_seconds: float = 10.0):
+        self._executable = executable
+        self._timeout_seconds = timeout_seconds
+
+    def read(self, pdf_path: Path) -> str:
+        process = subprocess.run(
+            [self._executable, str(pdf_path)],
+            cwd=pdf_path.parent,
+            timeout=self._timeout_seconds,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        return "\n".join(part for part in (process.stdout, process.stderr) if part)
+
+
 class PdfValidator:
     """Enforce hard artifact invariants without model judgment."""
 
-    def __init__(self, *, reader: PdfInfoReader) -> None:
-        self._reader = reader
+    def __init__(self, *, reader: PdfInfoReader | None = None) -> None:
+        self._reader = reader or SubprocessPdfInfoReader()
 
     def validate(self, pdf_path: Path) -> PdfValidationReport:
         metadata = self._reader.read(pdf_path)

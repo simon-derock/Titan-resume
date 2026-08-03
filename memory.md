@@ -44,8 +44,8 @@ live model dependencies.
 The Milestone 0 foundation is complete. The deterministic domain layer now has
 immutable policy, evidence, bullet, entry, and versioned resume-content models;
 safe LaTeX escaping, locked-template rendering, restricted PDF compilation, and
-typed page-count validation are implemented. Real `pdfinfo`, text, screenshot,
-and geometry integration remain.
+typed page-count validation are implemented. Real `pdfinfo` metadata is wired;
+text extraction, screenshot, and geometry integration remain.
 
 ## Implementation Status
 
@@ -69,13 +69,15 @@ and geometry integration remain.
   `f3c825128095dc3399ea11c08c18035b33050a216930c295c79e8eb11bd21de4`).
 - `PdfValidator` accepts exactly one parsed page, rejects overflow with a fatal
   `page_overflow`, and reports malformed metadata as a fatal parse issue.
+- The default PDF metadata reader invokes `pdfinfo` with fixed list arguments and
+  no shell; a compiled two-page fixture is rejected through the real boundary.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 34 tests with 99.59% branch-aware coverage,
-including a real cache-only Tectonic compile of the locked template.
+The complete local gate passes 35 tests with 99.60% branch-aware coverage,
+including real cache-only compilation and two-page `pdfinfo` validation.
 
 ## Known Issues
 
@@ -83,18 +85,18 @@ including a real cache-only Tectonic compile of the locked template.
   a hash-verified workspace-local Tectonic engine is installed instead.
 - CI does not yet provision the pinned Tectonic binary and support cache, so the
   real compiler test is skipped when that engine is absent.
-- Real PDF metadata/text integration, screenshot rendering, and geometry
-  reporting are not implemented.
+- PDF text extraction, screenshot rendering, and geometry reporting are not
+  implemented.
 
 ## Current Blocker
 
-No blocker for the real PDF metadata boundary. Reproducible compiler provisioning
-in CI remains required before Milestone 1 can close.
+No blocker for screenshot rendering. Reproducible compiler provisioning in CI
+remains required before Milestone 1 can close.
 
 ## Next Exact Action
 
-Write and observe the failing integration test that validates a real two-page PDF
-through the system `pdfinfo` boundary.
+Write and observe the failing integration test that renders the compiled first
+page to a high-resolution PNG with the A4 aspect ratio preserved.
 
 ## Files Changed Recently
 
@@ -110,9 +112,9 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 34
+- Tests passing: 35
 - Tests failing: 0
-- Measured line and branch coverage: 99.59%
+- Measured line and branch coverage: 99.60%
 - Live model calls: 0
 - Compiled resume fixtures: 1
 
@@ -142,6 +144,8 @@ No prompts exist yet.
   PDF.
 - 2026-08-03: Enforced the exactly-one-page invariant as deterministic typed
   validation; no LLM or vision result can override page overflow.
+- 2026-08-03: Verified the page-count gate against a real compiled two-page PDF
+  using the no-shell `pdfinfo` boundary.
 
 ## Session Log
 
