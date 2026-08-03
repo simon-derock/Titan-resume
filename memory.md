@@ -10,12 +10,12 @@ Telegram bot; the deterministic document pipeline comes first.
 
 ## Current Milestone
 
-Milestone 0 — Project contract and tooling.
+Milestone 1 — Deterministic vertical slice.
 
 ## Current Objective
 
-Establish the enforced TDD and operational-memory baseline, then begin the
-deterministic vertical slice without live model dependencies.
+Produce and validate a compact one-page PDF from fixture resume JSON without
+live model dependencies.
 
 ## Non-Negotiable Invariants
 
@@ -41,20 +41,23 @@ deterministic vertical slice without live model dependencies.
 
 ## Current Architecture
 
-Only the Milestone 0 foundation exists: strict Pydantic policy/settings models,
-pytest marker configuration, and a project-memory contract checker.
+The Milestone 0 foundation is complete. The deterministic domain layer now has
+immutable resume policy, evidence-record, and evidence-grounded bullet models;
+rendering and artifact validation are not yet implemented.
 
 ## Implementation Status
 
 - Project metadata and a local uv environment are present.
 - `ResumePolicy` enforces `page_count == 1`.
 - `Settings` rejects an empty Telegram admin allowlist.
+- Resume bullets require evidence IDs, and cross-record validation rejects IDs
+  that are missing or not allowed for resume use.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete Milestone 0 local gate passes: 10 tests, 100% measured coverage,
+The complete local gate passes: 14 tests, 100% measured coverage,
 Ruff lint and format checks, strict mypy, and `memory-check`.
 
 ## Known Issues
@@ -70,8 +73,8 @@ satisfy its real-compiler exit criterion.
 
 ## Next Exact Action
 
-Write and observe the failing evidence-grounding test for a resume bullet that
-references an unknown evidence ID.
+Write and observe a failing contract test for strict, versioned `ResumeContent`
+that contains only evidence-grounded bullets.
 
 ## Files Changed Recently
 
@@ -87,7 +90,7 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 10
+- Tests passing: 14
 - Measured line and branch coverage: 100%
 - Live model calls: 0
 - Compiled resume fixtures: 0
@@ -100,9 +103,13 @@ No prompts exist yet.
   versions.
 - 2026-08-03: Set the canonical GitHub remote and adopted an auditable red/green
   commit sequence with professional commit messages.
+- 2026-08-03: Completed Milestone 0 and began the deterministic slice with
+  immutable evidence records and allowlisted cross-reference validation.
 
 ## Session Log
 
 - 2026-08-03: Read the full plan, inspected the empty repository, recorded the
   missing toolchain, completed the first policy/configuration/memory red–green
   cycles, and established the initial CI contract.
+- 2026-08-03: Pushed the Milestone 0 red/green history to `origin/main`; added and
+  verified the first Milestone 1 evidence-grounding increment.
