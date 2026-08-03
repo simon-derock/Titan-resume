@@ -59,6 +59,21 @@ class EvidenceText(BaseModel):
     evidence_ids: tuple[str, ...] = Field(min_length=1)
 
 
+class ResumeHeader(BaseModel):
+    """Stable candidate identity and contact data rendered in the page header."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    name: str = Field(min_length=1)
+    headline: str = Field(min_length=1)
+    location: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    linkedin: str | None = None
+    github: str | None = None
+    portfolio: str | None = None
+
+
 class ResumeEntry(BaseModel):
     """A role, project, or education entry containing grounded bullets."""
 

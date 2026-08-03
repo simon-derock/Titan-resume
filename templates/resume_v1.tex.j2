@@ -1,0 +1,86 @@
+% TITAN-TEMPLATE: resume_v1
+\documentclass[a4paper,10pt]{article}
+
+\usepackage[ top=0.30in, bottom=0.30in, left=0.38in, right=0.38in ]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\usepackage{xcolor}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlist[itemize]{leftmargin=0.16in, itemsep=0pt, topsep=1pt, parsep=0pt}
+\titleformat{\section}{\large\bfseries}{}{0pt}{}[\vspace{-3pt}\titlerule]
+\titlespacing*{\section}{0pt}{5pt}{3pt}
+
+{% raw %}\newcommand{\resumeEntry}[4]{
+  \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lr}
+    \textbf{#1} & #4 \\
+    \textit{#2} & \textit{#3}
+  \end{tabular*}\vspace{-3pt}
+}{% endraw %}
+
+\begin{document}
+\fontsize{9.5}{11}\selectfont
+
+% TITAN-ELEMENT: header
+\begin{center}
+  {\LARGE\bfseries {{ header.name | latex }}}\\[-1pt]
+  {{ header.headline | latex }}{% if header.location %} $\vert$ {{ header.location | latex }}{% endif %}\\[-1pt]
+  {% if header.email %}\href{mailto:{{ header.email | latex }}}{ {{- header.email | latex -}} }{% endif %}
+  {% if header.phone %} $\vert$ {{ header.phone | latex }}{% endif %}
+  {% if header.linkedin %} $\vert$ \href{ {{- header.linkedin | latex -}} }{LinkedIn}{% endif %}
+  {% if header.github %} $\vert$ \href{ {{- header.github | latex -}} }{GitHub}{% endif %}
+  {% if header.portfolio %} $\vert$ \href{ {{- header.portfolio | latex -}} }{Portfolio}{% endif %}
+\end{center}\vspace{-7pt}
+
+{% if resume.summary %}
+% TITAN-ELEMENT: {{ resume.summary.element_id }}
+\section{Summary}
+{{ resume.summary.text | latex }}
+{% endif %}
+
+{% if resume.experience %}
+\section{Experience}
+{% for entry in resume.experience %}
+% TITAN-ELEMENT: {{ entry.element_id }}
+\resumeEntry{ {{- entry.heading | latex -}} }{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }
+{% if entry.bullets %}\begin{itemize}
+{% for bullet in entry.bullets %}% TITAN-ELEMENT: {{ bullet.element_id }}
+\item {{ bullet.text | latex }}
+{% endfor %}\end{itemize}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if resume.projects %}
+\section{Projects}
+{% for entry in resume.projects %}
+% TITAN-ELEMENT: {{ entry.element_id }}
+\resumeEntry{ {{- entry.heading | latex -}} }{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }
+{% if entry.bullets %}\begin{itemize}
+{% for bullet in entry.bullets %}% TITAN-ELEMENT: {{ bullet.element_id }}
+\item {{ bullet.text | latex }}
+{% endfor %}\end{itemize}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if resume.skills %}
+\section{Skills}
+{% for skill_line in resume.skills %}% TITAN-ELEMENT: {{ skill_line.element_id }}
+{{ skill_line.text | latex }}{% if not loop.last %}\\{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if resume.education %}
+\section{Education}
+{% for entry in resume.education %}% TITAN-ELEMENT: {{ entry.element_id }}
+\resumeEntry{ {{- entry.heading | latex -}} }{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }
+{% endfor %}
+{% endif %}
+
+\end{document}

@@ -43,8 +43,8 @@ live model dependencies.
 
 The Milestone 0 foundation is complete. The deterministic domain layer now has
 immutable policy, evidence, bullet, entry, and versioned resume-content models;
-safe LaTeX text escaping is implemented, while template rendering and artifact
-validation are not yet implemented.
+safe LaTeX escaping and locked-template rendering are implemented, while PDF
+compilation and artifact validation are not yet implemented.
 
 ## Implementation Status
 
@@ -57,12 +57,14 @@ validation are not yet implemented.
   and recursively checked for unavailable evidence references.
 - Candidate-controlled LaTeX reserved characters and command prefixes are
   escaped deterministically before template rendering.
+- `LatexRenderer` uses a sandboxed, strict Jinja2 environment and the versioned
+  `resume_v1` template with deterministic element markers.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local test, lint, type, and memory gates pass: 22 tests with 99.24%
+The complete local test, lint, type, and memory gates pass: 23 tests with 99.35%
 branch-aware coverage.
 
 ## Known Issues
@@ -78,9 +80,8 @@ satisfy its real-compiler exit criterion.
 
 ## Next Exact Action
 
-Write and observe the failing integration test that renders structured resume
-content through the locked `resume_v1` Jinja2 template without exposing raw
-candidate LaTeX.
+Write and observe the failing compiler test requiring invalid TeX to return a
+structured failure without shell escape or an unbounded subprocess.
 
 ## Files Changed Recently
 
@@ -96,8 +97,8 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 22
-- Measured line and branch coverage: 99.24%
+- Tests passing: 23
+- Measured line and branch coverage: 99.35%
 - Live model calls: 0
 - Compiled resume fixtures: 0
 
@@ -115,6 +116,8 @@ No prompts exist yet.
   LaTeX and unversioned or ungrounded nested content cannot enter rendering.
 - 2026-08-03: Implemented character-wise LaTeX escaping so injected commands are
   rendered as literal text rather than executable template source.
+- 2026-08-03: Added the versioned single-column A4 template and strict sandboxed
+  renderer; template inputs remain structured and element-addressable.
 
 ## Session Log
 

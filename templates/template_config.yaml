@@ -1,0 +1,15 @@
+template_id: resume_v1
+version: 1.0.0
+page_size: A4
+page_count: 1
+top_margin_in: 0.30
+bottom_margin_in: 0.30
+left_margin_in: 0.38
+right_margin_in: 0.38
+header_enabled: false
+footer_enabled: false
+minimum_body_font_pt: 9.3
+target_page_fill_percent:
+  minimum: 93
+  maximum: 98
+
