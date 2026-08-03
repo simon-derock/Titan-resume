@@ -93,6 +93,30 @@ def test_compiler_disables_shell_escape_and_enforces_timeout(tmp_path: Path) -> 
 
 
 @pytest.mark.unit
+@pytest.mark.security
+def test_tectonic_compiler_uses_untrusted_cached_mode(tmp_path: Path) -> None:
+    tex_path = tmp_path / "resume.tex"
+    tex_path.write_text(r"\documentclass{article}", encoding="utf-8")
+    runner = InvalidTexRunner()
+
+    LatexCompiler(
+        runner=runner,
+        executable="/opt/tectonic",
+        engine="tectonic",
+    ).compile(tex_path)
+
+    assert runner.command == (
+        "/opt/tectonic",
+        "--untrusted",
+        "--only-cached",
+        "--keep-logs",
+        "--outdir",
+        str(tmp_path),
+        "resume.tex",
+    )
+
+
+@pytest.mark.unit
 def test_compiler_returns_pdf_path_after_successful_process(tmp_path: Path) -> None:
     tex_path = tmp_path / "resume.tex"
     tex_path.write_text(r"\documentclass{article}", encoding="utf-8")
