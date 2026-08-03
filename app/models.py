@@ -89,6 +89,32 @@ class CompileResult(BaseModel):
     ) = None
 
 
+class ValidationIssue(BaseModel):
+    """One deterministic or advisory defect tied to a resume element."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    issue_id: str = Field(min_length=1)
+    source: Literal["geometry", "vision", "ats", "provenance", "compiler"]
+    element_id: str = ""
+    issue_type: str = Field(min_length=1)
+    severity: Literal["low", "medium", "high", "fatal"]
+    message: str = Field(min_length=1)
+    recommended_action: str = ""
+    measured_value: int | float | str | None = None
+    expected_value: int | float | str | None = None
+
+
+class PdfValidationReport(BaseModel):
+    """Typed deterministic validation result for a compiled PDF artifact."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    passed: bool
+    page_count: int | None
+    issues: tuple[ValidationIssue, ...] = ()
+
+
 class ResumeEntry(BaseModel):
     """A role, project, or education entry containing grounded bullets."""
 
