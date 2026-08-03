@@ -63,37 +63,46 @@ not yet implemented.
 - `LatexCompiler` uses fixed list arguments, explicitly disables shell escape,
   enforces a timeout, and returns typed success, compile, timeout, or unavailable
   engine results through an injectable process runner.
+- The compiler supports explicit pdfLaTeX and Tectonic policies. Tectonic runs
+  with `--untrusted` and `--only-cached`; the verified local engine is upstream
+  Tectonic 0.16.9 (Linux x86-64 archive SHA-256
+  `f3c825128095dc3399ea11c08c18035b33050a216930c295c79e8eb11bd21de4`).
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local test, lint, type, and memory gates pass: 29 tests with 99.49%
-branch-aware coverage.
+The previous complete gate passed 29 tests with 99.49% branch-aware coverage.
+The new Tectonic command-policy unit test passes; the real compiler test is RED
+because its required support bundle has not yet been cached.
 
 ## Known Issues
 
-- No LaTeX engine is installed, so real compiler integration is not yet possible.
-- The deterministic rendering, compilation, PDF validation, screenshot, and
-  geometry slice is not implemented.
+- System TeX installation was unavailable without an interactive sudo password;
+  a hash-verified workspace-local Tectonic engine is installed instead.
+- Tectonic's support bundle is not cached yet, so the real compiler integration
+  test fails safely in cache-only mode.
+- PDF validation, screenshot rendering, and geometry reporting are not
+  implemented.
 
 ## Current Blocker
 
-Real compiler integration is blocked until a LaTeX engine is installed. The
-restricted compiler behavior itself is covered with deterministic runners.
+Real compiler integration is blocked until Tectonic's support bundle is fetched
+once into the ignored workspace cache. Restricted compilation correctly refuses
+network access at runtime.
 
 ## Next Exact Action
 
-Install a local `pdflatex` engine, then write and observe the real compiler
-integration test for the locked fixture before adding PDF validation.
+Warm `.tools/tectonic-cache` from the official Tectonic bundle, then rerun
+`tests/integration/test_real_compiler.py` and diagnose any template failure.
 
 ## Files Changed Recently
 
 - `pyproject.toml`, `Makefile`, `.github/workflows/ci.yml`
 - `app/models.py`, `app/config.py`
+- `app/services/rendering.py`, `templates/resume_v1.tex.j2`
 - `scripts/check_memory.py`
-- `tests/unit/test_resume_policy.py`, `tests/unit/test_config.py`
-- `tests/unit/test_memory_check.py`
+- `tests/unit/test_compiler.py`, `tests/integration/test_real_compiler.py`
 
 ## Prompt Versions
 
@@ -101,7 +110,8 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 29
+- Tests passing: 30
+- Tests failing: 1 real compiler integration (support cache absent)
 - Measured line and branch coverage: 99.49%
 - Live model calls: 0
 - Compiled resume fixtures: 0
@@ -124,6 +134,9 @@ No prompts exist yet.
   renderer; template inputs remain structured and element-addressable.
 - 2026-08-03: Added restricted LaTeX compilation with explicit shell-escape
   denial, bounded execution, injectable process calls, and typed failure modes.
+- 2026-08-03: Chose hash-verified, workspace-local Tectonic after system TeX
+  installation required unavailable sudo credentials; runtime compilation stays
+  untrusted and cache-only.
 
 ## Session Log
 

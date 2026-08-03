@@ -3,7 +3,7 @@
 import subprocess
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Protocol
+from typing import Literal, Protocol
 
 from jinja2 import FileSystemLoader, StrictUndefined
 from jinja2.sandbox import SandboxedEnvironment
@@ -88,20 +88,16 @@ class LatexCompiler:
         *,
         runner: ProcessRunner | None = None,
         executable: str = "pdflatex",
+        engine: Literal["pdflatex", "tectonic"] = "pdflatex",
         timeout_seconds: float = 20.0,
     ) -> None:
         self._runner = runner or SubprocessRunner()
         self._executable = executable
+        self._engine = engine
         self._timeout_seconds = timeout_seconds
 
     def compile(self, tex_path: Path) -> CompileResult:
-        command = (
-            self._executable,
-            "-no-shell-escape",
-            "-interaction=nonstopmode",
-            "-halt-on-error",
-            tex_path.name,
-        )
+        command = self._command(tex_path)
         try:
             process = self._runner.run(
                 command,
@@ -135,6 +131,25 @@ class LatexCompiler:
             pdf_path=str(pdf_path) if success else None,
             log=_process_log(process.stdout, process.stderr),
             error_type=None if success else "compilation_error",
+        )
+
+    def _command(self, tex_path: Path) -> tuple[str, ...]:
+        if self._engine == "tectonic":
+            return (
+                self._executable,
+                "--untrusted",
+                "--only-cached",
+                "--keep-logs",
+                "--outdir",
+                str(tex_path.parent),
+                tex_path.name,
+            )
+        return (
+            self._executable,
+            "-no-shell-escape",
+            "-interaction=nonstopmode",
+            "-halt-on-error",
+            tex_path.name,
         )
 
 
