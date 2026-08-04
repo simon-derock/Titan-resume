@@ -115,6 +115,52 @@ class PdfValidationReport(BaseModel):
     issues: tuple[ValidationIssue, ...] = ()
 
 
+class GeometryPolicy(BaseModel):
+    """Minimum safe whitespace around all rendered resume text."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    minimum_top_margin_pt: float = Field(default=18.0, ge=0.0)
+    minimum_bottom_margin_pt: float = Field(default=20.0, ge=0.0)
+    minimum_horizontal_margin_pt: float = Field(default=22.0, ge=0.0)
+
+
+class TextBox(BaseModel):
+    """Measured page coordinates for one text-bearing element."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    element_id: str = Field(min_length=1)
+    text: str
+    x0: float
+    y0: float
+    x1: float
+    y1: float
+
+
+class PageGeometry(BaseModel):
+    """Page dimensions and element-level text bounds in PDF points."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    width_pt: float = Field(gt=0.0)
+    height_pt: float = Field(gt=0.0)
+    text_boxes: tuple[TextBox, ...] = Field(min_length=1)
+
+
+class GeometryReport(BaseModel):
+    """Deterministic margin measurements and any resulting defects."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    passed: bool
+    minimum_left_margin_pt: float
+    minimum_right_margin_pt: float
+    minimum_top_margin_pt: float
+    minimum_bottom_margin_pt: float
+    issues: tuple[ValidationIssue, ...] = ()
+
+
 class ResumeEntry(BaseModel):
     """A role, project, or education entry containing grounded bullets."""
 
