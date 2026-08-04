@@ -184,6 +184,18 @@ class ResumeStrategy(BaseModel):
     must_not_claim: tuple[str, ...] = ()
 
 
+class ResumeWritingRequest(BaseModel):
+    """Grounded, space-bounded input exposed to a resume writing provider."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    job_description: StructuredJobDescription
+    strategy: ResumeStrategy
+    space_budget: ResumeSpaceBudget
+    selected_evidence: tuple[EvidenceRecord, ...]
+    schema_version: Literal[1] = 1
+
+
 class JobEvidenceIntelligenceResult(BaseModel):
     """Serializable output of the complete offline JD intelligence slice."""
 

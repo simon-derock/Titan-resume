@@ -14,9 +14,9 @@ Milestone 3 — Structured writing.
 
 ## Current Objective
 
-Define the structured resume-writer contract so a replaceable model can transform
-the grounded strategy into line-budgeted `ResumeContent` without inventing claims
-or generating raw LaTeX.
+Version the first writer prompt and provider adapter contract on top of the fully
+validated structured writer boundary, while retaining fake-client coverage and
+keeping live calls disabled by default.
 
 ## Non-Negotiable Invariants
 
@@ -122,18 +122,24 @@ and warms the locked-template support cache before executing real compiler tests
   replaceable structured analysis, resume-allowed evidence loading, conservative
   matching, unique-source inventory, bounded space planning, and grounded
   strategy into one serializable Milestone 2 result.
+- `StructuredResumeWriter` exposes only strategy-selected evidence and a strategy
+  with omitted IDs removed, validates responses through `ResumeContent`, rejects
+  unavailable provenance, unsupported `must_not_claim` terms, raw LaTeX, foreign
+  roles, section/entry/bullet/line overflow, and retries at most three times with
+  sanitized terminal errors.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 113 tests with 99.87% branch-aware coverage,
+The complete local gate passes 129 tests with 100% line and branch coverage,
 including real compilation, page metadata, PNG, coordinate extraction, and
 safe-margin, ATS, end-to-end vertical-slice, CI provisioning, and private
 candidate-store validation, plus deterministic JD intake, schema, and evidence
 matching, bounded space-planning, grounded strategy, and offline structured-JD
 analysis contracts. A golden integration proves stable rankings and preserves
-Kubernetes as an unsupported must-have gap.
+Kubernetes as an unsupported must-have gap; writer tests prove it cannot re-enter
+content through a provider response.
 
 ## Known Issues
 
@@ -149,19 +155,19 @@ Kubernetes as an unsupported must-have gap.
 
 ## Current Blocker
 
-No engineering blocker. Writer development uses fake clients and golden fixtures
-until a model provider and real target job description are selected.
+No engineering blocker. A live model provider and real target JD are not selected;
+prompt and adapter contracts remain provider-neutral and offline-testable.
 
 ## Next Exact Action
 
-Add failing structured-writer boundary tests requiring selected evidence only,
-valid recursive provenance, protected `must_not_claim` gaps, line-budget limits,
-bounded retries, and zero raw LaTeX.
+Add a failing `tests/contract/test_writer_prompt.py` contract for a versioned
+writer prompt that explicitly requires structured JSON, selected evidence IDs,
+line budgets, protected terms, `must_not_claim`, and no LaTeX.
 
 ## Files Changed Recently
 
-- `app/models.py`, `app/services/intelligence.py`
-- `tests/integration/test_jd_evidence_intelligence.py`
+- `app/models.py`, `app/services/writing.py`
+- `tests/unit/test_structured_writer.py`
 - `memory.md`
 
 ## Prompt Versions
@@ -170,9 +176,9 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 113
+- Tests passing: 129
 - Tests failing: 0
-- Measured line and branch coverage: 99.77%
+- Measured line and branch coverage: 100.00%
 - Live model calls: 0
 - Compiled resume fixtures: 1
 - Golden JD intelligence fixtures: 1
@@ -244,6 +250,9 @@ No prompts exist yet.
 - 2026-08-04: Closed Milestone 2 only after one typed integration proved raw-JD
   normalization, canonical analysis, allowlisted evidence retrieval, stable
   matching, bounded planning, and unsupported-requirement propagation together.
+- 2026-08-04: Limited the writer-facing request to selected evidence and removed
+  omitted evidence IDs from the provider-visible strategy; provider output is
+  untrusted until provenance, claim, role, LaTeX, and space policies all pass.
 
 ## Session Log
 
@@ -274,3 +283,6 @@ No prompts exist yet.
   at 99.87% coverage and live model and vision call counts remain zero.
 - 2026-08-04: Completed the golden JD evidence-intelligence flow and advanced to
   Milestone 3 with 113 passing tests and zero live model or vision calls.
+- 2026-08-04: Completed the grounded structured-writer RED/GREEN slice with 129
+  passing tests and 100% line/branch coverage; live model and vision calls remain
+  zero.
