@@ -47,7 +47,8 @@ safe LaTeX escaping, locked-template rendering, restricted PDF compilation, and
 typed page-count validation are implemented. Real `pdfinfo` metadata is wired;
 high-resolution first-page PNG rendering is wired; ATS text extraction and
 PDF-coordinate extraction are wired. The next step is composing these verified
-components into one deterministic vertical-slice workflow.
+components into one deterministic vertical-slice workflow. That composition is
+now implemented; CI compiler provisioning is the remaining Milestone 1 gate.
 
 ## Implementation Status
 
@@ -82,14 +83,17 @@ components into one deterministic vertical-slice workflow.
   empty-page, and malformed-coordinate failures explicitly.
 - `PdfTextExtractor` uses first-page layout mode, while `AtsTextValidator`
   rejects blank text, missing sections, and non-logical section order.
+- `DeterministicResumePipeline` validates provenance, renders, compiles, applies
+  page/ATS/geometry gates, renders the preview, and returns one typed artifact
+  result. Compile and page failures stop downstream work.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 54 tests with 99.74% branch-aware coverage,
+The complete local gate passes 57 tests with 99.77% branch-aware coverage,
 including real compilation, page metadata, PNG, coordinate extraction, and
-safe-margin and ATS validation.
+safe-margin, ATS, and end-to-end vertical-slice validation.
 
 ## Known Issues
 
@@ -98,18 +102,17 @@ safe-margin and ATS validation.
 - CI does not yet provision the pinned Tectonic binary and support cache, so the
   real compiler test is skipped when that engine is absent.
 - Minimum font-size and detailed alignment checks are not implemented.
-- The deterministic components are not yet exposed through one vertical-slice
-  pipeline result or CLI.
+- No CLI exists yet; the typed pipeline is directly callable.
 
 ## Current Blocker
 
-No blocker for vertical-slice composition. Reproducible compiler provisioning in CI
-remains required before Milestone 1 can close.
+Reproducible pinned Tectonic provisioning in CI is the remaining Milestone 1
+blocker; local deterministic end-to-end execution passes.
 
 ## Next Exact Action
 
-Write and observe the failing deterministic end-to-end test that returns the TeX,
-one-page PDF, PNG preview, ATS report, and geometry report as one pipeline result.
+Provision hash-verified Tectonic 0.16.9 and its support cache in CI so real
+compiler-marked tests execute rather than skip.
 
 ## Files Changed Recently
 
@@ -125,9 +128,9 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 54
+- Tests passing: 57
 - Tests failing: 0
-- Measured line and branch coverage: 99.74%
+- Measured line and branch coverage: 99.77%
 - Live model calls: 0
 - Compiled resume fixtures: 1
 
@@ -167,6 +170,8 @@ No prompts exist yet.
   locked compiled page against deterministic safe-margin thresholds.
 - 2026-08-04: Verified ATS-readable text and logical section order against a
   fully sectioned compiled fixture.
+- 2026-08-04: Composed the deterministic renderer, compiler, page, ATS, geometry,
+  and screenshot components into one typed vertical-slice pipeline.
 
 ## Session Log
 
@@ -179,3 +184,5 @@ No prompts exist yet.
   untrusted execution and no runtime network access.
 - 2026-08-04: Verified real word-level PDF geometry extraction and margin safety.
 - 2026-08-04: Verified real ATS text extraction and section-order validation.
+- 2026-08-04: Verified the deterministic pipeline's success, compile-failure,
+  and page-veto outcomes.

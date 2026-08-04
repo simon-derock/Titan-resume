@@ -172,6 +172,23 @@ class AtsValidationReport(BaseModel):
     issues: tuple[ValidationIssue, ...] = ()
 
 
+class DeterministicPipelineResult(BaseModel):
+    """Serializable artifacts and gate reports from the deterministic slice."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    status: Literal["passed", "compile_failed", "validation_failed"]
+    passed: bool
+    tex_path: str
+    pdf_path: str | None = None
+    screenshot_path: str | None = None
+    compile_result: CompileResult
+    page_report: PdfValidationReport | None = None
+    ats_report: AtsValidationReport | None = None
+    geometry_report: GeometryReport | None = None
+    issues: tuple[ValidationIssue, ...] = ()
+
+
 class ResumeEntry(BaseModel):
     """A role, project, or education entry containing grounded bullets."""
 
