@@ -53,6 +53,9 @@ extend-exclude = ["TITAN_PLAN.md"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "RUF"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["app", "scripts"]
+
 [tool.mypy]
 python_version = "3.11"
 strict = true
