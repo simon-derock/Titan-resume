@@ -14,8 +14,8 @@ Milestone 2 — JD and evidence intelligence.
 
 ## Current Objective
 
-Build deterministic JD ingestion and structured requirement contracts on top of
-the privacy-safe candidate evidence store.
+Build deterministic requirement-to-evidence matching on top of normalized job
+descriptions, strict requirement contracts, and the privacy-safe evidence store.
 
 ## Non-Negotiable Invariants
 
@@ -97,15 +97,19 @@ and warms the locked-template support cache before executing real compiler tests
 - `JsonCandidateEvidenceStore` validates local JSON through the strict evidence
   model, returns only resume-allowed records in stable identifier order, rejects
   duplicate IDs, and sanitizes unavailable or malformed private-store errors.
+- `JobDescriptionIngester` enforces configurable input bounds, normalizes line
+  endings and whitespace, removes exact duplicate blocks, and hashes normalized
+  content with SHA-256. `StructuredJobDescription` provides a strict, immutable
+  contract for grouped requirements without performing any model call.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 65 tests with 99.78% branch-aware coverage,
+The complete local gate passes 81 tests with 99.81% branch-aware coverage,
 including real compilation, page metadata, PNG, coordinate extraction, and
 safe-margin, ATS, end-to-end vertical-slice, CI provisioning, and private
-candidate-store validation.
+candidate-store validation, plus deterministic JD intake and schema contracts.
 
 ## Known Issues
 
@@ -126,12 +130,13 @@ JD contracts and matching use synthetic fixtures until one is available.
 
 ## Next Exact Action
 
-Add failing structured-JD contract and ingestion tests before implementing
-normalized, size-bounded, SHA-256-addressed job-description input.
+Add failing golden evidence-matching tests covering aliases, unsupported skills,
+stable score ordering, and deterministic tie-breaking.
 
 ## Files Changed Recently
 
-- `app/services/profile.py`, `tests/unit/test_candidate_store.py`
+- `app/models.py`, `app/services/jd.py`
+- `tests/contract/test_structured_jd.py`, `tests/unit/test_jd_ingestion.py`
 - `memory.md`
 
 ## Prompt Versions
@@ -140,7 +145,7 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 65
+- Tests passing: 81
 - Tests failing: 0
 - Measured line and branch coverage: 99.77%
 - Live model calls: 0
@@ -195,6 +200,9 @@ No prompts exist yet.
 - 2026-08-04: Measured the supplied resume through the real page, ATS, and
   geometry boundaries; one-page validation passed, while reading order and three
   safe-margin gates correctly failed.
+- 2026-08-04: Added bounded, duplicate-aware JD text normalization with stable
+  SHA-256 addressing and a strict structured requirement contract; this layer is
+  deterministic and introduces no language-model dependency.
 
 ## Session Log
 
@@ -213,3 +221,5 @@ No prompts exist yet.
   then passed 59 tests and all static gates with the GREEN implementation.
 - 2026-08-04: Began Milestone 2 with a six-test candidate-store RED/GREEN pair;
   the full repository gate now passes 65 tests at 99.78% coverage.
+- 2026-08-04: Completed the JD intake RED/GREEN slice with 81 passing tests and
+  99.81% branch-aware coverage; live model and vision call counts remain zero.

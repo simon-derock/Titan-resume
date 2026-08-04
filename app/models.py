@@ -2,9 +2,11 @@
 
 from collections.abc import Iterable
 from datetime import date
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+Sha256Hex = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 
 
 class UnknownEvidenceError(ValueError):
@@ -34,6 +36,42 @@ class EvidenceRecord(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     allowed_for_resume: bool
     last_verified_at: date
+
+
+class IngestedJobDescription(BaseModel):
+    """Normalized, content-addressed job-description source text."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    raw_text: str = Field(min_length=1)
+    raw_text_hash: Sha256Hex
+
+
+class StructuredJobDescription(BaseModel):
+    """Validated requirement groups extracted from one job description."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    role: str = Field(min_length=1)
+    company: str = ""
+    seniority: Literal[
+        "intern",
+        "entry",
+        "mid",
+        "senior",
+        "lead",
+        "principal",
+        "unspecified",
+    ] = "unspecified"
+    must_have_skills: tuple[str, ...] = ()
+    preferred_skills: tuple[str, ...] = ()
+    responsibilities: tuple[str, ...] = ()
+    domain: str = ""
+    keywords: tuple[str, ...] = ()
+    rejection_conditions: tuple[str, ...] = ()
+    location_constraints: tuple[str, ...] = ()
+    experience_requirements: tuple[str, ...] = ()
+    raw_text_hash: Sha256Hex
 
 
 class ResumeBullet(BaseModel):
