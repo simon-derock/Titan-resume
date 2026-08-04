@@ -1,0 +1,85 @@
+% TITAN-TEMPLATE: moderncv_two_column_v1
+% Adapted from Genki Ogaki's Two-column CV template with ModernCV (v1.0).
+% Source: https://www.overleaf.com/latex/templates/two-column-cv-template-with-moderncv/mqycjnmnswzz
+% License: LaTeX Project Public License 1.3c or later.
+% This renamed adaptation was modified for TITAN's structured, escaped content.
+\documentclass[10pt,a4paper]{moderncv}
+\moderncvtheme[blue]{banking}
+\nopagenumbers{}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[scale=0.90]{geometry}
+\usepackage{tabularx}
+\usepackage{mathpazo}
+\usepackage{enumitem}
+
+\renewcommand*{\labelitemi}{--}
+\setlist[itemize]{leftmargin=0.16in,itemsep=0pt,topsep=1pt,parsep=0pt}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+
+{% raw %}\newcommand*{\titanentry}[4]{
+  \subsection{#1}\vspace{-1.5mm}
+  \begin{tabularx}{\textwidth}{LR}
+    {\itshape #2} & {\itshape #3\if\relax\detokenize{#4}\relax\else, #4\fi}
+  \end{tabularx}
+  \par\addvspace{0.5mm}
+}{% endraw %}
+
+\begin{document}
+\begin{center}
+  {\Huge\bfseries {{ header.name | latex }}}\\[-1mm]
+  {\large {{ header.headline | latex }}}{% if header.location %} $\vert$ {{ header.location | latex }}{% endif %}\\[-1mm]
+  \small
+  {% if header.email %}\href{mailto:{{ header.email | latex }}}{ {{- header.email | latex -}} }{% endif %}
+  {% if header.phone %} $\vert$ {{ header.phone | latex }}{% endif %}
+  {% if header.linkedin %} $\vert$ \href{ {{- header.linkedin | latex -}} }{LinkedIn}{% endif %}
+  {% if header.github %} $\vert$ \href{ {{- header.github | latex -}} }{GitHub}{% endif %}
+  {% if header.portfolio %} $\vert$ \href{ {{- header.portfolio | latex -}} }{Portfolio}{% endif %}
+\end{center}
+\vspace{-3mm}
+
+\begin{minipage}[t]{0.62\textwidth}
+{% if resume.experience %}\section{EXPERIENCE}
+{% for entry in resume.experience %}% TITAN-ELEMENT: {{ entry.element_id }}
+\titanentry{ {{- entry.heading | latex -}} }{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }
+{% if entry.bullets %}\begin{itemize}
+{% for bullet in entry.bullets %}% TITAN-ELEMENT: {{ bullet.element_id }}
+\item {{ bullet.text | latex }}
+{% endfor %}\end{itemize}
+{% endif %}
+{% endfor %}{% endif %}
+
+{% if resume.projects %}\section{PROJECTS}
+{% for entry in resume.projects %}% TITAN-ELEMENT: {{ entry.element_id }}
+\titanentry{ {{- entry.heading | latex -}} }{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }
+{% if entry.bullets %}\begin{itemize}
+{% for bullet in entry.bullets %}% TITAN-ELEMENT: {{ bullet.element_id }}
+\item {{ bullet.text | latex }}
+{% endfor %}\end{itemize}
+{% endif %}
+{% endfor %}{% endif %}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.35\textwidth}
+{% if resume.summary %}% TITAN-ELEMENT: {{ resume.summary.element_id }}
+\section{SUMMARY}
+{{ resume.summary.text | latex }}
+{% endif %}
+
+{% if resume.skills %}\section{SKILLS}
+{% for skill_line in resume.skills %}% TITAN-ELEMENT: {{ skill_line.element_id }}
+{{ skill_line.text | latex }}{% if not loop.last %}\\[0.5mm]{% endif %}
+{% endfor %}{% endif %}
+
+{% if resume.education %}\section{EDUCATION}
+{% for entry in resume.education %}% TITAN-ELEMENT: {{ entry.element_id }}
+\textbf{ {{- entry.heading | latex -}} }\\[-0.5mm]
+{% if entry.subheading %}\textit{ {{- entry.subheading | latex -}} }\\[-0.5mm]{% endif %}
+{\small {{ (entry.date_range or "") | latex }}{% if entry.location %} $\vert$ {{ entry.location | latex }}{% endif %}}\par\addvspace{1.5mm}
+{% endfor %}{% endif %}
+\end{minipage}
+
+\end{document}

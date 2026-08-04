@@ -9,6 +9,7 @@ from jinja2 import FileSystemLoader, StrictUndefined
 from jinja2.sandbox import SandboxedEnvironment
 
 from app.models import CompileResult, ResumeContent, ResumeHeader
+from app.templates import get_template_profile
 
 LATEX_ESCAPES = {
     "\\": r"\textbackslash{}",
@@ -50,7 +51,8 @@ class LatexRenderer:
     ) -> Path:
         """Write deterministic LaTeX source and return its artifact path."""
 
-        template = self._environment.get_template(f"{content.template_id}.tex.j2")
+        profile = get_template_profile(content.template_id)
+        template = self._environment.get_template(profile.template_file)
         source = template.render(header=header, resume=content)
         output_path.write_text(source, encoding="utf-8")
         return output_path

@@ -7,6 +7,11 @@ from typing import Annotated, Literal, Self
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 Sha256Hex = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+ResumeTemplateId = Literal[
+    "resume_v1",
+    "moderncv_two_column_v1",
+    "deedy_cv_v1",
+]
 
 
 class UnknownEvidenceError(ValueError):
@@ -193,6 +198,7 @@ class ResumeWritingRequest(BaseModel):
     strategy: ResumeStrategy
     space_budget: ResumeSpaceBudget
     selected_evidence: tuple[EvidenceRecord, ...]
+    template_id: ResumeTemplateId = "resume_v1"
     schema_version: Literal[1] = 1
 
 
@@ -387,7 +393,7 @@ class ResumeContent(BaseModel):
     projects: tuple[ResumeEntry, ...] = ()
     skills: tuple[EvidenceText, ...] = ()
     education: tuple[ResumeEntry, ...] = ()
-    template_id: Literal["resume_v1"] = "resume_v1"
+    template_id: ResumeTemplateId = "resume_v1"
     content_version: int = Field(default=1, ge=1)
 
 

@@ -4,7 +4,6 @@ from pydantic import ValidationError
 from app.models import ResumeContent
 from app.templates import SUPPORTED_TEMPLATE_IDS, get_template_profile
 
-
 EXPECTED_TEMPLATE_IDS = (
     "resume_v1",
     "moderncv_two_column_v1",

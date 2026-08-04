@@ -11,6 +11,7 @@ from app.models import (
     ResumeEntry,
     ResumeSpaceBudget,
     ResumeStrategy,
+    ResumeTemplateId,
     ResumeWritingRequest,
     StructuredJobDescription,
     UnknownEvidenceError,
@@ -61,6 +62,7 @@ class StructuredResumeWriter:
         strategy: ResumeStrategy,
         space_budget: ResumeSpaceBudget,
         evidence_records: tuple[EvidenceRecord, ...],
+        template_id: ResumeTemplateId = "resume_v1",
     ) -> ResumeContent:
         """Return validated structured content or one sanitized typed failure."""
 
@@ -86,6 +88,7 @@ class StructuredResumeWriter:
             strategy=provider_strategy,
             space_budget=space_budget,
             selected_evidence=selected_evidence,
+            template_id=template_id,
         )
         for _ in range(self._max_attempts):
             try:
@@ -100,6 +103,7 @@ class StructuredResumeWriter:
                     strategy=strategy,
                     space_budget=space_budget,
                     selected_evidence=selected_evidence,
+                    template_id=template_id,
                 )
                 return content
             except (
@@ -127,8 +131,11 @@ def _validate_written_content(
     strategy: ResumeStrategy,
     space_budget: ResumeSpaceBudget,
     selected_evidence: tuple[EvidenceRecord, ...],
+    template_id: ResumeTemplateId,
 ) -> None:
     if content.target_role != strategy.target_role:
+        raise _ResumeWritingPolicyError
+    if content.template_id != template_id:
         raise _ResumeWritingPolicyError
 
     validate_resume_content_evidence(content, selected_evidence)
