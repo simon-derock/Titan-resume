@@ -14,9 +14,9 @@ Milestone 2 — JD and evidence intelligence.
 
 ## Current Objective
 
-Define the structured JD analyzer boundary so a replaceable language model can
-populate the validated requirement contract without bypassing deterministic
-hash, provenance, or retry policies.
+Close Milestone 2 with a golden offline integration that connects normalized JD
+input, fake structured analysis, candidate storage, evidence matching, strategy,
+and the bounded one-page plan.
 
 ## Non-Negotiable Invariants
 
@@ -114,16 +114,21 @@ and warms the locked-template support cache before executing real compiler tests
   must-have evidence above preferred evidence, applies source and bullet limits,
   maps supported evidence into template sections, and carries partial or missing
   must-haves forward as explicit `must_not_claim` constraints.
+- `StructuredJobDescriptionAnalyzer` accepts a provider-neutral typed client,
+  injects or verifies the canonical ingested-JD hash, validates every response
+  through `StructuredJobDescription`, retries provider/schema failures at most
+  three times, and emits a sanitized typed failure after exhaustion.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 104 tests with 99.86% branch-aware coverage,
+The complete local gate passes 112 tests with 99.87% branch-aware coverage,
 including real compilation, page metadata, PNG, coordinate extraction, and
 safe-margin, ATS, end-to-end vertical-slice, CI provisioning, and private
 candidate-store validation, plus deterministic JD intake, schema, and evidence
-matching, bounded space-planning, and grounded strategy contracts.
+matching, bounded space-planning, grounded strategy, and offline structured-JD
+analysis contracts.
 
 ## Known Issues
 
@@ -144,13 +149,14 @@ JD contracts and matching use synthetic fixtures until one is available.
 
 ## Next Exact Action
 
-Add failing structured-analyzer boundary tests using a fake model client; require
-schema-valid output, preserve the ingested JD hash, and keep live calls disabled.
+Add `tests/integration/test_jd_evidence_intelligence.py` as a failing golden flow
+from raw JD text through fake analysis, stored evidence, matching, strategy, and
+space planning; assert expected rankings and unsupported-skill gaps.
 
 ## Files Changed Recently
 
-- `app/models.py`, `app/services/strategy.py`
-- `tests/unit/test_resume_strategy.py`
+- `app/models.py`, `app/services/jd.py`
+- `tests/unit/test_jd_analysis.py`
 - `memory.md`
 
 ## Prompt Versions
@@ -159,7 +165,7 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 104
+- Tests passing: 112
 - Tests failing: 0
 - Measured line and branch coverage: 99.77%
 - Live model calls: 0
@@ -226,6 +232,9 @@ No prompts exist yet.
 - 2026-08-04: Ranked must-have support ahead of confidence and preferences in the
   deterministic strategy layer; incomplete must-haves are propagated as claims
   the writer is forbidden to invent.
+- 2026-08-04: Kept the first model-facing boundary provider-neutral and offline;
+  the application, not a model, owns JD source hashes, schema validation, retry
+  limits, and sanitized terminal failures.
 
 ## Session Log
 
@@ -252,3 +261,5 @@ No prompts exist yet.
   99.84% coverage and live model and vision call counts remain zero.
 - 2026-08-04: Added grounded strategy selection and provenance-failure tests;
   104 tests pass at 99.86% coverage with zero live model or vision calls.
+- 2026-08-04: Added eight fake-client structured-JD analysis tests; 112 tests pass
+  at 99.87% coverage and live model and vision call counts remain zero.

@@ -47,6 +47,16 @@ class IngestedJobDescription(BaseModel):
     raw_text_hash: Sha256Hex
 
 
+class JobDescriptionAnalysisRequest(BaseModel):
+    """Typed, content-addressed request passed to a JD analysis provider."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    raw_text: str = Field(min_length=1)
+    raw_text_hash: Sha256Hex
+    schema_version: Literal[1] = 1
+
+
 class StructuredJobDescription(BaseModel):
     """Validated requirement groups extracted from one job description."""
 

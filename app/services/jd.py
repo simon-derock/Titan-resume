@@ -2,12 +2,79 @@
 
 import hashlib
 import re
+from collections.abc import Mapping
+from typing import Protocol
 
-from app.models import IngestedJobDescription
+from pydantic import ValidationError
+
+from app.models import (
+    IngestedJobDescription,
+    JobDescriptionAnalysisRequest,
+    StructuredJobDescription,
+)
 
 
 class JobDescriptionIngestionError(ValueError):
     """Raised when job-description source text is outside intake policy."""
+
+
+class JobDescriptionAnalysisError(RuntimeError):
+    """Raised after bounded structured-analysis attempts are exhausted."""
+
+    def __init__(self, *, attempts: int) -> None:
+        self.attempts = attempts
+        super().__init__(f"structured JD analysis failed after {attempts} attempts")
+
+
+class StructuredJdModelClient(Protocol):
+    """Replaceable provider boundary for structured JD analysis."""
+
+    def analyze(self, request: JobDescriptionAnalysisRequest) -> object: ...
+
+
+class _ForeignSourceHashError(ValueError):
+    """Internal signal for a response tied to the wrong source document."""
+
+
+class StructuredJobDescriptionAnalyzer:
+    """Validate bounded provider responses against canonical JD provenance."""
+
+    def __init__(
+        self,
+        *,
+        client: StructuredJdModelClient,
+        max_attempts: int = 2,
+    ) -> None:
+        if not 1 <= max_attempts <= 3:
+            raise ValueError("max_attempts must be between 1 and 3")
+        self._client = client
+        self._max_attempts = max_attempts
+
+    def analyze(
+        self,
+        document: IngestedJobDescription,
+    ) -> StructuredJobDescription:
+        """Return schema-valid requirements or one sanitized typed failure."""
+
+        request = JobDescriptionAnalysisRequest(
+            raw_text=document.raw_text,
+            raw_text_hash=document.raw_text_hash,
+        )
+        for _ in range(self._max_attempts):
+            try:
+                response = self._client.analyze(request)
+            except Exception:
+                continue
+
+            try:
+                return _validate_analysis_response(
+                    response,
+                    expected_hash=document.raw_text_hash,
+                )
+            except (ValidationError, _ForeignSourceHashError):
+                continue
+
+        raise JobDescriptionAnalysisError(attempts=self._max_attempts) from None
 
 
 class JobDescriptionIngester:
@@ -61,3 +128,22 @@ def _normalize_job_description(raw_text: str) -> str:
             unique_blocks.append(block)
 
     return "\n\n".join(unique_blocks)
+
+
+def _validate_analysis_response(
+    response: object,
+    *,
+    expected_hash: str,
+) -> StructuredJobDescription:
+    if isinstance(response, Mapping):
+        payload = dict(response)
+        response_hash = payload.get("raw_text_hash")
+        if response_hash is not None and response_hash != expected_hash:
+            raise _ForeignSourceHashError
+        payload["raw_text_hash"] = expected_hash
+        return StructuredJobDescription.model_validate(payload)
+
+    result = StructuredJobDescription.model_validate(response)
+    if result.raw_text_hash != expected_hash:
+        raise _ForeignSourceHashError
+    return result
