@@ -14,8 +14,8 @@ Milestone 2 — JD and evidence intelligence.
 
 ## Current Objective
 
-Build deterministic requirement-to-evidence matching on top of normalized job
-descriptions, strict requirement contracts, and the privacy-safe evidence store.
+Build deterministic resume strategy and bounded one-page space planning on top
+of normalized JDs and conservative requirement-to-evidence matches.
 
 ## Non-Negotiable Invariants
 
@@ -101,15 +101,20 @@ and warms the locked-template support cache before executing real compiler tests
   endings and whitespace, removes exact duplicate blocks, and hashes normalized
   content with SHA-256. `StructuredJobDescription` provides a strict, immutable
   contract for grouped requirements without performing any model call.
+- `EvidenceMatcher` considers only structured skills on resume-allowed evidence,
+  resolves a fixed explicit alias set, aggregates compound requirements, reports
+  strong/partial/missing coverage, and uses evidence IDs as stable tie-breakers.
+  Claim prose is never keyword-mined as proof of a skill.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 81 tests with 99.81% branch-aware coverage,
+The complete local gate passes 87 tests with 99.83% branch-aware coverage,
 including real compilation, page metadata, PNG, coordinate extraction, and
 safe-margin, ATS, end-to-end vertical-slice, CI provisioning, and private
-candidate-store validation, plus deterministic JD intake and schema contracts.
+candidate-store validation, plus deterministic JD intake, schema, and evidence
+matching contracts.
 
 ## Known Issues
 
@@ -130,13 +135,14 @@ JD contracts and matching use synthetic fixtures until one is available.
 
 ## Next Exact Action
 
-Add failing golden evidence-matching tests covering aliases, unsupported skills,
-stable score ordering, and deterministic tie-breaking.
+Add failing space-planner tests proving section and bullet allocations remain
+within the locked one-page budget and cannot grow without explicit policy.
 
 ## Files Changed Recently
 
-- `app/models.py`, `app/services/jd.py`
-- `tests/contract/test_structured_jd.py`, `tests/unit/test_jd_ingestion.py`
+- `app/models.py`, `app/services/matching.py`
+- `tests/unit/test_evidence_matching.py`, `tests/unit/test_candidate_store.py`
+- `pyproject.toml`
 - `memory.md`
 
 ## Prompt Versions
@@ -145,7 +151,7 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 81
+- Tests passing: 87
 - Tests failing: 0
 - Measured line and branch coverage: 99.77%
 - Live model calls: 0
@@ -203,6 +209,9 @@ No prompts exist yet.
 - 2026-08-04: Added bounded, duplicate-aware JD text normalization with stable
   SHA-256 addressing and a strict structured requirement contract; this layer is
   deterministic and introduces no language-model dependency.
+- 2026-08-04: Chose conservative structured-skill matching over claim-text
+  keyword search so an unsupported skill cannot become evidence merely because
+  its name appears in narrative prose; aliases are explicit and versionable.
 
 ## Session Log
 
@@ -223,3 +232,5 @@ No prompts exist yet.
   the full repository gate now passes 65 tests at 99.78% coverage.
 - 2026-08-04: Completed the JD intake RED/GREEN slice with 81 passing tests and
   99.81% branch-aware coverage; live model and vision call counts remain zero.
+- 2026-08-04: Added golden alias, allowlist, compound, claim-isolation, ordering,
+  and tie-break tests for evidence matching; 87 tests now pass at 99.83% coverage.

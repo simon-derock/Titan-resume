@@ -74,6 +74,19 @@ class StructuredJobDescription(BaseModel):
     raw_text_hash: Sha256Hex
 
 
+class EvidenceMatch(BaseModel):
+    """Deterministic support found for one structured JD skill requirement."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    requirement: str = Field(min_length=1)
+    requirement_type: Literal["must_have", "preferred"]
+    status: Literal["strong", "partial", "missing"]
+    score: float = Field(ge=0.0, le=1.0)
+    matched_components: tuple[str, ...] = ()
+    evidence_ids: tuple[str, ...] = ()
+
+
 class ResumeBullet(BaseModel):
     """One evidence-grounded, layout-budgeted resume statement."""
 

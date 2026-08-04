@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import pytest
+
 from app.services.profile import CandidateStoreError, JsonCandidateEvidenceStore
 
 
