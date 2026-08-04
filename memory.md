@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
 
 ## Project Identity
 
@@ -46,8 +46,7 @@ immutable policy, evidence, bullet, entry, and versioned resume-content models;
 safe LaTeX escaping, locked-template rendering, restricted PDF compilation, and
 typed page-count validation are implemented. Real `pdfinfo` metadata is wired;
 high-resolution first-page PNG rendering is wired; ATS text extraction and
-PDF-coordinate extraction remain. Pure safe-margin geometry policy is
-implemented.
+PDF-coordinate extraction are wired. ATS text/read-order validation remains.
 
 ## Implementation Status
 
@@ -77,13 +76,17 @@ implemented.
   reports raster failures explicitly, and preserves the A4 page ratio at 200 DPI.
 - `GeometryValidator` measures all four page edges from element text boxes and
   emits fatal `unsafe_margin` issues below the configured safety thresholds.
+- `PdfGeometryExtractor` parses first-page `pdftotext -bbox` XHTML into typed
+  page dimensions and deterministic word-level boxes, rejecting tool, schema,
+  empty-page, and malformed-coordinate failures explicitly.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 40 tests with 99.68% branch-aware coverage,
-including real compilation, page metadata validation, and PNG rendering.
+The complete local gate passes 47 tests with 99.70% branch-aware coverage,
+including real compilation, page metadata, PNG, coordinate extraction, and
+safe-margin validation.
 
 ## Known Issues
 
@@ -91,18 +94,17 @@ including real compilation, page metadata validation, and PNG rendering.
   a hash-verified workspace-local Tectonic engine is installed instead.
 - CI does not yet provision the pinned Tectonic binary and support cache, so the
   real compiler test is skipped when that engine is absent.
-- PDF text and coordinate extraction are not implemented; geometry policy
-  currently consumes validated in-memory boxes.
+- ATS text extraction and section reading-order validation are not implemented.
 
 ## Current Blocker
 
-No blocker for PDF coordinate extraction. Reproducible compiler provisioning in CI
+No blocker for ATS text extraction. Reproducible compiler provisioning in CI
 remains required before Milestone 1 can close.
 
 ## Next Exact Action
 
-Write and observe the failing integration test that extracts real word bounding
-boxes and page dimensions from the compiled PDF.
+Write and observe the failing integration test that extracts ATS text from the
+compiled PDF and verifies logical section reading order.
 
 ## Files Changed Recently
 
@@ -118,9 +120,9 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 40
+- Tests passing: 47
 - Tests failing: 0
-- Measured line and branch coverage: 99.68%
+- Measured line and branch coverage: 99.70%
 - Live model calls: 0
 - Compiled resume fixtures: 1
 
@@ -156,6 +158,8 @@ No prompts exist yet.
   preserved for Telegram preview and later vision review.
 - 2026-08-03: Added geometry-first safe-margin vetoes using explicit PDF-point
   thresholds; perceptual review cannot override these failures.
+- 2026-08-04: Integrated real Poppler bounding-box extraction and validated the
+  locked compiled page against deterministic safe-margin thresholds.
 
 ## Session Log
 
@@ -166,3 +170,4 @@ No prompts exist yet.
   verified the first Milestone 1 evidence-grounding increment.
 - 2026-08-03: Verified the first real LaTeX artifact through Tectonic 0.16.9 with
   untrusted execution and no runtime network access.
+- 2026-08-04: Verified real word-level PDF geometry extraction and margin safety.

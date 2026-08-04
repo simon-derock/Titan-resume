@@ -2,6 +2,7 @@
 
 import re
 import subprocess
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Protocol
 
@@ -13,6 +14,7 @@ from app.models import (
     TextBox,
     ValidationIssue,
 )
+from app.services.rendering import ProcessRunner, SubprocessRunner
 
 
 class PdfInfoReader(Protocol):
@@ -152,3 +154,75 @@ class GeometryValidator:
             measured_value=measured_value,
             expected_value=expected_value,
         )
+
+
+class GeometryExtractionError(RuntimeError):
+    """Raised when PDF word coordinates cannot be extracted safely."""
+
+
+class PdfGeometryExtractor:
+    """Extract first-page word bounds through Poppler's XHTML output."""
+
+    def __init__(
+        self,
+        *,
+        runner: ProcessRunner | None = None,
+        executable: str = "pdftotext",
+        timeout_seconds: float = 10.0,
+    ) -> None:
+        self._runner = runner or SubprocessRunner()
+        self._executable = executable
+        self._timeout_seconds = timeout_seconds
+
+    def extract(self, pdf_path: Path) -> PageGeometry:
+        command = (
+            self._executable,
+            "-f",
+            "1",
+            "-l",
+            "1",
+            "-bbox",
+            str(pdf_path),
+            "-",
+        )
+        process = self._runner.run(
+            command,
+            cwd=pdf_path.parent,
+            timeout_seconds=self._timeout_seconds,
+        )
+        if process.returncode != 0:
+            raise GeometryExtractionError(
+                "PDF bounding-box metadata could not be extracted."
+            )
+
+        try:
+            root = ET.fromstring(process.stdout)
+            page = root.find(".//{*}page")
+            if page is None:
+                raise GeometryExtractionError(
+                    "PDF bounding-box metadata does not contain a page."
+                )
+            text_boxes = tuple(
+                TextBox(
+                    element_id=f"page.1.word.{index}",
+                    text="".join(word.itertext()),
+                    x0=float(word.attrib["xMin"]),
+                    y0=float(word.attrib["yMin"]),
+                    x1=float(word.attrib["xMax"]),
+                    y1=float(word.attrib["yMax"]),
+                )
+                for index, word in enumerate(page.findall(".//{*}word"), start=1)
+            )
+            if not text_boxes:
+                raise GeometryExtractionError(
+                    "PDF bounding-box metadata does not contain text."
+                )
+            return PageGeometry(
+                width_pt=float(page.attrib["width"]),
+                height_pt=float(page.attrib["height"]),
+                text_boxes=text_boxes,
+            )
+        except (ET.ParseError, KeyError, ValueError) as exc:
+            raise GeometryExtractionError(
+                "PDF bounding-box metadata is malformed."
+            ) from exc
