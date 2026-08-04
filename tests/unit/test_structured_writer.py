@@ -217,12 +217,14 @@ def write_resume(
     *,
     records: tuple[EvidenceRecord, ...] | None = None,
     budget: ResumeSpaceBudget | None = None,
+    template_id: str = "resume_v1",
 ):
     return service.write(
         job_description=job_description(),
         strategy=strategy(),
         space_budget=budget or space_budget(),
         evidence_records=records or evidence_records(),
+        template_id=template_id,
     )
 
 
@@ -243,6 +245,21 @@ def test_writer_sends_only_strategy_selected_evidence() -> None:
         "evidence.skill.python",
     )
     assert "evidence.omitted.private" not in client.requests[0].model_dump_json()
+
+
+def test_writer_enforces_the_requested_template() -> None:
+    wrong_template = valid_response()
+    requested_template = {
+        **valid_response(),
+        "template_id": "moderncv_two_column_v1",
+    }
+    service, client = writer([wrong_template, requested_template])
+
+    result = write_resume(service, template_id="moderncv_two_column_v1")
+
+    assert result.template_id == "moderncv_two_column_v1"
+    assert len(client.requests) == 2
+    assert client.requests[0].template_id == "moderncv_two_column_v1"
 
 
 def test_writer_rejects_unavailable_selected_evidence_before_calling_client() -> None:
