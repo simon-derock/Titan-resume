@@ -13,3 +13,7 @@ build/
 *.egg-info/
 outputs/*
 !outputs/.gitkeep
+
+# Candidate source documents contain personal data and remain local.
+/*_Resume.pdf
+data/private/

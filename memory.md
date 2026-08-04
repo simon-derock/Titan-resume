@@ -10,12 +10,12 @@ Telegram bot; the deterministic document pipeline comes first.
 
 ## Current Milestone
 
-Milestone 1 — Deterministic vertical slice.
+Milestone 2 — JD and evidence intelligence.
 
 ## Current Objective
 
-Produce and validate a compact one-page PDF from fixture resume JSON without
-live model dependencies.
+Build the privacy-safe candidate evidence store and use the supplied current
+resume as a local source document without automatically verifying its claims.
 
 ## Non-Negotiable Invariants
 
@@ -41,14 +41,15 @@ live model dependencies.
 
 ## Current Architecture
 
-The Milestone 0 foundation is complete. The deterministic domain layer now has
+Milestones 0 and 1 are complete. The deterministic domain layer now has
 immutable policy, evidence, bullet, entry, and versioned resume-content models;
 safe LaTeX escaping, locked-template rendering, restricted PDF compilation, and
 typed page-count validation are implemented. Real `pdfinfo` metadata is wired;
 high-resolution first-page PNG rendering is wired; ATS text extraction and
 PDF-coordinate extraction are wired. The next step is composing these verified
 components into one deterministic vertical-slice workflow. That composition is
-now implemented; CI compiler provisioning is the remaining Milestone 1 gate.
+implemented, and CI now provisions the pinned, hash-verified Tectonic compiler
+and warms the locked-template support cache before executing real compiler tests.
 
 ## Implementation Status
 
@@ -86,41 +87,46 @@ now implemented; CI compiler provisioning is the remaining Milestone 1 gate.
 - `DeterministicResumePipeline` validates provenance, renders, compiles, applies
   page/ATS/geometry gates, renders the preview, and returns one typed artifact
   result. Compile and page failures stop downstream work.
+- CI installs Tectonic 0.16.9 from the verified upstream archive, checks its
+  SHA-256 digest, and warms the exact package/font surface used by the locked
+  template before tests execute cache-only compilation.
+- `Philip_Simon_Derock_AI_Engineer_Resume.pdf` is the user-designated current
+  source resume. It remains local and ignored because it contains personal data.
+  It is one US Letter page with extractable text; its two-column layout produces
+  an interleaved ATS reading order and is not the locked A4 output template.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 57 tests with 99.77% branch-aware coverage,
+The complete local gate passes 59 tests with 99.77% branch-aware coverage,
 including real compilation, page metadata, PNG, coordinate extraction, and
-safe-margin, ATS, and end-to-end vertical-slice validation.
+safe-margin, ATS, end-to-end vertical-slice, and CI provisioning validation.
 
 ## Known Issues
 
 - System TeX installation was unavailable without an interactive sudo password;
   a hash-verified workspace-local Tectonic engine is installed instead.
-- CI does not yet provision the pinned Tectonic binary and support cache, so the
-  real compiler test is skipped when that engine is absent.
 - Minimum font-size and detailed alignment checks are not implemented.
 - No CLI exists yet; the typed pipeline is directly callable.
+- Claims extracted from the supplied resume are candidate-provided source
+  material and must not become resume-allowed evidence without explicit review.
 
 ## Current Blocker
 
-Reproducible pinned Tectonic provisioning in CI is the remaining Milestone 1
-blocker; local deterministic end-to-end execution passes.
+No engineering blocker. Candidate claims require explicit provenance and review
+before the evidence store may return them for resume generation.
 
 ## Next Exact Action
 
-Provision hash-verified Tectonic 0.16.9 and its support cache in CI so real
-compiler-marked tests execute rather than skip.
+Add `tests/unit/test_candidate_store.py` with failing tests proving that the
+candidate store returns only resume-allowed evidence in deterministic order.
 
 ## Files Changed Recently
 
-- `pyproject.toml`, `Makefile`, `.github/workflows/ci.yml`
-- `app/models.py`, `app/config.py`
-- `app/services/rendering.py`, `templates/resume_v1.tex.j2`
-- `scripts/check_memory.py`
-- `tests/unit/test_compiler.py`, `tests/integration/test_real_compiler.py`
+- `.github/workflows/ci.yml`, `tests/fixtures/compiler_warmup.tex`
+- `tests/contract/test_ci_compiler_provisioning.py`
+- `.gitignore`, `memory.md`
 
 ## Prompt Versions
 
@@ -128,7 +134,7 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 57
+- Tests passing: 59
 - Tests failing: 0
 - Measured line and branch coverage: 99.77%
 - Live model calls: 0
@@ -172,6 +178,11 @@ No prompts exist yet.
   fully sectioned compiled fixture.
 - 2026-08-04: Composed the deterministic renderer, compiler, page, ATS, geometry,
   and screenshot components into one typed vertical-slice pipeline.
+- 2026-08-04: Closed Milestone 1 after CI installed the pinned, hash-verified
+  Tectonic toolchain and reproducibly warmed locked-template support files.
+- 2026-08-04: Designated the supplied Word-exported resume as a local candidate
+  source; preserved it outside version control and recorded its Letter page size
+  and two-column ATS-order limitation.
 
 ## Session Log
 
@@ -186,3 +197,5 @@ No prompts exist yet.
 - 2026-08-04: Verified real ATS text extraction and section-order validation.
 - 2026-08-04: Verified the deterministic pipeline's success, compile-failure,
   and page-veto outcomes.
+- 2026-08-04: Verified compiler provisioning through a clean RED commit archive,
+  then passed 59 tests and all static gates with the GREEN implementation.
