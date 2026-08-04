@@ -161,6 +161,17 @@ class GeometryReport(BaseModel):
     issues: tuple[ValidationIssue, ...] = ()
 
 
+class AtsValidationReport(BaseModel):
+    """ATS text availability and logical reading-order result."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    passed: bool
+    text_extractable: bool
+    reading_order_valid: bool
+    issues: tuple[ValidationIssue, ...] = ()
+
+
 class ResumeEntry(BaseModel):
     """A role, project, or education entry containing grounded bullets."""
 

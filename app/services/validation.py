@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Protocol
 
 from app.models import (
+    AtsValidationReport,
     GeometryPolicy,
     GeometryReport,
     PageGeometry,
@@ -226,3 +227,109 @@ class PdfGeometryExtractor:
             raise GeometryExtractionError(
                 "PDF bounding-box metadata is malformed."
             ) from exc
+
+
+class TextExtractionError(RuntimeError):
+    """Raised when ATS-readable text cannot be obtained from a PDF."""
+
+
+class PdfTextExtractor:
+    """Extract first-page text in visual layout order through Poppler."""
+
+    def __init__(
+        self,
+        *,
+        runner: ProcessRunner | None = None,
+        executable: str = "pdftotext",
+        timeout_seconds: float = 10.0,
+    ) -> None:
+        self._runner = runner or SubprocessRunner()
+        self._executable = executable
+        self._timeout_seconds = timeout_seconds
+
+    def extract(self, pdf_path: Path) -> str:
+        command = (
+            self._executable,
+            "-f",
+            "1",
+            "-l",
+            "1",
+            "-layout",
+            str(pdf_path),
+            "-",
+        )
+        process = self._runner.run(
+            command,
+            cwd=pdf_path.parent,
+            timeout_seconds=self._timeout_seconds,
+        )
+        if process.returncode != 0:
+            raise TextExtractionError("ATS text could not be extracted from the PDF.")
+        return process.stdout
+
+
+class AtsTextValidator:
+    """Validate extracted text presence and configured section order."""
+
+    def __init__(self, *, expected_sections: tuple[str, ...]) -> None:
+        self._expected_sections = expected_sections
+
+    def validate(self, extracted_text: str) -> AtsValidationReport:
+        if not extracted_text.strip():
+            issue = ValidationIssue(
+                issue_id="ats.text.missing",
+                source="ats",
+                issue_type="ats_text_missing",
+                severity="fatal",
+                message="The compiled PDF does not expose extractable text.",
+                recommended_action="Inspect fonts and PDF text encoding.",
+            )
+            return AtsValidationReport(
+                passed=False,
+                text_extractable=False,
+                reading_order_valid=False,
+                issues=(issue,),
+            )
+
+        section_positions: list[int] = []
+        for section in self._expected_sections:
+            position = extracted_text.find(section)
+            if position < 0:
+                issue = ValidationIssue(
+                    issue_id=f"ats.section.missing.{section.lower()}",
+                    source="ats",
+                    issue_type="reading_order_invalid",
+                    severity="fatal",
+                    message=f"Expected section is missing: {section}.",
+                    recommended_action="Restore the required section heading.",
+                )
+                return AtsValidationReport(
+                    passed=False,
+                    text_extractable=True,
+                    reading_order_valid=False,
+                    issues=(issue,),
+                )
+            section_positions.append(position)
+
+        reading_order_valid = section_positions == sorted(section_positions)
+        if not reading_order_valid:
+            issue = ValidationIssue(
+                issue_id="ats.section.reading_order",
+                source="ats",
+                issue_type="reading_order_invalid",
+                severity="fatal",
+                message="Resume sections are not in the configured reading order.",
+                recommended_action="Restore the locked single-column section order.",
+            )
+            return AtsValidationReport(
+                passed=False,
+                text_extractable=True,
+                reading_order_valid=False,
+                issues=(issue,),
+            )
+
+        return AtsValidationReport(
+            passed=True,
+            text_extractable=True,
+            reading_order_valid=True,
+        )

@@ -46,7 +46,8 @@ immutable policy, evidence, bullet, entry, and versioned resume-content models;
 safe LaTeX escaping, locked-template rendering, restricted PDF compilation, and
 typed page-count validation are implemented. Real `pdfinfo` metadata is wired;
 high-resolution first-page PNG rendering is wired; ATS text extraction and
-PDF-coordinate extraction are wired. ATS text/read-order validation remains.
+PDF-coordinate extraction are wired. The next step is composing these verified
+components into one deterministic vertical-slice workflow.
 
 ## Implementation Status
 
@@ -79,14 +80,16 @@ PDF-coordinate extraction are wired. ATS text/read-order validation remains.
 - `PdfGeometryExtractor` parses first-page `pdftotext -bbox` XHTML into typed
   page dimensions and deterministic word-level boxes, rejecting tool, schema,
   empty-page, and malformed-coordinate failures explicitly.
+- `PdfTextExtractor` uses first-page layout mode, while `AtsTextValidator`
+  rejects blank text, missing sections, and non-logical section order.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 47 tests with 99.70% branch-aware coverage,
+The complete local gate passes 54 tests with 99.74% branch-aware coverage,
 including real compilation, page metadata, PNG, coordinate extraction, and
-safe-margin validation.
+safe-margin and ATS validation.
 
 ## Known Issues
 
@@ -94,17 +97,19 @@ safe-margin validation.
   a hash-verified workspace-local Tectonic engine is installed instead.
 - CI does not yet provision the pinned Tectonic binary and support cache, so the
   real compiler test is skipped when that engine is absent.
-- ATS text extraction and section reading-order validation are not implemented.
+- Minimum font-size and detailed alignment checks are not implemented.
+- The deterministic components are not yet exposed through one vertical-slice
+  pipeline result or CLI.
 
 ## Current Blocker
 
-No blocker for ATS text extraction. Reproducible compiler provisioning in CI
+No blocker for vertical-slice composition. Reproducible compiler provisioning in CI
 remains required before Milestone 1 can close.
 
 ## Next Exact Action
 
-Write and observe the failing integration test that extracts ATS text from the
-compiled PDF and verifies logical section reading order.
+Write and observe the failing deterministic end-to-end test that returns the TeX,
+one-page PDF, PNG preview, ATS report, and geometry report as one pipeline result.
 
 ## Files Changed Recently
 
@@ -120,9 +125,9 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 47
+- Tests passing: 54
 - Tests failing: 0
-- Measured line and branch coverage: 99.70%
+- Measured line and branch coverage: 99.74%
 - Live model calls: 0
 - Compiled resume fixtures: 1
 
@@ -160,6 +165,8 @@ No prompts exist yet.
   thresholds; perceptual review cannot override these failures.
 - 2026-08-04: Integrated real Poppler bounding-box extraction and validated the
   locked compiled page against deterministic safe-margin thresholds.
+- 2026-08-04: Verified ATS-readable text and logical section order against a
+  fully sectioned compiled fixture.
 
 ## Session Log
 
@@ -171,3 +178,4 @@ No prompts exist yet.
 - 2026-08-03: Verified the first real LaTeX artifact through Tectonic 0.16.9 with
   untrusted execution and no runtime network access.
 - 2026-08-04: Verified real word-level PDF geometry extraction and margin safety.
+- 2026-08-04: Verified real ATS text extraction and section-order validation.
