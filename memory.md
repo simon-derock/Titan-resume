@@ -10,13 +10,13 @@ Telegram bot; the deterministic document pipeline comes first.
 
 ## Current Milestone
 
-Milestone 2 — JD and evidence intelligence.
+Milestone 3 — Structured writing.
 
 ## Current Objective
 
-Close Milestone 2 with a golden offline integration that connects normalized JD
-input, fake structured analysis, candidate storage, evidence matching, strategy,
-and the bounded one-page plan.
+Define the structured resume-writer contract so a replaceable model can transform
+the grounded strategy into line-budgeted `ResumeContent` without inventing claims
+or generating raw LaTeX.
 
 ## Non-Negotiable Invariants
 
@@ -118,17 +118,22 @@ and warms the locked-template support cache before executing real compiler tests
   injects or verifies the canonical ingested-JD hash, validates every response
   through `StructuredJobDescription`, retries provider/schema failures at most
   three times, and emits a sanitized typed failure after exhaustion.
+- `JobEvidenceIntelligencePipeline` composes normalized JD ingestion, fake or
+  replaceable structured analysis, resume-allowed evidence loading, conservative
+  matching, unique-source inventory, bounded space planning, and grounded
+  strategy into one serializable Milestone 2 result.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 112 tests with 99.87% branch-aware coverage,
+The complete local gate passes 113 tests with 99.87% branch-aware coverage,
 including real compilation, page metadata, PNG, coordinate extraction, and
 safe-margin, ATS, end-to-end vertical-slice, CI provisioning, and private
 candidate-store validation, plus deterministic JD intake, schema, and evidence
 matching, bounded space-planning, grounded strategy, and offline structured-JD
-analysis contracts.
+analysis contracts. A golden integration proves stable rankings and preserves
+Kubernetes as an unsupported must-have gap.
 
 ## Known Issues
 
@@ -144,19 +149,19 @@ analysis contracts.
 
 ## Current Blocker
 
-No engineering blocker. A target job description has not been supplied yet, so
-JD contracts and matching use synthetic fixtures until one is available.
+No engineering blocker. Writer development uses fake clients and golden fixtures
+until a model provider and real target job description are selected.
 
 ## Next Exact Action
 
-Add `tests/integration/test_jd_evidence_intelligence.py` as a failing golden flow
-from raw JD text through fake analysis, stored evidence, matching, strategy, and
-space planning; assert expected rankings and unsupported-skill gaps.
+Add failing structured-writer boundary tests requiring selected evidence only,
+valid recursive provenance, protected `must_not_claim` gaps, line-budget limits,
+bounded retries, and zero raw LaTeX.
 
 ## Files Changed Recently
 
-- `app/models.py`, `app/services/jd.py`
-- `tests/unit/test_jd_analysis.py`
+- `app/models.py`, `app/services/intelligence.py`
+- `tests/integration/test_jd_evidence_intelligence.py`
 - `memory.md`
 
 ## Prompt Versions
@@ -165,11 +170,12 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 112
+- Tests passing: 113
 - Tests failing: 0
 - Measured line and branch coverage: 99.77%
 - Live model calls: 0
 - Compiled resume fixtures: 1
+- Golden JD intelligence fixtures: 1
 
 ## Decision Log
 
@@ -235,6 +241,9 @@ No prompts exist yet.
 - 2026-08-04: Kept the first model-facing boundary provider-neutral and offline;
   the application, not a model, owns JD source hashes, schema validation, retry
   limits, and sanitized terminal failures.
+- 2026-08-04: Closed Milestone 2 only after one typed integration proved raw-JD
+  normalization, canonical analysis, allowlisted evidence retrieval, stable
+  matching, bounded planning, and unsupported-requirement propagation together.
 
 ## Session Log
 
@@ -263,3 +272,5 @@ No prompts exist yet.
   104 tests pass at 99.86% coverage with zero live model or vision calls.
 - 2026-08-04: Added eight fake-client structured-JD analysis tests; 112 tests pass
   at 99.87% coverage and live model and vision call counts remain zero.
+- 2026-08-04: Completed the golden JD evidence-intelligence flow and advanced to
+  Milestone 3 with 113 passing tests and zero live model or vision calls.

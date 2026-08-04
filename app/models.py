@@ -184,6 +184,18 @@ class ResumeStrategy(BaseModel):
     must_not_claim: tuple[str, ...] = ()
 
 
+class JobEvidenceIntelligenceResult(BaseModel):
+    """Serializable output of the complete offline JD intelligence slice."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    ingested_jd: IngestedJobDescription
+    job_description: StructuredJobDescription
+    evidence_matches: tuple[EvidenceMatch, ...]
+    space_budget: ResumeSpaceBudget
+    strategy: ResumeStrategy
+
+
 class ResumeBullet(BaseModel):
     """One evidence-grounded, layout-budgeted resume statement."""
 
