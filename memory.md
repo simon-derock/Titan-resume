@@ -14,8 +14,8 @@ Milestone 2 — JD and evidence intelligence.
 
 ## Current Objective
 
-Build the privacy-safe candidate evidence store and use the supplied current
-resume as a local source document without automatically verifying its claims.
+Build deterministic JD ingestion and structured requirement contracts on top of
+the privacy-safe candidate evidence store.
 
 ## Non-Negotiable Invariants
 
@@ -94,14 +94,18 @@ and warms the locked-template support cache before executing real compiler tests
   source resume. It remains local and ignored because it contains personal data.
   It is one US Letter page with extractable text; its two-column layout produces
   an interleaved ATS reading order and is not the locked A4 output template.
+- `JsonCandidateEvidenceStore` validates local JSON through the strict evidence
+  model, returns only resume-allowed records in stable identifier order, rejects
+  duplicate IDs, and sanitizes unavailable or malformed private-store errors.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 59 tests with 99.77% branch-aware coverage,
+The complete local gate passes 65 tests with 99.78% branch-aware coverage,
 including real compilation, page metadata, PNG, coordinate extraction, and
-safe-margin, ATS, end-to-end vertical-slice, and CI provisioning validation.
+safe-margin, ATS, end-to-end vertical-slice, CI provisioning, and private
+candidate-store validation.
 
 ## Known Issues
 
@@ -111,22 +115,24 @@ safe-margin, ATS, end-to-end vertical-slice, and CI provisioning validation.
 - No CLI exists yet; the typed pipeline is directly callable.
 - Claims extracted from the supplied resume are candidate-provided source
   material and must not become resume-allowed evidence without explicit review.
+- The supplied resume fails the locked quality policy despite being one page:
+  section reading order is invalid, while measured left/right/top margins are
+  17.4/2.501/14.195 pt against 22/22/18 pt minimums.
 
 ## Current Blocker
 
-No engineering blocker. Candidate claims require explicit provenance and review
-before the evidence store may return them for resume generation.
+No engineering blocker. A target job description has not been supplied yet, so
+JD contracts and matching use synthetic fixtures until one is available.
 
 ## Next Exact Action
 
-Add `tests/unit/test_candidate_store.py` with failing tests proving that the
-candidate store returns only resume-allowed evidence in deterministic order.
+Add failing structured-JD contract and ingestion tests before implementing
+normalized, size-bounded, SHA-256-addressed job-description input.
 
 ## Files Changed Recently
 
-- `.github/workflows/ci.yml`, `tests/fixtures/compiler_warmup.tex`
-- `tests/contract/test_ci_compiler_provisioning.py`
-- `.gitignore`, `memory.md`
+- `app/services/profile.py`, `tests/unit/test_candidate_store.py`
+- `memory.md`
 
 ## Prompt Versions
 
@@ -134,7 +140,7 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 59
+- Tests passing: 65
 - Tests failing: 0
 - Measured line and branch coverage: 99.77%
 - Live model calls: 0
@@ -183,6 +189,12 @@ No prompts exist yet.
 - 2026-08-04: Designated the supplied Word-exported resume as a local candidate
   source; preserved it outside version control and recorded its Letter page size
   and two-column ATS-order limitation.
+- 2026-08-04: Added a privacy-safe JSON candidate evidence store that exposes
+  only explicitly resume-allowed, strictly validated records in deterministic
+  order and does not echo malformed private content in error messages.
+- 2026-08-04: Measured the supplied resume through the real page, ATS, and
+  geometry boundaries; one-page validation passed, while reading order and three
+  safe-margin gates correctly failed.
 
 ## Session Log
 
@@ -199,3 +211,5 @@ No prompts exist yet.
   and page-veto outcomes.
 - 2026-08-04: Verified compiler provisioning through a clean RED commit archive,
   then passed 59 tests and all static gates with the GREEN implementation.
+- 2026-08-04: Began Milestone 2 with a six-test candidate-store RED/GREEN pair;
+  the full repository gate now passes 65 tests at 99.78% coverage.
