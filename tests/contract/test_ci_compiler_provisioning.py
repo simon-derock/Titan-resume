@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CI_WORKFLOW = PROJECT_ROOT / ".github" / "workflows" / "ci.yml"
 WARMUP_FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "compiler_warmup.tex"
