@@ -2,9 +2,9 @@
 
 from collections.abc import Iterable
 from datetime import date
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 Sha256Hex = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 
@@ -85,6 +85,78 @@ class EvidenceMatch(BaseModel):
     score: float = Field(ge=0.0, le=1.0)
     matched_components: tuple[str, ...] = ()
     evidence_ids: tuple[str, ...] = ()
+
+
+class SpacePlanningPolicy(BaseModel):
+    """Reviewed physical limits for the initial one-page template."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    total_line_limit: int = Field(default=47, ge=1)
+    header_line_limit: int = Field(default=3, ge=2, le=3)
+    summary_line_limit: int = Field(default=2, ge=0, le=2)
+    experience_line_limit: int = Field(default=18, ge=16, le=20)
+    project_line_limit: int = Field(default=18, ge=18, le=24)
+    skills_line_limit: int = Field(default=4, ge=3, le=5)
+    education_line_limit: int = Field(default=2, ge=1, le=2)
+    experience_entry_limit: int = Field(default=3, ge=0, le=3)
+    experience_bullets_per_entry_limit: int = Field(default=3, ge=0, le=3)
+    project_entry_limit: int = Field(default=3, ge=0, le=3)
+    project_bullets_per_entry_limit: int = Field(default=2, ge=0, le=2)
+    education_entry_limit: int = Field(default=1, ge=0, le=1)
+
+    @model_validator(mode="after")
+    def validate_reserved_lines(self) -> Self:
+        if self.reserved_line_count > self.total_line_limit:
+            raise ValueError("reserved section lines exceed the total line limit")
+        return self
+
+    @property
+    def reserved_line_count(self) -> int:
+        return (
+            self.header_line_limit
+            + self.summary_line_limit
+            + self.experience_line_limit
+            + self.project_line_limit
+            + self.skills_line_limit
+            + self.education_line_limit
+        )
+
+
+class SectionSpaceBudget(BaseModel):
+    """Line, entry, and bullet ceilings for one repeatable resume section."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    section: Literal["experience", "projects", "education"]
+    line_limit: int = Field(ge=0)
+    entry_limit: int = Field(ge=0)
+    bullets_per_entry_limit: int = Field(ge=0)
+
+
+class ResumeSpaceBudget(BaseModel):
+    """Serializable section allocation for a single resume revision."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    total_line_limit: int = Field(ge=1)
+    header_line_limit: int = Field(ge=0)
+    summary_line_limit: int = Field(ge=0)
+    experience: SectionSpaceBudget
+    projects: SectionSpaceBudget
+    skills_line_limit: int = Field(ge=0)
+    education: SectionSpaceBudget
+
+    @property
+    def reserved_line_count(self) -> int:
+        return (
+            self.header_line_limit
+            + self.summary_line_limit
+            + self.experience.line_limit
+            + self.projects.line_limit
+            + self.skills_line_limit
+            + self.education.line_limit
+        )
 
 
 class ResumeBullet(BaseModel):

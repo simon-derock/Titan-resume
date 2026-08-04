@@ -14,8 +14,8 @@ Milestone 2 — JD and evidence intelligence.
 
 ## Current Objective
 
-Build deterministic resume strategy and bounded one-page space planning on top
-of normalized JDs and conservative requirement-to-evidence matches.
+Build a deterministic resume strategy that selects the strongest grounded
+evidence within the locked one-page space budget.
 
 ## Non-Negotiable Invariants
 
@@ -105,16 +105,20 @@ and warms the locked-template support cache before executing real compiler tests
   resolves a fixed explicit alias set, aggregates compound requirements, reports
   strong/partial/missing coverage, and uses evidence IDs as stable tie-breakers.
   Claim prose is never keyword-mined as proof of a skill.
+- `SpacePlanner` reserves a reviewed 47-line page budget and caps the initial
+  template at three experience entries with three bullets each, three projects
+  with two bullets each, and one education entry. Runtime inventory cannot raise
+  those limits, and section reservations cannot exceed the page limit.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 87 tests with 99.83% branch-aware coverage,
+The complete local gate passes 99 tests with 99.84% branch-aware coverage,
 including real compilation, page metadata, PNG, coordinate extraction, and
 safe-margin, ATS, end-to-end vertical-slice, CI provisioning, and private
 candidate-store validation, plus deterministic JD intake, schema, and evidence
-matching contracts.
+matching and bounded space-planning contracts.
 
 ## Known Issues
 
@@ -135,14 +139,13 @@ JD contracts and matching use synthetic fixtures until one is available.
 
 ## Next Exact Action
 
-Add failing space-planner tests proving section and bullet allocations remain
-within the locked one-page budget and cannot grow without explicit policy.
+Add failing resume-strategy tests that select allowlisted evidence by requirement
+coverage and confidence while preserving deterministic tie-break behavior.
 
 ## Files Changed Recently
 
-- `app/models.py`, `app/services/matching.py`
-- `tests/unit/test_evidence_matching.py`, `tests/unit/test_candidate_store.py`
-- `pyproject.toml`
+- `app/models.py`, `app/services/planning.py`
+- `tests/unit/test_space_planning.py`
 - `memory.md`
 
 ## Prompt Versions
@@ -151,7 +154,7 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 87
+- Tests passing: 99
 - Tests failing: 0
 - Measured line and branch coverage: 99.77%
 - Live model calls: 0
@@ -212,6 +215,9 @@ No prompts exist yet.
 - 2026-08-04: Chose conservative structured-skill matching over claim-text
   keyword search so an unsupported skill cannot become evidence merely because
   its name appears in narrative prose; aliases are explicit and versionable.
+- 2026-08-04: Locked the initial writer to an explicit 47-line physical budget;
+  changing entry or bullet ceilings now requires a reviewed schema change rather
+  than an unconstrained runtime value.
 
 ## Session Log
 
@@ -234,3 +240,5 @@ No prompts exist yet.
   99.81% branch-aware coverage; live model and vision call counts remain zero.
 - 2026-08-04: Added golden alias, allowlist, compound, claim-isolation, ordering,
   and tie-break tests for evidence matching; 87 tests now pass at 99.83% coverage.
+- 2026-08-04: Added the bounded space-planning RED/GREEN pair; 99 tests pass at
+  99.84% coverage and live model and vision call counts remain zero.
