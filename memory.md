@@ -14,8 +14,9 @@ Milestone 2 — JD and evidence intelligence.
 
 ## Current Objective
 
-Build a deterministic resume strategy that selects the strongest grounded
-evidence within the locked one-page space budget.
+Define the structured JD analyzer boundary so a replaceable language model can
+populate the validated requirement contract without bypassing deterministic
+hash, provenance, or retry policies.
 
 ## Non-Negotiable Invariants
 
@@ -109,16 +110,20 @@ and warms the locked-template support cache before executing real compiler tests
   template at three experience entries with three bullets each, three projects
   with two bullets each, and one education entry. Runtime inventory cannot raise
   those limits, and section reservations cannot exceed the page limit.
+- `ResumeStrategyBuilder` rejects unknown or disallowed match references, ranks
+  must-have evidence above preferred evidence, applies source and bullet limits,
+  maps supported evidence into template sections, and carries partial or missing
+  must-haves forward as explicit `must_not_claim` constraints.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 99 tests with 99.84% branch-aware coverage,
+The complete local gate passes 104 tests with 99.86% branch-aware coverage,
 including real compilation, page metadata, PNG, coordinate extraction, and
 safe-margin, ATS, end-to-end vertical-slice, CI provisioning, and private
 candidate-store validation, plus deterministic JD intake, schema, and evidence
-matching and bounded space-planning contracts.
+matching, bounded space-planning, and grounded strategy contracts.
 
 ## Known Issues
 
@@ -139,13 +144,13 @@ JD contracts and matching use synthetic fixtures until one is available.
 
 ## Next Exact Action
 
-Add failing resume-strategy tests that select allowlisted evidence by requirement
-coverage and confidence while preserving deterministic tie-break behavior.
+Add failing structured-analyzer boundary tests using a fake model client; require
+schema-valid output, preserve the ingested JD hash, and keep live calls disabled.
 
 ## Files Changed Recently
 
-- `app/models.py`, `app/services/planning.py`
-- `tests/unit/test_space_planning.py`
+- `app/models.py`, `app/services/strategy.py`
+- `tests/unit/test_resume_strategy.py`
 - `memory.md`
 
 ## Prompt Versions
@@ -154,7 +159,7 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 99
+- Tests passing: 104
 - Tests failing: 0
 - Measured line and branch coverage: 99.77%
 - Live model calls: 0
@@ -218,6 +223,9 @@ No prompts exist yet.
 - 2026-08-04: Locked the initial writer to an explicit 47-line physical budget;
   changing entry or bullet ceilings now requires a reviewed schema change rather
   than an unconstrained runtime value.
+- 2026-08-04: Ranked must-have support ahead of confidence and preferences in the
+  deterministic strategy layer; incomplete must-haves are propagated as claims
+  the writer is forbidden to invent.
 
 ## Session Log
 
@@ -242,3 +250,5 @@ No prompts exist yet.
   and tie-break tests for evidence matching; 87 tests now pass at 99.83% coverage.
 - 2026-08-04: Added the bounded space-planning RED/GREEN pair; 99 tests pass at
   99.84% coverage and live model and vision call counts remain zero.
+- 2026-08-04: Added grounded strategy selection and provenance-failure tests;
+  104 tests pass at 99.86% coverage with zero live model or vision calls.

@@ -159,6 +159,21 @@ class ResumeSpaceBudget(BaseModel):
         )
 
 
+class ResumeStrategy(BaseModel):
+    """Deterministic evidence selection and explicit requirement gaps."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    target_role: str = Field(min_length=1)
+    selected_experience_evidence_ids: tuple[str, ...] = ()
+    selected_project_evidence_ids: tuple[str, ...] = ()
+    selected_skill_evidence_ids: tuple[str, ...] = ()
+    selected_education_evidence_ids: tuple[str, ...] = ()
+    omitted_evidence_ids: tuple[str, ...] = ()
+    unmet_must_have_requirements: tuple[str, ...] = ()
+    must_not_claim: tuple[str, ...] = ()
+
+
 class ResumeBullet(BaseModel):
     """One evidence-grounded, layout-budgeted resume statement."""
 
