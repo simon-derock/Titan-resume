@@ -4,6 +4,7 @@ import pytest
 
 from app.models import (
     EvidenceText,
+    GeometryPolicy,
     ResumeBullet,
     ResumeContent,
     ResumeEntry,
@@ -122,5 +123,5 @@ def test_supported_template_produces_a_safe_extractable_one_page_pdf(
         assert expected_text.lower() in extracted_text.lower()
 
     geometry = PdfGeometryExtractor().extract(pdf_path)
-    geometry_report = GeometryValidator().validate(geometry)
+    geometry_report = GeometryValidator(policy=GeometryPolicy()).validate(geometry)
     assert geometry_report.passed is True, geometry_report.issues

@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-08-04
+Last updated: 2026-08-05
 
 ## Project Identity
 
@@ -10,7 +10,7 @@ Telegram bot; the deterministic document pipeline comes first.
 
 ## Current Milestone
 
-Milestone 3 — Structured writing.
+Milestone 3 complete — Three-template deterministic rendering catalog.
 
 ## Current Objective
 
@@ -42,15 +42,18 @@ keeping live calls disabled by default.
 
 ## Current Architecture
 
-Milestones 0 and 1 are complete. The deterministic domain layer now has
-immutable policy, evidence, bullet, entry, and versioned resume-content models;
-safe LaTeX escaping, locked-template rendering, restricted PDF compilation, and
-typed page-count validation are implemented. Real `pdfinfo` metadata is wired;
-high-resolution first-page PNG rendering is wired; ATS text extraction and
-PDF-coordinate extraction are wired. The next step is composing these verified
-components into one deterministic vertical-slice workflow. That composition is
-implemented, and CI now provisions the pinned, hash-verified Tectonic compiler
-and warms the locked-template support cache before executing real compiler tests.
+Milestones 0–3 are complete. The deterministic domain layer has immutable
+policy, evidence, bullet, entry, and versioned resume-content models; safe LaTeX
+escaping, three-template Jinja2 rendering, restricted PDF compilation, and typed
+page-count validation. Real `pdfinfo`, ATS extraction, geometry, and first-page
+PNG rendering are wired. CI provisions and warms Tectonic 0.16.9. The three
+supported templates are `resume_v1` (single-column A4), `moderncv_two_column_v1`
+(banking-style two-column A4, implemented with stable article primitives due to
+a Tectonic 0.16.9 `free(): invalid pointer` crash in moderncv's FontAwesome
+dependency), and `deedy_cv_v1` (two-column A4, Apache-2.0, `\scshape` replaced
+with `\MakeUppercase` and `$\vert$` replaced with `\textbar{}` for text-mode
+safety). Reference source files are tracked under `latex_templates/` for design
+provenance and attribution; they are not used at compilation time.
 
 ## Implementation Status
 
@@ -127,19 +130,26 @@ and warms the locked-template support cache before executing real compiler tests
   unavailable provenance, unsupported `must_not_claim` terms, raw LaTeX, foreign
   roles, section/entry/bullet/line overflow, and retries at most three times with
   sanitized terminal errors.
+- Three production Jinja2 templates are implemented: `resume_v1.tex.j2`,
+  `moderncv_two_column_v1.tex.j2`, and `deedy_cv_v1.tex.j2`. Each compiles
+  under Tectonic 0.16.9 `--untrusted --only-cached` and passes one-page, ATS
+  text extraction, and geometry validation.
+- The `compiler_warmup.tex` fixture now covers `tabularx`, `mathpazo`, and
+  `helvet` package surface required by the two-column templates.
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 129 tests with 100% line and branch coverage,
-including real compilation, page metadata, PNG, coordinate extraction, and
-safe-margin, ATS, end-to-end vertical-slice, CI provisioning, and private
-candidate-store validation, plus deterministic JD intake, schema, and evidence
-matching, bounded space-planning, grounded strategy, and offline structured-JD
-analysis contracts. A golden integration proves stable rankings and preserves
-Kubernetes as an unsupported must-have gap; writer tests prove it cannot re-enter
-content through a provider response.
+The complete local gate passes 142 tests with 100% line and branch coverage,
+including real compilation of all three resume templates, page metadata, PNG,
+coordinate extraction, safe-margin, ATS, end-to-end vertical-slice, CI
+provisioning, and private candidate-store validation, plus deterministic JD
+intake, schema, and evidence matching, bounded space-planning, grounded strategy,
+offline structured-JD analysis contracts, multi-template rendering contracts, and
+production-quality PDF validation for all three templates. A golden integration
+proves stable rankings and preserves Kubernetes as an unsupported must-have gap;
+writer tests prove it cannot re-enter content through a provider response.
 
 ## Known Issues
 
@@ -155,20 +165,26 @@ content through a provider response.
 
 ## Current Blocker
 
-No engineering blocker. A live model provider and real target JD are not selected;
-prompt and adapter contracts remain provider-neutral and offline-testable.
+No engineering blocker. All three templates compile and pass quality gates.
+A live model provider and real target JD are not selected; prompt and adapter
+contracts remain provider-neutral and offline-testable.
 
 ## Next Exact Action
 
 Add a failing `tests/contract/test_writer_prompt.py` contract for a versioned
 writer prompt that explicitly requires structured JSON, selected evidence IDs,
-line budgets, protected terms, `must_not_claim`, and no LaTeX.
+line budgets, protected terms, `must_not_claim`, and no LaTeX. Then implement
+the first versioned prompt string and provider adapter (Milestone 4).
 
 ## Files Changed Recently
 
-- `app/models.py`, `app/services/writing.py`
-- `tests/unit/test_structured_writer.py`
-- `memory.md`
+- `templates/resume_v1.tex.j2`, `templates/moderncv_two_column_v1.tex.j2`,
+  `templates/deedy_cv_v1.tex.j2`
+- `tests/fixtures/compiler_warmup.tex`
+- `tests/contract/test_ci_compiler_provisioning.py`
+- `tests/integration/test_template_pdf_quality.py`
+- `latex_templates/` (reference sources, design provenance)
+- `memory.md`, `TITAN_PLAN.md`
 
 ## Prompt Versions
 
@@ -176,12 +192,14 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 129
+- Tests passing: 142
 - Tests failing: 0
 - Measured line and branch coverage: 100.00%
 - Live model calls: 0
-- Compiled resume fixtures: 1
+- Live vision calls: 0
+- Compiled resume fixtures: 3 (one per supported template)
 - Golden JD intelligence fixtures: 1
+- Supported templates: 3 (resume_v1, moderncv_two_column_v1, deedy_cv_v1)
 
 ## Decision Log
 
@@ -253,6 +271,20 @@ No prompts exist yet.
 - 2026-08-04: Limited the writer-facing request to selected evidence and removed
   omitted evidence IDs from the provider-visible strategy; provider output is
   untrusted until provenance, claim, role, LaTeX, and space policies all pass.
+- 2026-08-05: Expanded the supported template catalog from one to three:
+  `resume_v1` (single-column A4), `moderncv_two_column_v1` (banking-style
+  two-column), and `deedy_cv_v1` (two-column, Apache-2.0). RED tests first,
+  then GREEN implementation.
+- 2026-08-05: Chose article-class primitives for the ModernCV production
+  adaptation because moderncv.cls triggers a `free(): invalid pointer` crash
+  in Tectonic 0.16.9 via its FontAwesome dependency. The reference source is
+  retained under `latex_templates/` for attribution.
+- 2026-08-05: Replaced `\scshape` with `\MakeUppercase` and `$\vert$` with
+  `\textbar{}` across templates to eliminate math-mode leakage in text-mode
+  contexts and ensure clean T1-font compilation.
+- 2026-08-05: Warmed the Tectonic cache for TS1 Computer Modern 9-point
+  metrics (`tcrm0900.tfm`, `cm-super-ts1.enc`, `sfrm0900.pfb`) required by
+  the Deedy template's helvet/T1 font surface.
 
 ## Session Log
 
@@ -286,3 +318,8 @@ No prompts exist yet.
 - 2026-08-04: Completed the grounded structured-writer RED/GREEN slice with 129
   passing tests and 100% line/branch coverage; live model and vision calls remain
   zero.
+- 2026-08-05: Resumed the three-template catalog handover: warmed the Tectonic
+  cache for TS1 CM metrics; all three templates compiled and passed one-page,
+  ATS, and geometry quality gates (142 tests, 100% coverage). Ruff, format,
+  mypy, and memory checks all green. Committed and pushed the complete
+  RED/GREEN/GREEN template history to origin/main.

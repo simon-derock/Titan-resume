@@ -224,7 +224,11 @@ These rules are non-negotiable.
 - Vision output is advisory until confirmed by geometry or policy.
 - External model calls must be replaceable with mocks.
 - The system must work locally with minimal infrastructure.
-- Initial version uses one primary template.
+ - Version 1 supports three production templates: `resume_v1` (single-column
+   A4), `moderncv_two_column_v1` (two-column banking-style A4, production
+   adaptation uses stable article primitives — see compiler decision below),
+   and `deedy_cv_v1` (two-column A4, Apache-2.0). Reference sources are
+   retained under `latex_templates/` for attribution only.
 - Initial version uses SQLite or JSON; no vector database unless retrieval quality proves it necessary.
 - One orchestration service; no premature microservices.
 
@@ -242,7 +246,15 @@ These rules are non-negotiable.
 - Resume strategy generator
 - Space budget planner
 - Structured resume writer
-- One locked Jake-inspired LaTeX template
+ - Three locked LaTeX templates:
+   - `resume_v1.tex.j2` — single-column A4, TITAN ATS style
+   - `moderncv_two_column_v1.tex.j2` — two-column banking-inspired A4
+     (production adaptation uses stable `article` primitives; original
+     `moderncv.cls` causes a `free(): invalid pointer` crash in Tectonic
+     0.16.9 via its FontAwesome dependency; reference source retained in
+     `latex_templates/` for design provenance)
+   - `deedy_cv_v1.tex.j2` — two-column A4, Apache-2.0 (Deedy Resume by
+     Debarghya Das; reference source in `latex_templates/`)
 - PDF compilation
 - One-page validator
 - PDF text extraction
@@ -271,7 +283,7 @@ These rules are non-negotiable.
 
 ### Later versions
 
-- Multiple templates
+ - Additional community templates beyond the current three
 - URL ingestion
 - OCR-based screenshot parsing
 - LinkedIn import
@@ -307,7 +319,11 @@ titan-resume/
 │       └── storage.py
 ├── templates/
 │   ├── resume_v1.tex.j2
+│   ├── moderncv_two_column_v1.tex.j2
+│   ├── deedy_cv_v1.tex.j2
 │   └── template_config.yaml
+├── latex_templates/
+│   └── (reference sources for design provenance and attribution)
 ├── data/
 │   ├── candidate_profile.json
 │   ├── evidence.json

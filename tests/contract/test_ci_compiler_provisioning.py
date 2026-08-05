@@ -25,5 +25,8 @@ def test_ci_warms_the_locked_template_dependencies() -> None:
     assert "XDG_CACHE_HOME: ${{ github.workspace }}/.tools/tectonic-cache" in workflow
     assert ".tools/tectonic --untrusted --keep-logs" in workflow
     assert "tests/fixtures/compiler_warmup.tex" in workflow
+    assert "\\usepackage{tabularx}" in fixture
+    assert "\\usepackage{mathpazo}" in fixture
     assert "\\usepackage[T1]{fontenc}" in fixture
     assert "\\usepackage[hidelinks]{hyperref}" in fixture
+    assert "\\usepackage[scaled=0.94]{helvet}" in fixture

@@ -1,20 +1,25 @@
-\documentclass[a4paper,10pt]{article}
+\documentclass[10pt,a4paper]{article}
 \usepackage[top=0.30in,bottom=0.30in,left=0.38in,right=0.38in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{enumitem}
 \usepackage[hidelinks]{hyperref}
+\usepackage{tabularx}
+\usepackage{mathpazo}
+\usepackage[scaled=0.94]{helvet}
 \usepackage{titlesec}
 \usepackage{xcolor}
 \pagestyle{empty}
 \titleformat{\section}{\large\bfseries}{}{0pt}{}[\titlerule]
 \begin{document}
-\fontsize{9.5}{11}\selectfont
+\fontsize{9.3}{10.8}\selectfont
 {\LARGE\bfseries Compiler Fixture}
 \section{Summary}
-Regular, \textbf{bold}, and \textit{italic} text.
+Regular, \textbf{bold}, \textit{italic}, and the \textbar{} separator.
+{\sffamily Sans-serif, \textbf{bold}, \textit{italic}, and
+\fontsize{28}{32}\selectfont\textbf{display}.}
+{\fontencoding{TS1}\fontfamily{cmr}\fontsize{9.3}{10.8}\selectfont\textbullet}
 \begin{itemize}
-  \item Cached package and font coverage for locked-template CI compilation.
+  \item Cached package, class, and font coverage for all supported templates.
 \end{itemize}
 \end{document}
-

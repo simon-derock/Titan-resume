@@ -3,9 +3,9 @@
 % Source: https://www.overleaf.com/latex/templates/two-column-cv-template-with-moderncv/mqycjnmnswzz
 % License: LaTeX Project Public License 1.3c or later.
 % This renamed adaptation was modified for TITAN's structured, escaped content.
-\documentclass[10pt,a4paper]{moderncv}
-\moderncvtheme[blue]{banking}
-\nopagenumbers{}
+% The production form recreates the banking layout without moderncv's unstable
+% FontAwesome dependency under the pinned Tectonic 0.16.9 compiler.
+\documentclass[10pt,a4paper]{article}
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -13,9 +13,20 @@
 \usepackage{tabularx}
 \usepackage{mathpazo}
 \usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\usepackage{xcolor}
 
+\definecolor{modernblue}{HTML}{2A6EBB}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
 \renewcommand*{\labelitemi}{--}
 \setlist[itemize]{leftmargin=0.16in,itemsep=0pt,topsep=1pt,parsep=0pt}
+\titleformat{\section}{\large\bfseries\color{modernblue}}{}{0pt}{}[\color{modernblue}\titlerule]
+\titlespacing*{\section}{0pt}{5pt}{3pt}
+\titleformat{\subsection}{\normalsize\bfseries}{}{0pt}{}
+\titlespacing*{\subsection}{0pt}{2pt}{1pt}
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \newcolumntype{C}{>{\centering\arraybackslash}X}
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
@@ -31,13 +42,13 @@
 \begin{document}
 \begin{center}
   {\Huge\bfseries {{ header.name | latex }}}\\[-1mm]
-  {\large {{ header.headline | latex }}}{% if header.location %} $\vert$ {{ header.location | latex }}{% endif %}\\[-1mm]
+  {\large {{ header.headline | latex }}}{% if header.location %} \textbar{} {{ header.location | latex }}{% endif %}\\[-1mm]
   \small
   {% if header.email %}\href{mailto:{{ header.email | latex }}}{ {{- header.email | latex -}} }{% endif %}
-  {% if header.phone %} $\vert$ {{ header.phone | latex }}{% endif %}
-  {% if header.linkedin %} $\vert$ \href{ {{- header.linkedin | latex -}} }{LinkedIn}{% endif %}
-  {% if header.github %} $\vert$ \href{ {{- header.github | latex -}} }{GitHub}{% endif %}
-  {% if header.portfolio %} $\vert$ \href{ {{- header.portfolio | latex -}} }{Portfolio}{% endif %}
+  {% if header.phone %} \textbar{} {{ header.phone | latex }}{% endif %}
+  {% if header.linkedin %} \textbar{} \href{ {{- header.linkedin | latex -}} }{LinkedIn}{% endif %}
+  {% if header.github %} \textbar{} \href{ {{- header.github | latex -}} }{GitHub}{% endif %}
+  {% if header.portfolio %} \textbar{} \href{ {{- header.portfolio | latex -}} }{Portfolio}{% endif %}
 \end{center}
 \vspace{-3mm}
 
@@ -78,7 +89,7 @@
 {% for entry in resume.education %}% TITAN-ELEMENT: {{ entry.element_id }}
 \textbf{ {{- entry.heading | latex -}} }\\[-0.5mm]
 {% if entry.subheading %}\textit{ {{- entry.subheading | latex -}} }\\[-0.5mm]{% endif %}
-{\small {{ (entry.date_range or "") | latex }}{% if entry.location %} $\vert$ {{ entry.location | latex }}{% endif %}}\par\addvspace{1.5mm}
+{\small {{ (entry.date_range or "") | latex }}{% if entry.location %} \textbar{} {{ entry.location | latex }}{% endif %}}\par\addvspace{1.5mm}
 {% endfor %}{% endif %}
 \end{minipage}
 
