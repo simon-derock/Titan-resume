@@ -16,7 +16,7 @@ EVIDENCE_ID = "evidence.experience.titan"
 
 
 def _import_prompt_module():  # pragma: no cover
-    from app.prompts import writer_v1  # noqa: PLC0415
+    from app.prompts import writer_v1
 
     return writer_v1
 
@@ -24,23 +24,19 @@ def _import_prompt_module():  # pragma: no cover
 def _build_minimal_request():  # pragma: no cover
     from datetime import date
 
-    from app.models import (  # noqa: PLC0415
+    from app.models import (
         EvidenceRecord,
-        IngestedJobDescription,
         ResumeSpaceBudget,
         ResumeStrategy,
         ResumeWritingRequest,
         SectionSpaceBudget,
         StructuredJobDescription,
     )
-    from app.services.jd import JobDescriptionIngester  # noqa: PLC0415
 
-    raw_text = "Senior ML Engineer. Must have: Python, PyTorch."
-    ingested = JobDescriptionIngester().ingest(raw_text)
     jd = StructuredJobDescription(
         role="Senior ML Engineer",
         must_have_skills=("Python", "PyTorch"),
-        raw_text_hash=ingested.raw_text_hash,
+        raw_text_hash="a" * 64,
     )
     strategy = ResumeStrategy(
         target_role="Senior ML Engineer",
@@ -52,7 +48,10 @@ def _build_minimal_request():  # pragma: no cover
         header_line_limit=3,
         summary_line_limit=2,
         experience=SectionSpaceBudget(
-            section="experience", line_limit=18, entry_limit=3, bullets_per_entry_limit=3
+            section="experience",
+            line_limit=18,
+            entry_limit=3,
+            bullets_per_entry_limit=3,
         ),
         projects=SectionSpaceBudget(
             section="projects", line_limit=18, entry_limit=3, bullets_per_entry_limit=2
@@ -99,9 +98,7 @@ def test_writer_prompt_module_exposes_a_version_constant() -> None:
 def test_writer_prompt_version_matches_module_name() -> None:
     """PROMPT_VERSION should reference 'v1' to tie the constant to its module."""
     mod = _import_prompt_module()
-    assert "v1" in mod.PROMPT_VERSION.lower(), (
-        "PROMPT_VERSION must contain 'v1'"
-    )
+    assert "v1" in mod.PROMPT_VERSION.lower(), "PROMPT_VERSION must contain 'v1'"
 
 
 # ---------------------------------------------------------------------------
@@ -260,9 +257,7 @@ def test_writer_prompt_includes_must_not_claim_terms() -> None:
     assert "Kubernetes" in rendered, (
         "must_not_claim term 'Kubernetes' must appear verbatim in the prompt"
     )
-    assert "Go" in rendered, (
-        "must_not_claim term 'Go' must appear in the prompt"
-    )
+    assert "Go" in rendered, "must_not_claim term 'Go' must appear in the prompt"
 
 
 @pytest.mark.contract
@@ -313,9 +308,7 @@ def test_writer_prompt_includes_template_id() -> None:
     mod = _import_prompt_module()
     request = _build_minimal_request()
     rendered = mod.render(request)
-    assert "resume_v1" in rendered, (
-        "template_id must appear in the rendered prompt"
-    )
+    assert "resume_v1" in rendered, "template_id must appear in the rendered prompt"
 
 
 # ---------------------------------------------------------------------------

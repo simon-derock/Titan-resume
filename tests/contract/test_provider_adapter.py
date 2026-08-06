@@ -19,7 +19,6 @@ from app.models import (
     ResumeWritingRequest,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers shared across tests
 # ---------------------------------------------------------------------------
@@ -29,20 +28,16 @@ def _build_minimal_request() -> ResumeWritingRequest:
     from datetime import date
 
     from app.models import (
-        IngestedJobDescription,
         ResumeSpaceBudget,
         ResumeStrategy,
         SectionSpaceBudget,
         StructuredJobDescription,
     )
-    from app.services.jd import JobDescriptionIngester
 
-    raw_text = "Senior ML Engineer. Must have: Python, PyTorch."
-    ingested = JobDescriptionIngester().ingest(raw_text)
     jd = StructuredJobDescription(
         role="Senior ML Engineer",
         must_have_skills=("Python", "PyTorch"),
-        raw_text_hash=ingested.raw_text_hash,
+        raw_text_hash="a" * 64,
     )
     strategy = ResumeStrategy(
         target_role="Senior ML Engineer",
@@ -54,7 +49,10 @@ def _build_minimal_request() -> ResumeWritingRequest:
         header_line_limit=3,
         summary_line_limit=2,
         experience=SectionSpaceBudget(
-            section="experience", line_limit=18, entry_limit=3, bullets_per_entry_limit=3
+            section="experience",
+            line_limit=18,
+            entry_limit=3,
+            bullets_per_entry_limit=3,
         ),
         projects=SectionSpaceBudget(
             section="projects", line_limit=18, entry_limit=3, bullets_per_entry_limit=2
@@ -111,7 +109,7 @@ class _FakeWriterAdapterClient:
 @pytest.mark.contract
 def test_provider_adapter_module_is_importable() -> None:
     """app.services.providers must be importable without raising."""
-    import app.services.providers as providers  # noqa: PLC0415
+    import app.services.providers as providers
 
     assert providers is not None
 
@@ -119,7 +117,7 @@ def test_provider_adapter_module_is_importable() -> None:
 @pytest.mark.contract
 def test_provider_adapter_module_exposes_fake_client() -> None:
     """A FakeResumeWriterAdapterClient must exist for offline testing."""
-    from app.services.providers import FakeResumeWriterAdapterClient  # noqa: PLC0415
+    from app.services.providers import FakeResumeWriterAdapterClient
 
     assert callable(FakeResumeWriterAdapterClient)
 
@@ -127,7 +125,7 @@ def test_provider_adapter_module_exposes_fake_client() -> None:
 @pytest.mark.contract
 def test_provider_adapter_module_exposes_prompt_adapter() -> None:
     """PromptResumeWriterClient must be importable for real provider wiring."""
-    from app.services.providers import PromptResumeWriterClient  # noqa: PLC0415
+    from app.services.providers import PromptResumeWriterClient
 
     assert callable(PromptResumeWriterClient)
 
@@ -139,8 +137,8 @@ def test_provider_adapter_module_exposes_prompt_adapter() -> None:
 
 @pytest.mark.contract
 def test_fake_adapter_client_accepts_a_writing_request() -> None:
-    """FakeResumeWriterAdapterClient.write(request) must not raise on a valid request."""
-    from app.services.providers import FakeResumeWriterAdapterClient  # noqa: PLC0415
+    """FakeResumeWriterAdapterClient.write(request) must not raise."""
+    from app.services.providers import FakeResumeWriterAdapterClient
 
     request = _build_minimal_request()
     fake = FakeResumeWriterAdapterClient(responses=[{"resume_id": "r.001"}])
@@ -151,7 +149,7 @@ def test_fake_adapter_client_accepts_a_writing_request() -> None:
 @pytest.mark.contract
 def test_fake_adapter_client_records_every_request() -> None:
     """FakeResumeWriterAdapterClient must keep a log of every call."""
-    from app.services.providers import FakeResumeWriterAdapterClient  # noqa: PLC0415
+    from app.services.providers import FakeResumeWriterAdapterClient
 
     request = _build_minimal_request()
     fake = FakeResumeWriterAdapterClient(responses=[{"ok": True}, {"ok": True}])
@@ -163,7 +161,7 @@ def test_fake_adapter_client_records_every_request() -> None:
 @pytest.mark.contract
 def test_fake_adapter_client_raises_injected_exception() -> None:
     """FakeResumeWriterAdapterClient must re-raise any injected exception."""
-    from app.services.providers import FakeResumeWriterAdapterClient  # noqa: PLC0415
+    from app.services.providers import FakeResumeWriterAdapterClient
 
     request = _build_minimal_request()
     fake = FakeResumeWriterAdapterClient(responses=[RuntimeError("bad provider")])
@@ -179,8 +177,8 @@ def test_fake_adapter_client_raises_injected_exception() -> None:
 @pytest.mark.contract
 def test_prompt_adapter_uses_writer_v1_render_to_build_the_prompt() -> None:
     """PromptResumeWriterClient must delegate prompt construction to writer_v1."""
-    from app.prompts import writer_v1  # noqa: PLC0415
-    from app.services.providers import PromptResumeWriterClient  # noqa: PLC0415
+    from app.prompts import writer_v1
+    from app.services.providers import PromptResumeWriterClient
 
     request = _build_minimal_request()
     expected_prompt = writer_v1.render(request)
@@ -210,7 +208,7 @@ def test_prompt_adapter_uses_writer_v1_render_to_build_the_prompt() -> None:
 @pytest.mark.contract
 def test_prompt_adapter_passes_raw_backend_response_through() -> None:
     """PromptResumeWriterClient.write() must return whatever the backend returns."""
-    from app.services.providers import PromptResumeWriterClient  # noqa: PLC0415
+    from app.services.providers import PromptResumeWriterClient
 
     raw_response = {"resume_id": "r.test", "target_role": "Senior ML Engineer"}
 
@@ -226,7 +224,7 @@ def test_prompt_adapter_passes_raw_backend_response_through() -> None:
 @pytest.mark.contract
 def test_prompt_adapter_does_not_swallow_backend_exceptions() -> None:
     """PromptResumeWriterClient must let backend exceptions propagate."""
-    from app.services.providers import PromptResumeWriterClient  # noqa: PLC0415
+    from app.services.providers import PromptResumeWriterClient
 
     class _FailingBackend:
         def complete(self, prompt: str) -> object:
@@ -245,7 +243,7 @@ def test_prompt_adapter_does_not_swallow_backend_exceptions() -> None:
 @pytest.mark.contract
 def test_completions_backend_protocol_is_importable() -> None:
     """CompletionsBackend protocol must be importable from providers."""
-    from app.services.providers import CompletionsBackend  # noqa: PLC0415
+    from app.services.providers import CompletionsBackend
 
     assert CompletionsBackend is not None
 
@@ -258,7 +256,7 @@ def test_completions_backend_protocol_is_importable() -> None:
 @pytest.mark.contract
 def test_prompt_adapter_does_not_hard_code_credentials() -> None:
     """PromptResumeWriterClient must not store API keys as class attributes."""
-    from app.services.providers import PromptResumeWriterClient  # noqa: PLC0415
+    from app.services.providers import PromptResumeWriterClient
 
     cls_dict = vars(PromptResumeWriterClient)
     credential_names = {"api_key", "secret", "token", "password", "API_KEY"}

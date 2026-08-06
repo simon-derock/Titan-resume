@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-08-05
+Last updated: 2026-08-06
 
 ## Project Identity
 
@@ -10,13 +10,14 @@ Telegram bot; the deterministic document pipeline comes first.
 
 ## Current Milestone
 
-Milestone 3 complete — Three-template deterministic rendering catalog.
+Milestone 4 complete — Versioned writer prompt and provider adapter.
 
 ## Current Objective
 
-Version the first writer prompt and provider adapter contract on top of the fully
-validated structured writer boundary, while retaining fake-client coverage and
-keeping live calls disabled by default.
+Wire the Telegram bot shell: a minimal bot entrypoint that accepts a JD message
+from the admin, runs the offline intelligence pipeline, calls StructuredResumeWriter
+via the PromptResumeWriterClient, renders and compiles the PDF, and returns it
+as a Telegram document. Live LLM call remains optional and gated.
 
 ## Non-Negotiable Invariants
 
@@ -136,20 +137,29 @@ provenance and attribution; they are not used at compilation time.
   text extraction, and geometry validation.
 - The `compiler_warmup.tex` fixture now covers `tabularx`, `mathpazo`, and
   `helvet` package surface required by the two-column templates.
+- `app/prompts/writer_v1.py` exposes `PROMPT_VERSION = 'writer_v1.0'` and a
+  pure deterministic `render(request)` function that injects: JSON-only
+  output constraint, no-LaTeX prohibition, selected evidence IDs and claims,
+  space budget ceilings (line/entry/bullet per section), `must_not_claim`
+  terms framed as prohibitions, target role, template_id, schema_version,
+  and the expected JSON response schema. No randomness or external I/O.
+- `app/services/providers.py` defines `CompletionsBackend` (Protocol),
+  `FakeResumeWriterAdapterClient` (test double), and `PromptResumeWriterClient`
+  (real adapter delegating prompt construction to `writer_v1.render()`;
+  credentials live in the injected backend, never on the adapter class).
 - `scripts.check_memory` validates required operational memory.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 142 tests with 100% line and branch coverage,
-including real compilation of all three resume templates, page metadata, PNG,
-coordinate extraction, safe-margin, ATS, end-to-end vertical-slice, CI
-provisioning, and private candidate-store validation, plus deterministic JD
-intake, schema, and evidence matching, bounded space-planning, grounded strategy,
-offline structured-JD analysis contracts, multi-template rendering contracts, and
-production-quality PDF validation for all three templates. A golden integration
-proves stable rankings and preserves Kubernetes as an unsupported must-have gap;
-writer tests prove it cannot re-enter content through a provider response.
+The complete local gate passes 170 tests with no failures, including all
+previous gates plus 17 prompt-contract tests (version constant, render
+signature, JSON-only output, no-LaTeX prohibition, evidence ID/claim injection,
+space budget, must_not_claim prohibition, role/template/version injection,
+determinism) and 11 provider-adapter-contract tests (FakeResumeWriterAdapterClient,
+PromptResumeWriterClient prompt delegation, raw pass-through, exception
+propagation, CompletionsBackend protocol, no hard-coded credentials).
+Live model and vision call counts remain zero.
 
 ## Known Issues
 
@@ -165,26 +175,24 @@ writer tests prove it cannot re-enter content through a provider response.
 
 ## Current Blocker
 
-No engineering blocker. All three templates compile and pass quality gates.
-A live model provider and real target JD are not selected; prompt and adapter
-contracts remain provider-neutral and offline-testable.
+No engineering blocker. Prompt v1 and the provider adapter are implemented and
+covered. A live model provider and API key are not yet configured; live calls
+remain opt-in via `@pytest.mark.live_llm`.
 
 ## Next Exact Action
 
-Add a failing `tests/contract/test_writer_prompt.py` contract for a versioned
-writer prompt that explicitly requires structured JSON, selected evidence IDs,
-line budgets, protected terms, `must_not_claim`, and no LaTeX. Then implement
-the first versioned prompt string and provider adapter (Milestone 4).
+Wire the minimal Telegram bot shell: bot.py that accepts a JD message from the
+admin user, runs JobEvidenceIntelligencePipeline, calls StructuredResumeWriter
+via PromptResumeWriterClient with a real (or fake) backend, renders and compiles
+the resume PDF, and returns the PDF as a Telegram document (Milestone 5).
 
 ## Files Changed Recently
 
-- `templates/resume_v1.tex.j2`, `templates/moderncv_two_column_v1.tex.j2`,
-  `templates/deedy_cv_v1.tex.j2`
-- `tests/fixtures/compiler_warmup.tex`
-- `tests/contract/test_ci_compiler_provisioning.py`
-- `tests/integration/test_template_pdf_quality.py`
-- `latex_templates/` (reference sources, design provenance)
-- `memory.md`, `TITAN_PLAN.md`
+- `app/prompts/__init__.py`, `app/prompts/writer_v1.py`
+- `app/services/providers.py`
+- `tests/contract/test_writer_prompt.py`
+- `tests/contract/test_provider_adapter.py`
+- `memory.md`
 
 ## Prompt Versions
 
@@ -192,14 +200,14 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 142
+- Tests passing: 170
 - Tests failing: 0
-- Measured line and branch coverage: 100.00%
 - Live model calls: 0
 - Live vision calls: 0
 - Compiled resume fixtures: 3 (one per supported template)
 - Golden JD intelligence fixtures: 1
 - Supported templates: 3 (resume_v1, moderncv_two_column_v1, deedy_cv_v1)
+- Prompt versions: 1 (writer_v1.0)
 
 ## Decision Log
 
@@ -285,6 +293,13 @@ No prompts exist yet.
 - 2026-08-05: Warmed the Tectonic cache for TS1 Computer Modern 9-point
   metrics (`tcrm0900.tfm`, `cm-super-ts1.enc`, `sfrm0900.pfb`) required by
   the Deedy template's helvet/T1 font surface.
+- 2026-08-05: Added `app/prompts/writer_v1.py` with `PROMPT_VERSION` constant
+  and deterministic `render()` that injects all safety-critical sections into
+  the LLM prompt (JSON-only, no-LaTeX, evidence, budget, must_not_claim).
+- 2026-08-06: Added `app/services/providers.py` with `CompletionsBackend`
+  Protocol, `FakeResumeWriterAdapterClient` test double, and
+  `PromptResumeWriterClient` that delegates prompt construction to
+  `writer_v1.render()`. Credentials belong to the injected backend only.
 
 ## Session Log
 
@@ -323,3 +338,7 @@ No prompts exist yet.
   ATS, and geometry quality gates (142 tests, 100% coverage). Ruff, format,
   mypy, and memory checks all green. Committed and pushed the complete
   RED/GREEN/GREEN template history to origin/main.
+- 2026-08-06: Added writer prompt v1 and provider adapter (Milestone 4).
+  RED: 28 contract tests committed. GREEN: app/prompts/writer_v1.py and
+  app/services/providers.py implemented; all 170 tests pass, Ruff, format,
+  mypy, and memory checks green.
