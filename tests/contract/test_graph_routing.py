@@ -13,6 +13,11 @@ All tests use fake/stub collaborators — no live LLM or compiler calls.
 
 import pytest
 
+# Raw JD text used in all executor tests — must be >=80 chars for ingester
+_JD_TEXT = (
+    "Senior AI Engineer at TechCorp. "
+    "Requirements: Python, ML, production systems, evidence grounding."
+)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -20,16 +25,16 @@ import pytest
 
 
 def _import_graph():
-    import app.graph as graph  # noqa: PLC0415
+    import app.graph as graph
 
     return graph
 
 
 def _build_fake_collaborators():
     """Return stubs for every external service the executor depends on."""
-    from dataclasses import dataclass, field  # noqa: PLC0415
+    from dataclasses import dataclass, field
 
-    from app.models import (  # noqa: PLC0415
+    from app.models import (
         CompileResult,
         DeterministicPipelineResult,
         PdfValidationReport,
@@ -57,7 +62,8 @@ def _build_fake_collaborators():
             self,
             header: object,
             content: object,
-            output_dir: object,
+            evidence_records: object,
+            output_directory: object,
         ) -> DeterministicPipelineResult:
             r = self.results.pop(0)
             return r
@@ -92,7 +98,7 @@ def _build_fake_collaborators():
         )
 
     def validation_failed_result() -> DeterministicPipelineResult:
-        from app.models import ValidationIssue  # noqa: PLC0415
+        from app.models import ValidationIssue
 
         return DeterministicPipelineResult(
             status="validation_failed",
@@ -117,7 +123,13 @@ def _build_fake_collaborators():
             ),
         )
 
-    return FakeWriter, FakePipeline, passing_pipeline_result, compile_failed_result, validation_failed_result
+    return (
+        FakeWriter,
+        FakePipeline,
+        passing_pipeline_result,
+        compile_failed_result,
+        validation_failed_result,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -143,7 +155,9 @@ def test_graph_exposes_resume_graph_state() -> None:
 def test_graph_exposes_resume_graph_executor() -> None:
     """app.graph must expose a ResumeGraphExecutor class."""
     g = _import_graph()
-    assert hasattr(g, "ResumeGraphExecutor"), "app.graph must define ResumeGraphExecutor"
+    assert hasattr(g, "ResumeGraphExecutor"), (
+        "app.graph must define ResumeGraphExecutor"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -209,13 +223,13 @@ def test_executor_run_returns_passed_state_on_success(
     tmp_path,
 ) -> None:
     """A successful compile+validate run must set status='passed'."""
-    from datetime import date  # noqa: PLC0415
+    from datetime import date
 
-    from app.models import (  # noqa: PLC0415
+    from app.models import (
         EvidenceRecord,
+        EvidenceText,
         ResumeContent,
         ResumeHeader,
-        EvidenceText,
     )
 
     g = _import_graph()
@@ -241,7 +255,7 @@ def test_executor_run_returns_passed_state_on_success(
 
     exc = g.ResumeGraphExecutor(writer=writer, pipeline=pipeline)
     state = exc.run(
-        raw_jd_text="AI Engineer at TechCorp. Must have Python.",
+        raw_jd_text=_JD_TEXT,
         header=header,
         evidence_records=(
             EvidenceRecord(
@@ -272,21 +286,23 @@ def test_executor_run_returns_passed_state_on_success(
 @pytest.mark.graph
 def test_executor_compile_failure_does_not_retry(tmp_path) -> None:
     """A compile failure must set status='compile_failed' without retrying."""
-    from datetime import date  # noqa: PLC0415
+    from datetime import date
 
-    from app.models import EvidenceRecord, ResumeHeader  # noqa: PLC0415
+    from app.models import EvidenceRecord, ResumeHeader
 
     g = _import_graph()
     FakeWriter, FakePipeline, _, compile_failed, _ = _build_fake_collaborators()
 
     evidence_id = "evidence.experience.titan"
 
-    writer = FakeWriter(responses=[{"resume_id": "r.001", "target_role": "AI Engineer"}])
+    writer = FakeWriter(
+        responses=[{"resume_id": "r.001", "target_role": "AI Engineer"}]
+    )
     pipeline = FakePipeline(results=[compile_failed()])
 
     exc = g.ResumeGraphExecutor(writer=writer, pipeline=pipeline)
     state = exc.run(
-        raw_jd_text="AI Engineer at TechCorp. Must have Python.",
+        raw_jd_text=_JD_TEXT,
         header=ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
         evidence_records=(
             EvidenceRecord(
@@ -319,9 +335,9 @@ def test_executor_validation_failure_triggers_repair_within_budget(
     tmp_path,
 ) -> None:
     """Geometry/ATS validation failure must trigger at least one repair attempt."""
-    from datetime import date  # noqa: PLC0415
+    from datetime import date
 
-    from app.models import (  # noqa: PLC0415
+    from app.models import (
         EvidenceRecord,
         EvidenceText,
         ResumeContent,
@@ -329,7 +345,9 @@ def test_executor_validation_failure_triggers_repair_within_budget(
     )
 
     g = _import_graph()
-    FakeWriter, FakePipeline, passing, _, validation_failed = _build_fake_collaborators()
+    FakeWriter, FakePipeline, passing, _, validation_failed = (
+        _build_fake_collaborators()
+    )
 
     evidence_id = "evidence.experience.titan"
     valid_content = ResumeContent(
@@ -360,7 +378,7 @@ def test_executor_validation_failure_triggers_repair_within_budget(
 
     exc = g.ResumeGraphExecutor(writer=writer, pipeline=pipeline, max_repair_cycles=2)
     state = exc.run(
-        raw_jd_text="AI Engineer at TechCorp. Must have Python.",
+        raw_jd_text=_JD_TEXT,
         header=ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
         evidence_records=(
             EvidenceRecord(
@@ -393,9 +411,9 @@ def test_executor_exhausted_repair_budget_yields_manual_review(
     tmp_path,
 ) -> None:
     """After max_repair_cycles validation failures, status must be 'needs_review'."""
-    from datetime import date  # noqa: PLC0415
+    from datetime import date
 
-    from app.models import (  # noqa: PLC0415
+    from app.models import (
         EvidenceRecord,
         EvidenceText,
         ResumeContent,
@@ -420,18 +438,14 @@ def test_executor_exhausted_repair_budget_yields_manual_review(
     )
 
     max_cycles = 2
-    writer = FakeWriter(
-        responses=[valid_content.model_dump()] * (max_cycles + 1)
-    )
-    pipeline = FakePipeline(
-        results=[validation_failed()] * (max_cycles + 1)
-    )
+    writer = FakeWriter(responses=[valid_content.model_dump()] * (max_cycles + 1))
+    pipeline = FakePipeline(results=[validation_failed()] * (max_cycles + 1))
 
     exc = g.ResumeGraphExecutor(
         writer=writer, pipeline=pipeline, max_repair_cycles=max_cycles
     )
     state = exc.run(
-        raw_jd_text="AI Engineer at TechCorp. Must have Python.",
+        raw_jd_text=_JD_TEXT,
         header=ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
         evidence_records=(
             EvidenceRecord(
@@ -461,14 +475,13 @@ def test_executor_exhausted_repair_budget_yields_manual_review(
 @pytest.mark.graph
 def test_executor_writer_failure_sets_failed_status(tmp_path) -> None:
     """If the writer raises after all retries, status must be 'write_failed'."""
-    from datetime import date  # noqa: PLC0415
+    from datetime import date
 
-    from app.models import EvidenceRecord, ResumeHeader  # noqa: PLC0415
-
-    from app.services.writing import ResumeWritingError  # noqa: PLC0415
+    from app.models import EvidenceRecord, ResumeHeader
+    from app.services.writing import ResumeWritingError
 
     g = _import_graph()
-    FakeWriter, FakePipeline, passing, _, __ = _build_fake_collaborators()
+    FakeWriter, FakePipeline, _passing, _, __ = _build_fake_collaborators()
 
     evidence_id = "evidence.experience.titan"
 
@@ -477,7 +490,7 @@ def test_executor_writer_failure_sets_failed_status(tmp_path) -> None:
 
     exc = g.ResumeGraphExecutor(writer=writer, pipeline=pipeline)
     state = exc.run(
-        raw_jd_text="AI Engineer at TechCorp. Must have Python.",
+        raw_jd_text=_JD_TEXT,
         header=ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
         evidence_records=(
             EvidenceRecord(

@@ -10,14 +10,14 @@ Telegram bot; the deterministic document pipeline comes first.
 
 ## Current Milestone
 
-Milestone 4 complete — Versioned writer prompt and provider adapter.
+Milestone 5 complete — Bounded repair graph executor.
 
 ## Current Objective
 
-Wire the Telegram bot shell: a minimal bot entrypoint that accepts a JD message
-from the admin, runs the offline intelligence pipeline, calls StructuredResumeWriter
-via the PromptResumeWriterClient, renders and compiles the PDF, and returns it
-as a Telegram document. Live LLM call remains optional and gated.
+Wire the Telegram bot shell (Milestone 6): a minimal bot entrypoint that
+accepts a JD message from the admin user, runs the full ResumeGraphExecutor
+pipeline, and returns the compiled PDF as a Telegram document. Admin allowlist
+and basic access control must be enforced.
 
 ## Non-Negotiable Invariants
 
@@ -147,18 +147,22 @@ provenance and attribution; they are not used at compilation time.
   `FakeResumeWriterAdapterClient` (test double), and `PromptResumeWriterClient`
   (real adapter delegating prompt construction to `writer_v1.render()`;
   credentials live in the injected backend, never on the adapter class).
-- `scripts.check_memory` validates required operational memory.
+- `app/graph.py` defines `ResumeGraphState` (TypedDict with required keys:
+  request_id, raw_jd_text, status, iteration, max_repair_cycles,
+  pipeline_result, issues, resume_content, repair_feedback) and
+  `ResumeGraphExecutor` (injectable writer + pipeline, max_repair_cycles
+  1-3, bounded repair loop). Routing: pass -> 'passed', compile_failure ->
+  stops immediately (no retry), validation_failure -> repair within budget,
+  exhausted budget -> 'needs_review', writer error -> 'write_failed'.
+  Pure Python; no LangGraph dependency required until HITL checkpointing.
 - CI and Make targets define the initial quality gates.
 
 ## Test Status
 
-The complete local gate passes 170 tests with no failures, including all
-previous gates plus 17 prompt-contract tests (version constant, render
-signature, JSON-only output, no-LaTeX prohibition, evidence ID/claim injection,
-space budget, must_not_claim prohibition, role/template/version injection,
-determinism) and 11 provider-adapter-contract tests (FakeResumeWriterAdapterClient,
-PromptResumeWriterClient prompt delegation, raw pass-through, exception
-propagation, CompletionsBackend protocol, no hard-coded credentials).
+The complete local gate passes 181 tests with no failures, including all
+previous gates plus 11 graph-routing contract tests (state TypedDict keys,
+executor construction, max_repair_cycles bound, happy path, compile_failure
+halt, validation_failure repair, exhausted budget, and writer failure).
 Live model and vision call counts remain zero.
 
 ## Known Issues
@@ -175,23 +179,20 @@ Live model and vision call counts remain zero.
 
 ## Current Blocker
 
-No engineering blocker. Prompt v1 and the provider adapter are implemented and
-covered. A live model provider and API key are not yet configured; live calls
-remain opt-in via `@pytest.mark.live_llm`.
+No engineering blocker. Graph executor is implemented and covered.
+Telegram bot token and admin user IDs are not yet configured; bot.py is
+not yet implemented.
 
 ## Next Exact Action
 
-Wire the minimal Telegram bot shell: bot.py that accepts a JD message from the
-admin user, runs JobEvidenceIntelligencePipeline, calls StructuredResumeWriter
-via PromptResumeWriterClient with a real (or fake) backend, renders and compiles
-the resume PDF, and returns the PDF as a Telegram document (Milestone 5).
+Add a failing `tests/contract/test_bot_gateway.py` contract for the bot
+gateway: admin allowlist enforcement, JD message ingestion, and PDF
+document reply. Then implement `app/bot.py` (Milestone 6).
 
 ## Files Changed Recently
 
-- `app/prompts/__init__.py`, `app/prompts/writer_v1.py`
-- `app/services/providers.py`
-- `tests/contract/test_writer_prompt.py`
-- `tests/contract/test_provider_adapter.py`
+- `app/graph.py`
+- `tests/contract/test_graph_routing.py`
 - `memory.md`
 
 ## Prompt Versions
@@ -200,7 +201,7 @@ No prompts exist yet.
 
 ## Metrics Snapshot
 
-- Tests passing: 170
+- Tests passing: 181
 - Tests failing: 0
 - Live model calls: 0
 - Live vision calls: 0
@@ -208,6 +209,7 @@ No prompts exist yet.
 - Golden JD intelligence fixtures: 1
 - Supported templates: 3 (resume_v1, moderncv_two_column_v1, deedy_cv_v1)
 - Prompt versions: 1 (writer_v1.0)
+- Graph executor max_repair_cycles: 2 (configurable, cap 3)
 
 ## Decision Log
 
@@ -296,10 +298,10 @@ No prompts exist yet.
 - 2026-08-05: Added `app/prompts/writer_v1.py` with `PROMPT_VERSION` constant
   and deterministic `render()` that injects all safety-critical sections into
   the LLM prompt (JSON-only, no-LaTeX, evidence, budget, must_not_claim).
-- 2026-08-06: Added `app/services/providers.py` with `CompletionsBackend`
-  Protocol, `FakeResumeWriterAdapterClient` test double, and
-  `PromptResumeWriterClient` that delegates prompt construction to
-  `writer_v1.render()`. Credentials belong to the injected backend only.
+- 2026-08-06: Added `app/graph.py`: ResumeGraphState TypedDict and
+  ResumeGraphExecutor bounded repair state machine. Pure Python, no
+  LangGraph dependency. 11 contract tests cover all routing decisions.
+  LangGraph wrapping deferred until HITL checkpointing is needed.
 
 ## Session Log
 
@@ -342,3 +344,9 @@ No prompts exist yet.
   RED: 28 contract tests committed. GREEN: app/prompts/writer_v1.py and
   app/services/providers.py implemented; all 170 tests pass, Ruff, format,
   mypy, and memory checks green.
+- 2026-08-06: Added bounded repair graph executor (Milestone 5).
+  RED: 11 contract tests committed. GREEN: app/graph.py implemented with
+  ResumeGraphState TypedDict and ResumeGraphExecutor (injectable writer +
+  pipeline, compile_failure halts, validation_failure repairs within
+  budget, exhausted budget yields needs_review, writer error yields
+  write_failed); all 181 tests pass, Ruff, format, mypy, memory clean.
