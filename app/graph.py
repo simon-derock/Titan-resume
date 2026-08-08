@@ -31,7 +31,7 @@ from app.models import (
     ResumeHeader,
     ValidationIssue,
 )
-from app.services.writing import ResumeWritingError
+from app.services.writing import ResumeWritingError, StructuredResumeWriter
 
 if TYPE_CHECKING:
     pass
@@ -219,8 +219,21 @@ class ResumeGraphExecutor:
 
             # Write -------------------------------------------------------- #
             try:
-                raw = self._writer.write(request)
-                content = ResumeContent.model_validate(raw)
+                if isinstance(self._writer, StructuredResumeWriter):
+                    content = self._writer.write(
+                        job_description=jd,
+                        strategy=strategy,
+                        space_budget=space_budget,
+                        evidence_records=evidence_records,
+                        template_id=template_id,  # type: ignore[arg-type]
+                    )
+                else:
+                    raw = self._writer.write(request)
+                    content = (
+                        raw
+                        if isinstance(raw, ResumeContent)
+                        else ResumeContent.model_validate(raw)
+                    )
             except ResumeWritingError as exc:
                 state["status"] = "write_failed"
                 state["repair_feedback"] = str(exc)
@@ -229,6 +242,7 @@ class ResumeGraphExecutor:
                 state["status"] = "write_failed"
                 state["repair_feedback"] = f"Writer error: {exc}"
                 return state
+
 
             state["resume_content"] = content
 

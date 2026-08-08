@@ -15,3 +15,5 @@ class Settings(BaseSettings):
     )
 
     admin_telegram_ids: frozenset[int] = Field(min_length=1)
+    gemini_api_key: str | None = Field(default=None)
+

@@ -291,10 +291,12 @@ class AtsTextValidator:
                 issues=(issue,),
             )
 
+        lower_text = extracted_text.lower()
         section_positions: list[int] = []
         for section in self._expected_sections:
-            position = extracted_text.find(section)
+            position = lower_text.find(section.lower())
             if position < 0:
+
                 issue = ValidationIssue(
                     issue_id=f"ats.section.missing.{section.lower()}",
                     source="ats",

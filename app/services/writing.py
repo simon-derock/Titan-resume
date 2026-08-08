@@ -72,6 +72,9 @@ class StructuredResumeWriter:
             if record.allowed_for_resume
         }
         selected_ids = _selected_evidence_ids(strategy)
+        if not selected_ids:
+            selected_ids = set(allowed_records.keys())
+
         unavailable_ids = sorted(selected_ids - allowed_records.keys())
         if unavailable_ids:
             joined_ids = ", ".join(unavailable_ids)
@@ -82,6 +85,7 @@ class StructuredResumeWriter:
         selected_evidence = tuple(
             allowed_records[evidence_id] for evidence_id in sorted(selected_ids)
         )
+
         provider_strategy = strategy.model_copy(update={"omitted_evidence_ids": ()})
         request = ResumeWritingRequest(
             job_description=job_description,

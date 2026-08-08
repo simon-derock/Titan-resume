@@ -81,8 +81,9 @@ def _section_constraints(request: ResumeWritingRequest) -> str:
         f"- target_role MUST be exactly: {request.strategy.target_role!r}",
         f"- template_id MUST be exactly: {request.template_id!r}",
         f"- schema_version MUST be exactly: {request.schema_version}",
-        "- Every evidence_ids list must only reference IDs from the evidence "
-        "section below.",
+        "- Every evidence_ids list must contain only the EXACT evidence_id strings "
+        "listed as headings in the 'Candidate evidence' section (e.g. "
+        "\"evidence.exp.titan\"). Do NOT use source_id or any other identifier.",
         "- Do not invent facts, metrics, or skills not present in the evidence.",
         "- Do not use LaTeX commands in any field value.",
         "- Return only JSON — no prose, no markdown, no other text.",
@@ -121,9 +122,13 @@ def _section_evidence(records: tuple[EvidenceRecord, ...]) -> str:
     lines = [
         "## Candidate evidence (only these records may be referenced)",
         "",
+        "IMPORTANT: When populating evidence_ids fields in the JSON response, use the "
+        "exact string shown as the heading for each evidence block below "
+        "(e.g. \"evidence.exp.titan\"). Do NOT use source_id — use evidence_id.",
+        "",
     ]
     for record in records:
-        lines.append(f"### {record.evidence_id}")
+        lines.append(f"### evidence_id: {record.evidence_id}")
         lines.append(f"- source_type: {record.source_type}")
         lines.append(f"- source_id: {record.source_id}")
         lines.append(f"- claim: {record.claim}")
@@ -194,8 +199,8 @@ def _section_response_schema(request: ResumeWritingRequest) -> str:
         f'  "resume_id": "<unique ID for this revision>",\n'
         f'  "target_role": "{request.strategy.target_role}",\n'
         f'  "template_id": "{request.template_id}",\n'
-        f'  "schema_version": {request.schema_version},\n'
         f'  "content_version": 1,\n'
+
         '  "summary": {\n'
         '    "element_id": "summary.main",\n'
         '    "text": "<2-line plain-text summary>",\n'

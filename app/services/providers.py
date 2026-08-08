@@ -99,3 +99,98 @@ class PromptResumeWriterClient:
         """
         prompt = writer_v1.render(request)
         return self._backend.complete(prompt)
+
+
+# ---------------------------------------------------------------------------
+# GeminiCompletionsBackend — live Gemini API adapter
+# ---------------------------------------------------------------------------
+
+
+class GeminiCompletionsBackend:
+    """Synchronous completions backend powered by Google's Gemini SDK."""
+
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        model_name: str = "gemini-3.5-flash",
+    ) -> None:
+
+        if not api_key or not api_key.strip():
+            raise ValueError("api_key must not be empty")
+        self._api_key = api_key.strip()
+        self._model_name = model_name
+
+    _RETRY_STATUS_CODES: frozenset[int] = frozenset({429, 503})
+    _MAX_RETRIES: int = 4
+
+    def complete(self, prompt: str) -> object:
+        """Call Gemini API and return parsed JSON object.
+
+        Retries up to _MAX_RETRIES times on transient 503 / 429 errors
+        with exponential backoff (2 s → 4 s → 8 s → 16 s).
+        """
+        import json
+        import time
+
+        from google import genai
+        from google.genai import types
+        from google.genai.errors import ServerError, ClientError
+
+        client = genai.Client(api_key=self._api_key)
+
+        last_exc: Exception | None = None
+        for attempt in range(self._MAX_RETRIES):
+            try:
+                response = client.models.generate_content(
+                    model=self._model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        temperature=0.2,
+                        max_output_tokens=4096,
+                        candidate_count=1,
+                    ),
+                )
+                raw_text = response.text or ""
+                cleaned = self._clean_json_text(raw_text)
+                return self._extract_first_json_object(cleaned)
+            except (ServerError, ClientError) as exc:
+                status = getattr(exc, "status_code", None) or getattr(exc, "code", None)
+                if status in self._RETRY_STATUS_CODES and attempt < self._MAX_RETRIES - 1:
+                    wait = 2 ** (attempt + 1)
+                    time.sleep(wait)
+                    last_exc = exc
+                    continue
+                raise RuntimeError(f"Gemini API generation failed: {exc}") from exc
+            except Exception as exc:
+                raise RuntimeError(f"Gemini API generation failed: {exc}") from exc
+
+        raise RuntimeError(f"Gemini API generation failed after {self._MAX_RETRIES} retries: {last_exc}") from last_exc
+
+
+    def _clean_json_text(self, text: str) -> str:
+        cleaned = text.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        elif cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        return cleaned.strip()
+
+    def _extract_first_json_object(self, text: str) -> object:
+        """Parse the first complete JSON object from text, ignoring trailing garbage."""
+        import json
+        # Try straight parse first (fast path)
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError as exc:
+            # Walk the raw_decode path to grab only the first object
+            decoder = json.JSONDecoder()
+            try:
+                obj, _ = decoder.raw_decode(text)
+                return obj
+            except json.JSONDecodeError:
+                raise exc
+
