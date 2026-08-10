@@ -113,3 +113,34 @@ def test_templates_share_fixed_full_width_identity_header(
     assert r"\href{https://alex.example.com}{Portfolio}" in source
     if template_id != "resume_v1":
         assert source.index(r"\section{Summary}") < source.index(r"\begin{minipage}")
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("template_id", SUPPORTED_TEMPLATE_IDS)
+def test_templates_render_verified_entry_heading_hyperlink(
+    template_id: str,
+    tmp_path: Path,
+) -> None:
+    evidence_id = "project.titan.001"
+    content = ResumeContent(
+        resume_id="resume.entry_link.001",
+        target_role="AI Engineer",
+        projects=(
+            ResumeEntry(
+                element_id="projects.titan",
+                heading="TITAN",
+                url="https://github.com/alex/titan",
+                evidence_ids=(evidence_id,),
+            ),
+        ),
+        template_id=template_id,
+    )
+
+    rendered_path = LatexRenderer().render(
+        ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
+        content,
+        tmp_path / "resume.tex",
+    )
+
+    source = rendered_path.read_text(encoding="utf-8")
+    assert r"\href{https://github.com/alex/titan}{TITAN}" in source

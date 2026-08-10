@@ -14,13 +14,18 @@ from app.models import (
 )
 
 
-def evidence(evidence_id: str) -> EvidenceRecord:
+def evidence(
+    evidence_id: str,
+    *,
+    evidence_url: str | None = None,
+) -> EvidenceRecord:
     return EvidenceRecord(
         evidence_id=evidence_id,
         source_type="project",
         source_id="titan",
         claim="Built a deterministic resume compiler.",
         skills=("Python",),
+        evidence_url=evidence_url,
         confidence=1.0,
         allowed_for_resume=True,
         last_verified_at=date(2026, 8, 3),
@@ -104,3 +109,50 @@ def test_resume_content_accepts_known_nested_evidence_ids() -> None:
     evidence_record = evidence("project.titan.001")
 
     validate_resume_content_evidence(resume_content(), (evidence_record,))
+
+
+@pytest.mark.contract
+def test_resume_content_accepts_entry_url_verified_by_its_evidence() -> None:
+    verified_url = "https://github.com/alex/titan"
+    evidence_record = evidence(
+        "project.titan.001",
+        evidence_url=verified_url,
+    )
+    project = ResumeEntry(
+        element_id="projects.titan",
+        heading="TITAN",
+        url=verified_url,
+        evidence_ids=(evidence_record.evidence_id,),
+    )
+    content = resume_content().model_copy(update={"projects": (project,)})
+
+    validate_resume_content_evidence(content, (evidence_record,))
+
+
+@pytest.mark.contract
+def test_resume_content_rejects_entry_url_not_verified_by_its_evidence() -> None:
+    evidence_record = evidence(
+        "project.titan.001",
+        evidence_url="https://github.com/alex/titan",
+    )
+    project = ResumeEntry(
+        element_id="projects.titan",
+        heading="TITAN",
+        url="https://example.com/invented",
+        evidence_ids=(evidence_record.evidence_id,),
+    )
+    content = resume_content().model_copy(update={"projects": (project,)})
+
+    with pytest.raises(UnknownEvidenceError, match="unverified entry URL"):
+        validate_resume_content_evidence(content, (evidence_record,))
+
+
+@pytest.mark.contract
+def test_resume_entry_rejects_non_https_url() -> None:
+    with pytest.raises(ValidationError):
+        ResumeEntry(
+            element_id="projects.titan",
+            heading="TITAN",
+            url="javascript:alert(1)",
+            evidence_ids=("project.titan.001",),
+        )
