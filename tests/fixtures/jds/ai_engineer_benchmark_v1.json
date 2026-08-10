@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-08-11",
+  "description": "Paraphrased AI Engineer benchmark postings with source provenance. The source pages remain authoritative.",
+  "jobs": [
+    {
+      "benchmark_id": "linkedin_spiral_kite_ai_software_engineer",
+      "platform": "linkedin",
+      "source_url": "https://in.linkedin.com/jobs/view/ai-software-engineer-python-%2B-langgraph-%2B-rag-%E2%80%93-remote-immediate-joiner-at-spiral-kite-labs-4322652691",
+      "captured_at": "2026-08-11",
+      "role": "AI Software Engineer",
+      "company": "Spiral Kite Labs",
+      "seniority": "entry",
+      "required_skills": [
+        "Python",
+        "FastAPI",
+        "LangGraph",
+        "RAG",
+        "Vector Databases",
+        "LLM APIs",
+        "Docker"
+      ],
+      "raw_text": "AI Software Engineer at Spiral Kite Labs. Build production Python backend services, stateful LangGraph agent workflows, and retrieval-augmented generation pipelines covering ingestion, embeddings, vector stores, and query orchestration. Integrate LLM providers, APIs, and databases; deploy reliable conversational AI with FastAPI, Docker, testing, monitoring, security, and CI/CD. Experience with cloud platforms, asynchronous Python, prompt evaluation, and model fine-tuning is preferred."
+    },
+    {
+      "benchmark_id": "indeed_eagledrift_ai_engineer",
+      "platform": "indeed",
+      "source_url": "https://in.indeed.com/viewjob?jk=09ac98ada0615738",
+      "captured_at": "2026-08-11",
+      "role": "AI Engineer",
+      "company": "Eagledrift",
+      "seniority": "senior",
+      "required_skills": [
+        "Python",
+        "LangChain",
+        "LangGraph",
+        "Multi-Agent Systems",
+        "FastAPI",
+        "RAG",
+        "LLM Evaluation"
+      ],
+      "raw_text": "AI Engineer at Eagledrift. Deliver scalable LLM applications in production Python, including LangChain and LangGraph workflows with tools, memory, routing, and autonomous multi-agent planning. Expose AI capabilities through FastAPI or Flask services, integrate model APIs with retries, and implement structured outputs and guardrails. Build grounded RAG systems with embeddings and vector stores, then evaluate and monitor quality, safety, latency, and cost."
+    },
+    {
+      "benchmark_id": "wellfound_taxmann_ai_engineer",
+      "platform": "wellfound",
+      "source_url": "https://wellfound.com/jobs/3755620-ai-engineer",
+      "captured_at": "2026-08-11",
+      "role": "AI Engineer",
+      "company": "Taxmann",
+      "seniority": "entry",
+      "required_skills": [
+        "Python",
+        "FastAPI",
+        "RAG",
+        "Transformers",
+        "Vector Databases",
+        "LLM Fine-Tuning"
+      ],
+      "raw_text": "Entry-level AI Engineer at Taxmann. Design RAG applications that combine large language models with structured and unstructured knowledge. Build document ingestion, chunking, embedding, vector retrieval, and model-integration pipelines using Python and modern NLP tooling. Develop REST APIs with FastAPI or Flask, evaluate model performance, fine-tune supported models, and turn prototypes into scalable production features."
+    },
+    {
+      "benchmark_id": "wellfound_astra_security_ai_engineer",
+      "platform": "wellfound",
+      "source_url": "https://wellfound.com/jobs/4465217-ai-engineer",
+      "captured_at": "2026-08-11",
+      "role": "AI Engineer",
+      "company": "Astra Security",
+      "seniority": "mid",
+      "required_skills": [
+        "Python",
+        "LangGraph",
+        "Agentic AI",
+        "RAG",
+        "Vector Databases",
+        "Docker",
+        "Cloud"
+      ],
+      "raw_text": "AI Engineer at Astra Security. Build production agentic applications that reason, plan, retrieve knowledge, and execute multi-step cybersecurity workflows. Use LangGraph or equivalent orchestration, integrate hosted and self-managed LLMs, and connect AI services to backend platforms. Production RAG, vector databases, multi-agent systems, Docker, Git, CI/CD, cloud deployment, and scalable distributed-system design are central evaluation areas."
+    },
+    {
+      "benchmark_id": "google_software_engineer_iii_genai",
+      "platform": "google_careers",
+      "source_url": "https://www.google.com/about/careers/applications/jobs/results/100875379291366086-software-engineer-iii-genai-google-cloud",
+      "captured_at": "2026-08-11",
+      "role": "Software Engineer III, GenAI",
+      "company": "Google Cloud",
+      "seniority": "mid",
+      "required_skills": [
+        "Python",
+        "Software Engineering",
+        "Generative AI",
+        "LLMs",
+        "Agentic AI",
+        "Multimodal AI"
+      ],
+      "raw_text": "Software Engineer III for GenAI at Google Cloud. Apply strong Python or C++ software-engineering and algorithm skills to production generative-AI systems. Develop agentic applications that connect models with reliable information and domain data. Experience with large language models, multimodal generation, large vision models, Vertex AI, Google ADK, and production software delivery is relevant to the role."
+    }
+  ]
+}

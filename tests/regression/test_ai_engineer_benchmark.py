@@ -5,7 +5,6 @@ import pytest
 
 from app.services.jd import JobDescriptionIngester
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 BENCHMARK_PATH = (
     PROJECT_ROOT / "tests" / "fixtures" / "jds" / "ai_engineer_benchmark_v1.json"
