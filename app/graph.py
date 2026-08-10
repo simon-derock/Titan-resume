@@ -29,6 +29,7 @@ from app.models import (
     EvidenceRecord,
     ResumeContent,
     ResumeHeader,
+    ResumeTemplateId,
     ValidationIssue,
 )
 from app.services.writing import ResumeWritingError, StructuredResumeWriter
@@ -131,7 +132,7 @@ class ResumeGraphExecutor:
         header: ResumeHeader,
         evidence_records: tuple[EvidenceRecord, ...],
         output_dir: Path,
-        template_id: str = "resume_v1",
+        template_id: ResumeTemplateId = "resume_v1",
         request_id: str | None = None,
     ) -> ResumeGraphState:
         """Execute the full generation loop and return the terminal state."""
@@ -189,6 +190,7 @@ class ResumeGraphExecutor:
             available_education_entries=_source_count(
                 evidence_records, source_types={"education", "certification"}
             ),
+            template_id=template_id,
         )
         strategy = ResumeStrategyBuilder().build(
             job_description=jd,
@@ -214,7 +216,7 @@ class ResumeGraphExecutor:
                 strategy=strategy.model_copy(update={"omitted_evidence_ids": ()}),
                 space_budget=space_budget,
                 selected_evidence=_selected_evidence(strategy, evidence_records),
-                template_id=template_id,  # type: ignore[arg-type]
+                template_id=template_id,
             )
 
             # Write -------------------------------------------------------- #
@@ -225,7 +227,7 @@ class ResumeGraphExecutor:
                         strategy=strategy,
                         space_budget=space_budget,
                         evidence_records=evidence_records,
-                        template_id=template_id,  # type: ignore[arg-type]
+                        template_id=template_id,
                     )
                 else:
                     raw = self._writer.write(request)
@@ -242,7 +244,6 @@ class ResumeGraphExecutor:
                 state["status"] = "write_failed"
                 state["repair_feedback"] = f"Writer error: {exc}"
                 return state
-
 
             state["resume_content"] = content
 

@@ -2,6 +2,7 @@
 
 from app.models import (
     ResumeSpaceBudget,
+    ResumeTemplateId,
     SectionSpaceBudget,
     SpacePlanningPolicy,
 )
@@ -11,7 +12,7 @@ class SpacePlanner:
     """Translate available content into fixed one-page section ceilings."""
 
     def __init__(self, *, policy: SpacePlanningPolicy | None = None) -> None:
-        self._policy = policy or SpacePlanningPolicy()
+        self._policy = policy
 
     def plan(
         self,
@@ -19,6 +20,7 @@ class SpacePlanner:
         available_experience_entries: int,
         available_project_entries: int,
         available_education_entries: int,
+        template_id: ResumeTemplateId = "resume_v1",
     ) -> ResumeSpaceBudget:
         """Cap available entries while preserving reviewed physical limits."""
 
@@ -30,7 +32,7 @@ class SpacePlanner:
         if any(count < 0 for count in available_counts):
             raise ValueError("available entry counts must be non-negative")
 
-        policy = self._policy
+        policy = self._policy or _policy_for_template(template_id)
         return ResumeSpaceBudget(
             total_line_limit=policy.total_line_limit,
             header_line_limit=policy.header_line_limit,
@@ -64,3 +66,18 @@ class SpacePlanner:
                 bullets_per_entry_limit=0,
             ),
         )
+
+
+def _policy_for_template(template_id: ResumeTemplateId) -> SpacePlanningPolicy:
+    if template_id == "resume_v1":
+        return SpacePlanningPolicy()
+    return SpacePlanningPolicy(
+        total_line_limit=56,
+        experience_line_limit=20,
+        project_line_limit=24,
+        skills_line_limit=5,
+        experience_entry_limit=5,
+        experience_bullets_per_entry_limit=2,
+        project_entry_limit=6,
+        project_bullets_per_entry_limit=2,
+    )

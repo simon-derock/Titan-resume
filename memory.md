@@ -113,10 +113,10 @@ provenance and attribution; they are not used at compilation time.
   resolves a fixed explicit alias set, aggregates compound requirements, reports
   strong/partial/missing coverage, and uses evidence IDs as stable tie-breakers.
   Claim prose is never keyword-mined as proof of a skill.
-- `SpacePlanner` reserves a reviewed 47-line page budget and caps the initial
-  template at three experience entries with three bullets each, three projects
-  with two bullets each, and one education entry. Runtime inventory cannot raise
-  those limits, and section reservations cannot exceed the page limit.
+- `SpacePlanner` uses template-aware reviewed budgets. `resume_v1` retains its
+  47-line cap with three experiences and three projects. Both two-column
+  templates use a 56-line cap and can retain all five verified experiences and
+  all six projects; compilation and deterministic geometry remain hard vetoes.
 - `ResumeStrategyBuilder` rejects unknown or disallowed match references, ranks
   must-have evidence above preferred evidence, applies source and bullet limits,
   maps supported evidence into template sections, and carries partial or missing
@@ -165,7 +165,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 189 tests with three live tests deselected.
+The complete non-live suite passes 191 tests with three live tests deselected.
 Live model and vision call counts remain zero. The files changed by the current
 quality increment pass focused Ruff checks and formatting. Repository-wide Ruff
 still reports pre-existing issues in committed Gemini/Telegram files and a
@@ -184,8 +184,8 @@ user-owned uncommitted writer change.
   17.4/2.501/14.195 pt against 22/22/18 pt minimums.
 - The current generated resume uses only about 63% of the A4 page and is now
   correctly rejected by the default geometry policy.
-- Space planning still caps output at three experience entries and three
-  projects regardless of template or measured underfill.
+- The reference-grade template still needs a full-width fixed header/summary,
+  ATS-safe two-column body, and entry-level project hyperlink support.
 
 ## Current Blocker
 
@@ -194,14 +194,15 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Add failing template-aware space-planning tests proving an underfilled
-two-column resume can retain all five verified experience entries and restore
-additional high-value projects without weakening the exactly-one-page gate.
+Add failing content and rendering contracts for verified entry hyperlinks and a
+fixed full-width identity header shared by all three production templates.
 
 ## Files Changed Recently
 
 - `app/models.py`
 - `app/services/validation.py`
+- `app/services/planning.py`
+- `app/graph.py`
 - `tests/fixtures/jds/ai_engineer_benchmark_v1.json`
 - `tests/regression/test_ai_engineer_benchmark.py`
 - `tests/unit/test_geometry.py`
@@ -213,7 +214,7 @@ additional high-value projects without weakening the exactly-one-page gate.
 
 ## Metrics Snapshot
 
-- Tests passing: 189
+- Tests passing: 191
 - Tests failing: 0
 - Live model calls: 0
 - Live vision calls: 0
@@ -321,6 +322,9 @@ additional high-value projects without weakening the exactly-one-page gate.
 - 2026-08-11: Set 60 pt as the maximum default bottom whitespace, corresponding
   to approximately 93% A4 page utilization, so a technically one-page but
   materially sparse resume cannot pass deterministic validation.
+- 2026-08-11: Made space planning template-aware. Two-column templates can
+  expose the complete five-experience/six-project evidence inventory while the
+  conservative single-column limits remain unchanged.
 
 ## Session Log
 
@@ -373,3 +377,5 @@ additional high-value projects without weakening the exactly-one-page gate.
   PDFs, researched current AI Engineer postings across four requested job
   platforms, added a five-JD sourced benchmark, and introduced deterministic
   underfill rejection. The non-live suite passes 189 tests.
+- 2026-08-11: Added reviewed 56-line two-column budgets and wired template
+  selection through the graph. The non-live suite passes 191 tests.

@@ -106,9 +106,9 @@ def test_space_policy_rejects_sections_that_exceed_the_page_limit() -> None:
 @pytest.mark.parametrize(
     ("field", "value"),
     [
-        ("experience_entry_limit", 4),
+        ("experience_entry_limit", 6),
         ("experience_bullets_per_entry_limit", 4),
-        ("project_entry_limit", 4),
+        ("project_entry_limit", 7),
         ("project_bullets_per_entry_limit", 3),
         ("education_entry_limit", 2),
     ],

@@ -103,7 +103,7 @@ class EvidenceMatch(BaseModel):
 
 
 class SpacePlanningPolicy(BaseModel):
-    """Reviewed physical limits for the initial one-page template."""
+    """Reviewed physical limits for one locked resume template."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -114,9 +114,9 @@ class SpacePlanningPolicy(BaseModel):
     project_line_limit: int = Field(default=18, ge=18, le=24)
     skills_line_limit: int = Field(default=4, ge=3, le=5)
     education_line_limit: int = Field(default=2, ge=1, le=2)
-    experience_entry_limit: int = Field(default=3, ge=0, le=3)
+    experience_entry_limit: int = Field(default=3, ge=0, le=5)
     experience_bullets_per_entry_limit: int = Field(default=3, ge=0, le=3)
-    project_entry_limit: int = Field(default=3, ge=0, le=3)
+    project_entry_limit: int = Field(default=3, ge=0, le=6)
     project_bullets_per_entry_limit: int = Field(default=2, ge=0, le=2)
     education_entry_limit: int = Field(default=1, ge=0, le=1)
 
