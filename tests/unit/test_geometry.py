@@ -41,7 +41,7 @@ def test_geometry_validator_reports_text_crossing_safe_left_margin() -> None:
                 x0=18.0,
                 y0=24.0,
                 x1=560.0,
-                y1=40.0,
+                y1=820.0,
             ),
         ),
     )

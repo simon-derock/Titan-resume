@@ -123,5 +123,7 @@ def test_supported_template_produces_a_safe_extractable_one_page_pdf(
         assert expected_text.lower() in extracted_text.lower()
 
     geometry = PdfGeometryExtractor().extract(pdf_path)
-    geometry_report = GeometryValidator(policy=GeometryPolicy()).validate(geometry)
+    geometry_report = GeometryValidator(
+        policy=GeometryPolicy(maximum_bottom_margin_pt=geometry.height_pt)
+    ).validate(geometry)
     assert geometry_report.passed is True, geometry_report.issues

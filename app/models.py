@@ -300,7 +300,16 @@ class GeometryPolicy(BaseModel):
 
     minimum_top_margin_pt: float = Field(default=18.0, ge=0.0)
     minimum_bottom_margin_pt: float = Field(default=20.0, ge=0.0)
+    maximum_bottom_margin_pt: float = Field(default=60.0, ge=0.0)
     minimum_horizontal_margin_pt: float = Field(default=22.0, ge=0.0)
+
+    @model_validator(mode="after")
+    def validate_bottom_margin_range(self) -> Self:
+        if self.maximum_bottom_margin_pt < self.minimum_bottom_margin_pt:
+            raise ValueError(
+                "maximum bottom margin must not be smaller than minimum bottom margin"
+            )
+        return self
 
 
 class TextBox(BaseModel):

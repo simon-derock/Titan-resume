@@ -121,7 +121,7 @@ class GeometryValidator:
             "top": self._policy.minimum_top_margin_pt,
             "bottom": self._policy.minimum_bottom_margin_pt,
         }
-        issues = tuple(
+        issues = [
             self._unsafe_margin_issue(
                 edge=edge,
                 box=boxes[edge],
@@ -130,14 +130,22 @@ class GeometryValidator:
             )
             for edge, measured_value in margins.items()
             if measured_value < thresholds[edge]
-        )
+        ]
+        if margins["bottom"] > self._policy.maximum_bottom_margin_pt:
+            issues.append(
+                self._excessive_bottom_whitespace_issue(
+                    box=bottom_box,
+                    measured_value=margins["bottom"],
+                    expected_value=self._policy.maximum_bottom_margin_pt,
+                )
+            )
         return GeometryReport(
             passed=not issues,
             minimum_left_margin_pt=margins["left"],
             minimum_right_margin_pt=margins["right"],
             minimum_top_margin_pt=margins["top"],
             minimum_bottom_margin_pt=margins["bottom"],
-            issues=issues,
+            issues=tuple(issues),
         )
 
     @staticmethod
@@ -152,6 +160,25 @@ class GeometryValidator:
             severity="fatal",
             message=f"Text crosses the safe {edge} margin.",
             recommended_action="Adjust the affected content or safe layout tokens.",
+            measured_value=measured_value,
+            expected_value=expected_value,
+        )
+
+    @staticmethod
+    def _excessive_bottom_whitespace_issue(
+        *, box: TextBox, measured_value: float, expected_value: float
+    ) -> ValidationIssue:
+        return ValidationIssue(
+            issue_id=f"geometry.underfill.{box.element_id}",
+            source="geometry",
+            element_id=box.element_id,
+            issue_type="excessive_bottom_whitespace",
+            severity="high",
+            message="Resume leaves too much unused space at the bottom of the page.",
+            recommended_action=(
+                "Restore the highest-value omitted evidence before adding filler or "
+                "changing typography."
+            ),
             measured_value=measured_value,
             expected_value=expected_value,
         )
@@ -296,7 +323,6 @@ class AtsTextValidator:
         for section in self._expected_sections:
             position = lower_text.find(section.lower())
             if position < 0:
-
                 issue = ValidationIssue(
                     issue_id=f"ats.section.missing.{section.lower()}",
                     source="ats",

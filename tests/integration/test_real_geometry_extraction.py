@@ -39,7 +39,9 @@ def test_locked_pdf_exposes_real_safe_text_geometry(
     assert compile_result.pdf_path is not None
 
     geometry = PdfGeometryExtractor().extract(Path(compile_result.pdf_path))
-    report = GeometryValidator(policy=GeometryPolicy()).validate(geometry)
+    report = GeometryValidator(
+        policy=GeometryPolicy(maximum_bottom_margin_pt=geometry.height_pt)
+    ).validate(geometry)
 
     assert geometry.width_pt == pytest.approx(595.28, abs=0.1)
     assert geometry.height_pt == pytest.approx(841.89, abs=0.1)

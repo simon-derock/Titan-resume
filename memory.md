@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-08-06
+Last updated: 2026-08-11
 
 ## Project Identity
 
@@ -10,14 +10,14 @@ Telegram bot; the deterministic document pipeline comes first.
 
 ## Current Milestone
 
-Milestone 5 complete — Bounded repair graph executor.
+Resume-quality evaluation loop — benchmark and deterministic quality gates.
 
 ## Current Objective
 
-Wire the Telegram bot shell (Milestone 6): a minimal bot entrypoint that
-accepts a JD message from the admin user, runs the full ResumeGraphExecutor
-pipeline, and returns the compiled PDF as a Telegram document. Admin allowlist
-and basic access control must be enforced.
+Raise generated resume quality above the user-designated handmade resume before
+continuing Telegram work. The loop prioritizes evidence richness, JD targeting,
+page utilization, typography, working links, ATS extraction, and deterministic
+repair of sparse or visually weak output.
 
 ## Non-Negotiable Invariants
 
@@ -84,6 +84,9 @@ provenance and attribution; they are not used at compilation time.
   reports raster failures explicitly, and preserves the A4 page ratio at 200 DPI.
 - `GeometryValidator` measures all four page edges from element text boxes and
   emits fatal `unsafe_margin` issues below the configured safety thresholds.
+- `GeometryValidator` rejects more than 60 pt of unused bottom space with a
+  high-severity `excessive_bottom_whitespace` issue. Sparse compiler-only test
+  fixtures explicitly opt out; the production pipeline uses the quality gate.
 - `PdfGeometryExtractor` parses first-page `pdftotext -bbox` XHTML into typed
   page dimensions and deterministic word-level boxes, rejecting tool, schema,
   empty-page, and malformed-coordinate failures explicitly.
@@ -156,14 +159,17 @@ provenance and attribution; they are not used at compilation time.
   exhausted budget -> 'needs_review', writer error -> 'write_failed'.
   Pure Python; no LangGraph dependency required until HITL checkpointing.
 - CI and Make targets define the initial quality gates.
+- `tests/fixtures/jds/ai_engineer_benchmark_v1.json` contains five paraphrased,
+  provenance-backed AI Engineer postings from LinkedIn, Indeed, Wellfound, and
+  Google Careers spanning entry, mid, and senior expectations.
 
 ## Test Status
 
-The complete local gate passes 181 tests with no failures, including all
-previous gates plus 11 graph-routing contract tests (state TypedDict keys,
-executor construction, max_repair_cycles bound, happy path, compile_failure
-halt, validation_failure repair, exhausted budget, and writer failure).
-Live model and vision call counts remain zero.
+The complete non-live suite passes 189 tests with three live tests deselected.
+Live model and vision call counts remain zero. The files changed by the current
+quality increment pass focused Ruff checks and formatting. Repository-wide Ruff
+still reports pre-existing issues in committed Gemini/Telegram files and a
+user-owned uncommitted writer change.
 
 ## Known Issues
 
@@ -176,37 +182,44 @@ Live model and vision call counts remain zero.
 - The supplied resume fails the locked quality policy despite being one page:
   section reading order is invalid, while measured left/right/top margins are
   17.4/2.501/14.195 pt against 22/22/18 pt minimums.
+- The current generated resume uses only about 63% of the A4 page and is now
+  correctly rejected by the default geometry policy.
+- Space planning still caps output at three experience entries and three
+  projects regardless of template or measured underfill.
 
 ## Current Blocker
 
-No engineering blocker. Graph executor is implemented and covered.
-Telegram bot token and admin user IDs are not yet configured; bot.py is
-not yet implemented.
+No resume-quality engineering blocker. Telegram work is intentionally deferred
+by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Add a failing `tests/contract/test_bot_gateway.py` contract for the bot
-gateway: admin allowlist enforcement, JD message ingestion, and PDF
-document reply. Then implement `app/bot.py` (Milestone 6).
+Add failing template-aware space-planning tests proving an underfilled
+two-column resume can retain all five verified experience entries and restore
+additional high-value projects without weakening the exactly-one-page gate.
 
 ## Files Changed Recently
 
-- `app/graph.py`
-- `tests/contract/test_graph_routing.py`
+- `app/models.py`
+- `app/services/validation.py`
+- `tests/fixtures/jds/ai_engineer_benchmark_v1.json`
+- `tests/regression/test_ai_engineer_benchmark.py`
+- `tests/unit/test_geometry.py`
 - `memory.md`
 
 ## Prompt Versions
 
-No prompts exist yet.
+- `writer_v1.0`
 
 ## Metrics Snapshot
 
-- Tests passing: 181
+- Tests passing: 189
 - Tests failing: 0
 - Live model calls: 0
 - Live vision calls: 0
 - Compiled resume fixtures: 3 (one per supported template)
 - Golden JD intelligence fixtures: 1
+- Sourced AI Engineer benchmark JDs: 5
 - Supported templates: 3 (resume_v1, moderncv_two_column_v1, deedy_cv_v1)
 - Prompt versions: 1 (writer_v1.0)
 - Graph executor max_repair_cycles: 2 (configurable, cap 3)
@@ -302,6 +315,12 @@ No prompts exist yet.
   ResumeGraphExecutor bounded repair state machine. Pure Python, no
   LangGraph dependency. 11 contract tests cover all routing decisions.
   LangGraph wrapping deferred until HITL checkpointing is needed.
+- 2026-08-11: Deferred Telegram by explicit user direction and established the
+  handmade resume as the minimum richness and visual benchmark for generated
+  output.
+- 2026-08-11: Set 60 pt as the maximum default bottom whitespace, corresponding
+  to approximately 93% A4 page utilization, so a technically one-page but
+  materially sparse resume cannot pass deterministic validation.
 
 ## Session Log
 
@@ -350,3 +369,7 @@ No prompts exist yet.
   pipeline, compile_failure halts, validation_failure repairs within
   budget, exhausted budget yields needs_review, writer error yields
   write_failed); all 181 tests pass, Ruff, format, mypy, memory clean.
+- 2026-08-11: Read the full plan and memory, audited the handmade and generated
+  PDFs, researched current AI Engineer postings across four requested job
+  platforms, added a five-JD sourced benchmark, and introduced deterministic
+  underfill rejection. The non-live suite passes 189 tests.

@@ -3,9 +3,16 @@ from pathlib import Path
 
 import pytest
 
-from app.models import EvidenceRecord, EvidenceText, ResumeContent, ResumeHeader
+from app.models import (
+    EvidenceRecord,
+    EvidenceText,
+    GeometryPolicy,
+    ResumeContent,
+    ResumeHeader,
+)
 from app.services.pipeline import DeterministicResumePipeline
 from app.services.rendering import LatexCompiler
+from app.services.validation import GeometryValidator
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 TECTONIC_PATH = PROJECT_ROOT / ".tools" / "tectonic"
@@ -44,6 +51,9 @@ def test_deterministic_pipeline_returns_all_validated_artifacts(
             timeout_seconds=120.0,
         ),
         expected_sections=("Summary",),
+        geometry_validator=GeometryValidator(
+            policy=GeometryPolicy(maximum_bottom_margin_pt=842.0)
+        ),
     )
 
     result = pipeline.run(
