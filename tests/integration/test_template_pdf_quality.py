@@ -55,6 +55,7 @@ def representative_content(template_id: str) -> ResumeContent:
                 update={
                     "element_id": "projects.titan",
                     "subheading": "Self-Correcting Resume Compiler",
+                    "url": "https://github.com/alex/titan",
                 }
             ),
         ),

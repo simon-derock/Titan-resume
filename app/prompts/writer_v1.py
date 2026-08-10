@@ -19,7 +19,7 @@ import json
 
 from app.models import EvidenceRecord, ResumeSpaceBudget, ResumeWritingRequest
 
-PROMPT_VERSION: str = "writer_v1.0"
+PROMPT_VERSION: str = "writer_v1.1"
 
 
 # ---------------------------------------------------------------------------
@@ -83,8 +83,10 @@ def _section_constraints(request: ResumeWritingRequest) -> str:
         f"- schema_version MUST be exactly: {request.schema_version}",
         "- Every evidence_ids list must contain only the EXACT evidence_id strings "
         "listed as headings in the 'Candidate evidence' section (e.g. "
-        "\"evidence.exp.titan\"). Do NOT use source_id or any other identifier.",
+        '"evidence.exp.titan"). Do NOT use source_id or any other identifier.',
         "- Do not invent facts, metrics, or skills not present in the evidence.",
+        "- An entry url MUST be copied exactly from an evidence_url referenced by "
+        "that entry, or set to null when no verified URL exists.",
         "- Do not use LaTeX commands in any field value.",
         "- Return only JSON — no prose, no markdown, no other text.",
     ]
@@ -124,7 +126,7 @@ def _section_evidence(records: tuple[EvidenceRecord, ...]) -> str:
         "",
         "IMPORTANT: When populating evidence_ids fields in the JSON response, use the "
         "exact string shown as the heading for each evidence block below "
-        "(e.g. \"evidence.exp.titan\"). Do NOT use source_id — use evidence_id.",
+        '(e.g. "evidence.exp.titan"). Do NOT use source_id — use evidence_id.',
         "",
     ]
     for record in records:
@@ -137,6 +139,8 @@ def _section_evidence(records: tuple[EvidenceRecord, ...]) -> str:
         if record.metrics:
             metrics_str = json.dumps(record.metrics, separators=(",", ":"))
             lines.append(f"- metrics: {metrics_str}")
+        if record.evidence_url:
+            lines.append(f"- evidence_url: {record.evidence_url}")
         lines.append(f"- confidence: {record.confidence}")
         lines.append("")
     return "\n".join(lines)
@@ -200,7 +204,6 @@ def _section_response_schema(request: ResumeWritingRequest) -> str:
         f'  "target_role": "{request.strategy.target_role}",\n'
         f'  "template_id": "{request.template_id}",\n'
         f'  "content_version": 1,\n'
-
         '  "summary": {\n'
         '    "element_id": "summary.main",\n'
         '    "text": "<2-line plain-text summary>",\n'
@@ -213,6 +216,7 @@ def _section_response_schema(request: ResumeWritingRequest) -> str:
         '      "subheading": "<title or null>",\n'
         '      "location": "<city or null>",\n'
         '      "date_range": "<YYYY-YYYY or null>",\n'
+        '      "url": "<exact verified evidence_url or null>",\n'
         f'      "evidence_ids": [{ids_comment}],\n'
         '      "bullets": [\n'
         "        {\n"

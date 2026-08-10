@@ -46,7 +46,7 @@
 \begin{minipage}[t]{0.62\textwidth}
 {% if resume.experience %}\section{EXPERIENCE}
 {% for entry in resume.experience %}% TITAN-ELEMENT: {{ entry.element_id }}
-\titanentry{ {{- entry.heading | latex -}} }{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }
+\titanentry{%- if entry.url %}{\href{ {{- entry.url | latex -}} }{ {{- entry.heading | latex -}} }}{% else %}{ {{- entry.heading | latex -}} }{% endif %}{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }
 {% if entry.bullets %}\begin{itemize}
 {% for bullet in entry.bullets %}% TITAN-ELEMENT: {{ bullet.element_id }}
 \item {{ bullet.text | latex }}
@@ -56,7 +56,7 @@
 
 {% if resume.projects %}\section{PROJECTS}
 {% for entry in resume.projects %}% TITAN-ELEMENT: {{ entry.element_id }}
-\titanentry{ {{- entry.heading | latex -}} }{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }
+\titanentry{%- if entry.url %}{\href{ {{- entry.url | latex -}} }{ {{- entry.heading | latex -}} }}{% else %}{ {{- entry.heading | latex -}} }{% endif %}{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }
 {% if entry.bullets %}\begin{itemize}
 {% for bullet in entry.bullets %}% TITAN-ELEMENT: {{ bullet.element_id }}
 \item {{ bullet.text | latex }}
@@ -73,7 +73,7 @@
 
 {% if resume.education %}\section{EDUCATION}
 {% for entry in resume.education %}% TITAN-ELEMENT: {{ entry.element_id }}
-\textbf{ {{- entry.heading | latex -}} }\\[-0.5mm]
+\textbf{ {% if entry.url %}\href{ {{- entry.url | latex -}} }{ {{- entry.heading | latex -}} }{% else %} {{- entry.heading | latex -}} {% endif %} }\\[-0.5mm]
 {% if entry.subheading %}\textit{ {{- entry.subheading | latex -}} }\\[-0.5mm]{% endif %}
 {\small {{ (entry.date_range or "") | latex }}{% if entry.location %} \textbar{} {{ entry.location | latex }}{% endif %}}\par\addvspace{1.5mm}
 {% endfor %}{% endif %}

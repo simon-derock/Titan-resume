@@ -386,6 +386,7 @@ class ResumeEntry(BaseModel):
     subheading: str | None = None
     location: str | None = None
     date_range: str | None = None
+    url: str | None = Field(default=None, pattern=r"^https://")
     evidence_ids: tuple[str, ...] = Field(min_length=1)
     bullets: tuple[ResumeBullet, ...] = ()
 
@@ -445,13 +446,27 @@ def validate_resume_content_evidence(
     for skill_line in content.skills:
         referenced_ids.update(skill_line.evidence_ids)
 
-    allowed_ids = {
-        record.evidence_id for record in evidence_records if record.allowed_for_resume
+    allowed_records = {
+        record.evidence_id: record
+        for record in evidence_records
+        if record.allowed_for_resume
     }
+    allowed_ids = set(allowed_records)
     unavailable_ids = sorted(referenced_ids - allowed_ids)
     if unavailable_ids:
         joined_ids = ", ".join(unavailable_ids)
         raise UnknownEvidenceError(f"unavailable evidence IDs: {joined_ids}")
+
+    for entry in entries:
+        if entry.url is None:
+            continue
+        verified_urls = {
+            allowed_records[evidence_id].evidence_url
+            for evidence_id in entry.evidence_ids
+            if evidence_id in allowed_records
+        }
+        if entry.url not in verified_urls:
+            raise UnknownEvidenceError(f"unverified entry URL: {entry.url}")
 
 
 class ResumePolicy(BaseModel):

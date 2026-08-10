@@ -65,6 +65,9 @@ provenance and attribution; they are not used at compilation time.
   that are missing or not allowed for resume use.
 - `ResumeContent` is strict, template-locked, versioned, renderer-independent,
   and recursively checked for unavailable evidence references.
+- `ResumeEntry.url` accepts HTTPS destinations only. A rendered entry URL must
+  exactly match an `evidence_url` referenced by that entry, preventing the
+  writer from inventing or altering project links.
 - Candidate-controlled LaTeX reserved characters and command prefixes are
   escaped deterministically before template rendering.
 - `LatexRenderer` uses a sandboxed, strict Jinja2 environment and the versioned
@@ -169,7 +172,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 194 tests with three live tests deselected.
+The complete non-live suite passes 200 tests with three live tests deselected.
 Live model and vision call counts remain zero. The files changed by the current
 quality increment pass focused Ruff checks and formatting. Repository-wide Ruff
 still reports pre-existing issues in committed Gemini/Telegram files and a
@@ -198,8 +201,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Add failing content and rendering contracts for verified project hyperlinks,
-then populate the candidate evidence URLs from the handmade resume.
+Run the first sourced AI Engineer benchmark through the live writer using the
+two-column template, inspect the compiled PDF, and convert the first observed
+writing/layout defect into the next RED regression test.
 
 ## Files Changed Recently
 
@@ -214,15 +218,18 @@ then populate the candidate evidence URLs from the handmade resume.
 - `templates/resume_v1.tex.j2`
 - `templates/moderncv_two_column_v1.tex.j2`
 - `templates/deedy_cv_v1.tex.j2`
+- `app/prompts/writer_v1.py`
+- `tests/contract/test_resume_content.py`
+- `tests/integration/test_template_rendering.py`
 - `memory.md`
 
 ## Prompt Versions
 
-- `writer_v1.0`
+- `writer_v1.1`
 
 ## Metrics Snapshot
 
-- Tests passing: 194
+- Tests passing: 200
 - Tests failing: 0
 - Live model calls: 0
 - Live vision calls: 0
@@ -336,6 +343,9 @@ then populate the candidate evidence URLs from the handmade resume.
 - 2026-08-11: Centralized a fixed full-width header and summary shell across all
   production templates, including consistent 30 pt name typography and complete
   contact hyperlink normalization.
+- 2026-08-11: Added evidence-verified HTTPS entry links throughout the model,
+  writer prompt, provenance validator, and all production templates. Populated
+  six verified project destinations in the local candidate vault.
 
 ## Session Log
 
@@ -392,3 +402,5 @@ then populate the candidate evidence URLs from the handmade resume.
   selection through the graph. The non-live suite passes 191 tests.
 - 2026-08-11: Added and compiled the shared identity header across all three
   templates. The non-live suite passes 194 tests.
+- 2026-08-11: Added verified project-link rendering and upgraded the prompt to
+  `writer_v1.1`. All three linked templates compile; 200 non-live tests pass.

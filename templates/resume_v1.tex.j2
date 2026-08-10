@@ -33,7 +33,7 @@
 \section{Experience}
 {% for entry in resume.experience %}
 % TITAN-ELEMENT: {{ entry.element_id }}
-\resumeEntry{ {{- entry.heading | latex -}} }{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }
+\resumeEntry{%- if entry.url %}{\href{ {{- entry.url | latex -}} }{ {{- entry.heading | latex -}} }}{% else %}{ {{- entry.heading | latex -}} }{% endif %}{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }
 {% if entry.bullets %}\begin{itemize}
 {% for bullet in entry.bullets %}% TITAN-ELEMENT: {{ bullet.element_id }}
 \item {{ bullet.text | latex }}
@@ -46,7 +46,7 @@
 \section{Projects}
 {% for entry in resume.projects %}
 % TITAN-ELEMENT: {{ entry.element_id }}
-\resumeEntry{ {{- entry.heading | latex -}} }{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }
+\resumeEntry{%- if entry.url %}{\href{ {{- entry.url | latex -}} }{ {{- entry.heading | latex -}} }}{% else %}{ {{- entry.heading | latex -}} }{% endif %}{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }
 {% if entry.bullets %}\begin{itemize}
 {% for bullet in entry.bullets %}% TITAN-ELEMENT: {{ bullet.element_id }}
 \item {{ bullet.text | latex }}
@@ -65,7 +65,7 @@
 {% if resume.education %}
 \section{Education}
 {% for entry in resume.education %}% TITAN-ELEMENT: {{ entry.element_id }}
-\resumeEntry{ {{- entry.heading | latex -}} }{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }
+\resumeEntry{%- if entry.url %}{\href{ {{- entry.url | latex -}} }{ {{- entry.heading | latex -}} }}{% else %}{ {{- entry.heading | latex -}} }{% endif %}{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }
 {% endfor %}
 {% endif %}
 
