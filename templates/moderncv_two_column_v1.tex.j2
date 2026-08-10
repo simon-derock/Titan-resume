@@ -12,6 +12,7 @@
 \usepackage[scale=0.90]{geometry}
 \usepackage{tabularx}
 \usepackage{mathpazo}
+\usepackage[scaled=0.94]{helvet}
 \usepackage{enumitem}
 \usepackage[hidelinks]{hyperref}
 \usepackage{titlesec}
@@ -40,17 +41,7 @@
 }{% endraw %}
 
 \begin{document}
-\begin{center}
-  {\Huge\bfseries {{ header.name | latex }}}\\[-1mm]
-  {\large {{ header.headline | latex }}}{% if header.location %} \textbar{} {{ header.location | latex }}{% endif %}\\[-1mm]
-  \small
-  {% if header.email %}\href{mailto:{{ header.email | latex }}}{ {{- header.email | latex -}} }{% endif %}
-  {% if header.phone %} \textbar{} {{ header.phone | latex }}{% endif %}
-  {% if header.linkedin %} \textbar{} \href{ {{- header.linkedin | latex -}} }{LinkedIn}{% endif %}
-  {% if header.github %} \textbar{} \href{ {{- header.github | latex -}} }{GitHub}{% endif %}
-  {% if header.portfolio %} \textbar{} \href{ {{- header.portfolio | latex -}} }{Portfolio}{% endif %}
-\end{center}
-\vspace{-3mm}
+{% include "_resume_header.tex.j2" %}
 
 \begin{minipage}[t]{0.62\textwidth}
 {% if resume.experience %}\section{EXPERIENCE}
@@ -75,11 +66,6 @@
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.35\textwidth}
-{% if resume.summary %}% TITAN-ELEMENT: {{ resume.summary.element_id }}
-\section{SUMMARY}
-{{ resume.summary.text | latex }}
-{% endif %}
-
 {% if resume.skills %}\section{SKILLS}
 {% for skill_line in resume.skills %}% TITAN-ELEMENT: {{ skill_line.element_id }}
 {{ skill_line.text | latex }}{% if not loop.last %}\\[0.5mm]{% endif %}

@@ -138,6 +138,10 @@ provenance and attribution; they are not used at compilation time.
   `moderncv_two_column_v1.tex.j2`, and `deedy_cv_v1.tex.j2`. Each compiles
   under Tectonic 0.16.9 `--untrusted --only-cached` and passes one-page, ATS
   text extraction, and geometry validation.
+- All three templates render one shared full-width identity header with a 30 pt
+  sans-serif name, consistent headline/contact typography, normalized HTTPS
+  destinations, a clickable telephone link, and the dynamic summary before any
+  two-column body content.
 - The `compiler_warmup.tex` fixture now covers `tabularx`, `mathpazo`, and
   `helvet` package surface required by the two-column templates.
 - `app/prompts/writer_v1.py` exposes `PROMPT_VERSION = 'writer_v1.0'` and a
@@ -165,7 +169,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 191 tests with three live tests deselected.
+The complete non-live suite passes 194 tests with three live tests deselected.
 Live model and vision call counts remain zero. The files changed by the current
 quality increment pass focused Ruff checks and formatting. Repository-wide Ruff
 still reports pre-existing issues in committed Gemini/Telegram files and a
@@ -194,8 +198,8 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Add failing content and rendering contracts for verified entry hyperlinks and a
-fixed full-width identity header shared by all three production templates.
+Add failing content and rendering contracts for verified project hyperlinks,
+then populate the candidate evidence URLs from the handmade resume.
 
 ## Files Changed Recently
 
@@ -206,6 +210,10 @@ fixed full-width identity header shared by all three production templates.
 - `tests/fixtures/jds/ai_engineer_benchmark_v1.json`
 - `tests/regression/test_ai_engineer_benchmark.py`
 - `tests/unit/test_geometry.py`
+- `templates/_resume_header.tex.j2`
+- `templates/resume_v1.tex.j2`
+- `templates/moderncv_two_column_v1.tex.j2`
+- `templates/deedy_cv_v1.tex.j2`
 - `memory.md`
 
 ## Prompt Versions
@@ -214,7 +222,7 @@ fixed full-width identity header shared by all three production templates.
 
 ## Metrics Snapshot
 
-- Tests passing: 191
+- Tests passing: 194
 - Tests failing: 0
 - Live model calls: 0
 - Live vision calls: 0
@@ -325,6 +333,9 @@ fixed full-width identity header shared by all three production templates.
 - 2026-08-11: Made space planning template-aware. Two-column templates can
   expose the complete five-experience/six-project evidence inventory while the
   conservative single-column limits remain unchanged.
+- 2026-08-11: Centralized a fixed full-width header and summary shell across all
+  production templates, including consistent 30 pt name typography and complete
+  contact hyperlink normalization.
 
 ## Session Log
 
@@ -379,3 +390,5 @@ fixed full-width identity header shared by all three production templates.
   underfill rejection. The non-live suite passes 189 tests.
 - 2026-08-11: Added reviewed 56-line two-column budgets and wired template
   selection through the graph. The non-live suite passes 191 tests.
+- 2026-08-11: Added and compiled the shared identity header across all three
+  templates. The non-live suite passes 194 tests.

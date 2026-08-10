@@ -112,6 +112,4 @@ def test_templates_share_fixed_full_width_identity_header(
     assert r"\href{https://github.com/alex}{GitHub}" in source
     assert r"\href{https://alex.example.com}{Portfolio}" in source
     if template_id != "resume_v1":
-        assert source.index(r"\section{Summary}") < source.index(
-            r"\begin{minipage}"
-        )
+        assert source.index(r"\section{Summary}") < source.index(r"\begin{minipage}")

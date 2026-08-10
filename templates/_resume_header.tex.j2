@@ -1,0 +1,18 @@
+% TITAN-ELEMENT: header
+\begin{center}
+  {\fontfamily{phv}\selectfont\fontsize{30}{32}\selectfont\bfseries {{ header.name | latex }}}\\[-2pt]
+  {\fontfamily{phv}\selectfont\normalsize {{ header.headline | latex }}{% if header.location %} \textbar{} {{ header.location | latex }}{% endif %}}\\[-2pt]
+  {\fontfamily{phv}\selectfont\small
+  {% if header.email %}\href{mailto:{{ header.email | latex }}}{ {{- header.email | latex -}} }{% endif %}
+  {% if header.phone %} \textbar{} \href{tel:{{ header.phone.replace(' ', '') | latex }}}{ {{- header.phone | latex -}} }{% endif %}
+  {% if header.linkedin %} \textbar{} \href{ {%- if not header.linkedin.startswith('http') %}https://{% endif %}{{ header.linkedin | latex -}} }{LinkedIn}{% endif %}
+  {% if header.github %} \textbar{} \href{ {%- if not header.github.startswith('http') %}https://{% endif %}{{ header.github | latex -}} }{GitHub}{% endif %}
+  {% if header.portfolio %} \textbar{} \href{ {%- if not header.portfolio.startswith('http') %}https://{% endif %}{{ header.portfolio | latex -}} }{Portfolio}{% endif %}}
+\end{center}
+\vspace{-7pt}
+
+{% if resume.summary %}
+% TITAN-ELEMENT: {{ resume.summary.element_id }}
+\section{Summary}
+{{ resume.summary.text | latex }}
+{% endif %}
