@@ -19,7 +19,7 @@ import json
 
 from app.models import EvidenceRecord, ResumeSpaceBudget, ResumeWritingRequest
 
-PROMPT_VERSION: str = "writer_v1.6"
+PROMPT_VERSION: str = "writer_v1.7"
 
 
 # ---------------------------------------------------------------------------
@@ -103,6 +103,10 @@ def _section_constraints(request: ResumeWritingRequest) -> str:
         "that entry, or set to null when no verified URL exists.",
         "- Represent every selected experience, project, and education source in "
         "its matching section; do not omit selected sources.",
+        "- Allocate bullets by evidence richness and JD relevance. Do not force "
+        "every entry to have the same bullet count. Use a second bullet only when "
+        "the evidence supports a distinct architecture, outcome, metric, or "
+        "deployment detail; never add padding or repeat the first bullet.",
         "- Each entry and bullet evidence_ids list may contain only relevant IDs "
         "from that same section and source.",
         "- Keep bullet text at 160 characters or fewer whenever possible; the "
