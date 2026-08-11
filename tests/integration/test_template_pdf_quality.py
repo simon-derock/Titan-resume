@@ -180,3 +180,109 @@ def test_deedy_pipeline_validates_its_physical_column_reading_order(
     assert result.ats_report is not None
     assert result.ats_report.reading_order_valid is True
     assert result.passed is True
+
+
+@pytest.mark.integration
+@pytest.mark.compiler
+@pytest.mark.skipif(not TECTONIC_PATH.is_file(), reason="Tectonic is not installed")
+def test_deedy_dense_resume_reaches_reviewed_page_fill(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A complete 5/6/1 resume should fill at least 93% of its A4 height."""
+    monkeypatch.setenv("XDG_CACHE_HOME", str(TECTONIC_CACHE_PATH))
+
+    def entry(section: str, index: int, text: str) -> ResumeEntry:
+        return ResumeEntry(
+            element_id=f"{section}.{index}",
+            heading=f"{section.title()} {index}",
+            subheading="AI Engineer" if section == "experience" else None,
+            date_range="2025-2026" if section == "experience" else None,
+            evidence_ids=(EVIDENCE_ID,),
+            bullets=(
+                ResumeBullet(
+                    element_id=f"{section}.{index}.bullet",
+                    text=text,
+                    evidence_ids=(EVIDENCE_ID,),
+                    target_max_lines=2,
+                ),
+            ),
+        )
+
+    experience_texts = (
+        "Engineered production agent infrastructure using LangGraph, hybrid retrieval, and FastAPI services.",
+        "Developed an LLM coding copilot that helped engineers write cleaner and faster Python code.",
+        "Built workflow automation for real-time document processing and autonomous agent task execution.",
+        "Created healthcare prediction models using feature engineering and statistical modelling.",
+        "Completed practical training in cybersecurity essentials and network security fundamentals.",
+    )
+    project_texts = (
+        "Architected an asynchronous ReAct engine integrating eight agents, vector memory, and model routing.",
+        "Fine-tuned an open model on clinical samples and deployed offline inference to mobile hardware.",
+        "Designed a decoupled multi-agent RAG pipeline with message-bus orchestration and vector retrieval.",
+        "Deployed a headless AI server with embeddings, conversational memory, and local model inference.",
+        "Built a real-time player tracker using detection, Kalman filtering, and assignment optimization.",
+        "Shipped an email classifier as a FastAPI service for automated support-ticket processing.",
+    )
+    content = ResumeContent(
+        resume_id="resume.dense.001",
+        target_role="AI Engineer",
+        summary=EvidenceText(
+            element_id="summary.main",
+            text=(
+                "AI Engineer building production agentic RAG, multi-agent systems, "
+                "and reliable Python services with grounded model evaluation."
+            ),
+            evidence_ids=(EVIDENCE_ID,),
+        ),
+        experience=tuple(
+            entry("experience", index, text)
+            for index, text in enumerate(experience_texts, start=1)
+        ),
+        projects=tuple(
+            entry("project", index, text)
+            for index, text in enumerate(project_texts, start=1)
+        ),
+        skills=(
+            EvidenceText(
+                element_id="skills.main",
+                text=(
+                    "Python, FastAPI, LangGraph, LangChain, PyTorch, OpenCV, "
+                    "Agentic RAG, Multi-Agent Systems, Qdrant, ChromaDB, Zilliz, "
+                    "Ollama, Linux, Streamlit, MySQL"
+                ),
+                evidence_ids=(EVIDENCE_ID,),
+            ),
+        ),
+        education=(
+            ResumeEntry(
+                element_id="education.degree",
+                heading="B.Tech in Artificial Intelligence and Data Science",
+                subheading="Engineering University",
+                date_range="2021-2025",
+                location="Coimbatore, India",
+                evidence_ids=(EVIDENCE_ID,),
+            ),
+        ),
+        template_id="deedy_cv_v1",
+    )
+    tex_path = LatexRenderer().render(
+        ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
+        content,
+        tmp_path / "resume.tex",
+    )
+    compile_result = LatexCompiler(
+        executable=str(TECTONIC_PATH),
+        engine="tectonic",
+        timeout_seconds=120.0,
+    ).compile(tex_path)
+
+    assert compile_result.success is True, compile_result.log
+    assert compile_result.pdf_path is not None
+    pdf_path = Path(compile_result.pdf_path)
+    assert PdfValidator().validate(pdf_path).passed is True
+    geometry = PdfGeometryExtractor().extract(pdf_path)
+    report = GeometryValidator(
+        policy=GeometryPolicy(maximum_bottom_margin_pt=60.0)
+    ).validate(geometry)
+    assert report.passed is True, report.issues
