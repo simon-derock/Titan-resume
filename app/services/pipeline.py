@@ -84,7 +84,10 @@ class DeterministicResumePipeline:
 
         extracted_text = self._text_extractor.extract(pdf_path)
         ats_report = AtsTextValidator(
-            expected_sections=self._expected_sections
+            expected_sections=_ats_section_order(
+                self._expected_sections,
+                template_id=content.template_id,
+            )
         ).validate(extracted_text)
         geometry = self._geometry_extractor.extract(pdf_path)
         geometry_report = self._geometry_validator.validate(geometry)
@@ -105,3 +108,27 @@ class DeterministicResumePipeline:
             geometry_report=geometry_report,
             issues=issues,
         )
+
+
+def _ats_section_order(
+    expected_sections: tuple[str, ...],
+    *,
+    template_id: str,
+) -> tuple[str, ...]:
+    if template_id != "deedy_cv_v1":
+        return expected_sections
+
+    physical_order = {
+        section: index
+        for index, section in enumerate(
+            ("summary", "skills", "experience", "education", "projects")
+        )
+    }
+    return tuple(
+        sorted(
+            expected_sections,
+            key=lambda section: physical_order.get(
+                section.casefold(), len(physical_order)
+            ),
+        )
+    )

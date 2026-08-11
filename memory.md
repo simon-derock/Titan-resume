@@ -176,8 +176,8 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 210 tests with three live tests deselected.
-Live benchmark diagnostics have made twelve completion calls. Writer prompt v1.2
+The complete non-live suite passes 211 tests with three live tests deselected.
+Live benchmark diagnostics have made fourteen completion calls. Writer prompt v1.3
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
 and geometry because selection omitted education and left 116 pt of bottom
 whitespace. Live vision calls remain zero. The files changed by the current
@@ -208,9 +208,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Rerun the first sourced AI Engineer benchmark with writer prompt v1.3 and
-section-source coverage enforcement; verify all 5 experiences, 6 projects,
-education, hyperlinks, one-page status, and bottom-page fill.
+Tune Deedy's entry rhythm to move the validated live benchmark from 90.4% page
+fill into the 93-98% target band without changing safe margins, font size, or
+content; then rerun the complete deterministic pipeline.
 
 ## Files Changed Recently
 
@@ -237,9 +237,9 @@ education, hyperlinks, one-page status, and bottom-page fill.
 
 ## Metrics Snapshot
 
-- Tests passing: 210
+- Tests passing: 211
 - Tests failing: 0
-- Live model calls: 12
+- Live model calls: 14
 - Live vision calls: 0
 - Compiled resume fixtures: 3 (one per supported template)
 - Golden JD intelligence fixtures: 1
@@ -433,3 +433,7 @@ education, hyperlinks, one-page status, and bottom-page fill.
   only four experiences and four projects. Writer prompt v1.3 and deterministic
   policy now require every selected source in its correct section and reject
   cross-section provenance; 210 tests pass.
+- 2026-08-11: The enforced-coverage live pass produced 5 experiences, 6
+  projects, education, and all 6 verified project links on one page. Added
+  template-aware ATS ordering for Deedy's physical column extraction; 211 tests
+  pass. Remaining measured gap is 80.6 pt bottom whitespace versus 60 pt max.
