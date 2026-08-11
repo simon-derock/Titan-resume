@@ -277,6 +277,91 @@ def test_executor_run_returns_passed_state_on_success(
     assert state["pipeline_result"] is not None
 
 
+@pytest.mark.contract
+@pytest.mark.graph
+def test_executor_uses_structured_jd_analysis_for_strategy_and_writer(tmp_path) -> None:
+    """The graph must not reduce a rich JD to an unstructured first-line role."""
+    from dataclasses import dataclass, field
+    from datetime import date
+
+    from app.models import (
+        EvidenceRecord,
+        EvidenceText,
+        IngestedJobDescription,
+        ResumeContent,
+        ResumeHeader,
+        StructuredJobDescription,
+    )
+
+    g = _import_graph()
+    FakeWriter, FakePipeline, passing, _, _ = _build_fake_collaborators()
+
+    evidence_id = "evidence.experience.langgraph"
+
+    @dataclass
+    class FakeJdAnalyzer:
+        documents: list[IngestedJobDescription] = field(default_factory=list)
+
+        def analyze(
+            self, document: IngestedJobDescription
+        ) -> StructuredJobDescription:
+            self.documents.append(document)
+            return StructuredJobDescription(
+                role="AI Software Engineer",
+                company="Spiral Kite Labs",
+                seniority="entry",
+                must_have_skills=("LangGraph", "Python"),
+                keywords=("agent workflows", "RAG"),
+                raw_text_hash=document.raw_text_hash,
+            )
+
+    content = ResumeContent(
+        resume_id="resume.structured-jd.001",
+        target_role="AI Software Engineer",
+        skills=(
+            EvidenceText(
+                element_id="skills.main",
+                text="Python, LangGraph",
+                evidence_ids=(evidence_id,),
+            ),
+        ),
+        template_id="resume_v1",
+    )
+    analyzer = FakeJdAnalyzer()
+    writer = FakeWriter(responses=[content.model_dump()])
+    executor = g.ResumeGraphExecutor(
+        writer=writer,
+        pipeline=FakePipeline(results=[passing()]),
+        jd_analyzer=analyzer,
+    )
+
+    state = executor.run(
+        raw_jd_text=_JD_TEXT,
+        header=ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
+        evidence_records=(
+            EvidenceRecord(
+                evidence_id=evidence_id,
+                source_type="experience",
+                source_id="experience.langgraph",
+                claim="Built production LangGraph services in Python.",
+                skills=("LangGraph", "Python"),
+                confidence=1.0,
+                allowed_for_resume=True,
+                last_verified_at=date(2026, 8, 6),
+            ),
+        ),
+        output_dir=tmp_path,
+    )
+
+    assert state["status"] == "passed"
+    assert len(analyzer.documents) == 1
+    request = writer.calls[0]
+    assert request.job_description.role == "AI Software Engineer"
+    assert request.job_description.company == "Spiral Kite Labs"
+    assert request.strategy.target_role == "AI Software Engineer"
+    assert request.strategy.selected_experience_evidence_ids == (evidence_id,)
+
+
 # ---------------------------------------------------------------------------
 # 5. Executor routing — compile failure stops immediately
 # ---------------------------------------------------------------------------
