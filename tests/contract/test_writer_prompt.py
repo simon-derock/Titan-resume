@@ -243,6 +243,18 @@ def test_writer_prompt_includes_entry_and_bullet_limits() -> None:
     assert "bullet" in rendered.lower(), "bullet limit must be mentioned in the prompt"
 
 
+@pytest.mark.contract
+def test_writer_prompt_allocates_bullets_by_evidence_richness() -> None:
+    """Strong sources get detail without padding every entry to a uniform shape."""
+    mod = _import_prompt_module()
+    request = _build_minimal_request()
+
+    rendered = mod.render(request).lower()
+
+    assert "evidence richness" in rendered
+    assert "do not force every entry" in rendered
+
+
 # ---------------------------------------------------------------------------
 # 7. must_not_claim injected
 # ---------------------------------------------------------------------------
