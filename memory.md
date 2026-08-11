@@ -176,7 +176,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 217 tests with three live tests deselected.
+The complete non-live suite passes 218 tests with three live tests deselected.
 Live benchmark diagnostics reached the Gemini free-tier limit at exactly twenty
 completion calls. Writer prompt v1.5
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
@@ -209,9 +209,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Validate Google's corrected strategy through the repository's benchmark-only
-Gemini fallback while the primary model quota is exhausted, compile the result,
-then run the complete static gate and push only the green branch tip.
+Run the complete static gate for targeted writer retry feedback and preserve the
+green branch. When the primary Gemini quota resets, rerun Google and the five-job
+benchmark; retry 2 will now receive the exact sanitized validation defect.
 
 ## Files Changed Recently
 
@@ -233,12 +233,12 @@ then run the complete static gate and push only the green branch tip.
 
 ## Prompt Versions
 
-- `writer_v1.5`
+- `writer_v1.6`
 - `jd_analyzer_v1.0`
 
 ## Metrics Snapshot
 
-- Tests passing: 217
+- Tests passing: 218
 - Tests failing: 0
 - Live model calls: 20 (daily quota reached)
 - Live vision calls: 0
@@ -465,3 +465,7 @@ then run the complete static gate and push only the green branch tip.
   Server claim and the strategy's prohibition list. Strategy gaps remain
   skill-tag based, but `must_not_claim` now excludes terms found verbatim in
   verified evidence. Google's contradiction is removed; 217 tests pass.
+- 2026-08-11: Added self-correcting writer retries. Schema and policy failures
+  are reduced to typed, sanitized codes such as `selected_section_evidence` and
+  injected into writer prompt v1.6 for the next bounded attempt. Provider errors
+  remain private, and raw invalid model content is never echoed; 218 tests pass.

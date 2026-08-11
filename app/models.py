@@ -199,6 +199,7 @@ class ResumeWritingRequest(BaseModel):
     space_budget: ResumeSpaceBudget
     selected_evidence: tuple[EvidenceRecord, ...]
     template_id: ResumeTemplateId = "resume_v1"
+    repair_feedback: tuple[str, ...] = ()
     schema_version: Literal[1] = 1
 
 

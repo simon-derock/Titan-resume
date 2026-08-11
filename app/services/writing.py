@@ -40,6 +40,10 @@ class StructuredResumeWriterClient(Protocol):
 class _ResumeWritingPolicyError(ValueError):
     """Internal signal for schema-valid content that violates writer policy."""
 
+    def __init__(self, code: str) -> None:
+        self.code = code
+        super().__init__(code)
+
 
 class StructuredResumeWriter:
     """Accept only grounded, role-correct, line-budgeted resume content."""
@@ -110,12 +114,14 @@ class StructuredResumeWriter:
                     template_id=template_id,
                 )
                 return content
-            except (
-                ValidationError,
-                UnknownEvidenceError,
-                _ResumeWritingPolicyError,
-            ):
-                continue
+            except ValidationError as exc:
+                feedback = _schema_feedback(exc)
+            except UnknownEvidenceError:
+                feedback = ("evidence_provenance",)
+            except _ResumeWritingPolicyError as exc:
+                feedback = (exc.code,)
+
+            request = request.model_copy(update={"repair_feedback": feedback})
 
         raise ResumeWritingError(attempts=self._max_attempts) from None
 
@@ -138,9 +144,9 @@ def _validate_written_content(
     template_id: ResumeTemplateId,
 ) -> None:
     if content.target_role != strategy.target_role:
-        raise _ResumeWritingPolicyError
+        raise _ResumeWritingPolicyError("target_role")
     if content.template_id != template_id:
-        raise _ResumeWritingPolicyError
+        raise _ResumeWritingPolicyError("template_id")
 
     validate_resume_content_evidence(content, selected_evidence)
     _validate_selected_section_evidence(content, selected_evidence)
@@ -149,9 +155,9 @@ def _validate_written_content(
         _contains_protected_term(rendered_text, term)
         for term in strategy.must_not_claim
     ):
-        raise _ResumeWritingPolicyError
+        raise _ResumeWritingPolicyError("must_not_claim")
     if re.search(r"\\[A-Za-z@]+", rendered_text):
-        raise _ResumeWritingPolicyError
+        raise _ResumeWritingPolicyError("raw_latex")
 
     _validate_section_budget(
         content.experience,
@@ -172,9 +178,9 @@ def _validate_written_content(
         line_limit=space_budget.education.line_limit,
     )
     if len(content.skills) > space_budget.skills_line_limit:
-        raise _ResumeWritingPolicyError
+        raise _ResumeWritingPolicyError("skills_budget")
     if content.summary is not None and space_budget.summary_line_limit == 0:
-        raise _ResumeWritingPolicyError
+        raise _ResumeWritingPolicyError("summary_budget")
 
 
 def _validate_selected_section_evidence(
@@ -207,13 +213,13 @@ def _validate_selected_section_evidence(
         }
 
         if not rendered_ids <= expected_ids or not expected_ids <= rendered_ids:
-            raise _ResumeWritingPolicyError
+            raise _ResumeWritingPolicyError("selected_section_evidence")
 
         rendered_sources = {
             records_by_id[evidence_id].source_id for evidence_id in rendered_ids
         }
         if rendered_sources != expected_sources or len(entries) < len(expected_sources):
-            raise _ResumeWritingPolicyError
+            raise _ResumeWritingPolicyError("selected_section_evidence")
 
 
 def _validate_section_budget(
@@ -224,16 +230,24 @@ def _validate_section_budget(
     line_limit: int,
 ) -> None:
     if len(entries) > entry_limit:
-        raise _ResumeWritingPolicyError
+        raise _ResumeWritingPolicyError("section_entry_budget")
     if any(len(entry.bullets) > bullets_per_entry_limit for entry in entries):
-        raise _ResumeWritingPolicyError
+        raise _ResumeWritingPolicyError("section_bullet_budget")
 
     estimated_lines = sum(
         2 + sum(bullet.target_max_lines for bullet in entry.bullets)
         for entry in entries
     )
     if estimated_lines > line_limit:
-        raise _ResumeWritingPolicyError
+        raise _ResumeWritingPolicyError("section_line_budget")
+
+
+def _schema_feedback(error: ValidationError) -> tuple[str, ...]:
+    feedback = (
+        "schema." + ".".join(str(part) for part in issue["loc"]) + f".{issue['type']}"
+        for issue in error.errors(include_url=False, include_input=False)
+    )
+    return tuple(dict.fromkeys(feedback))
 
 
 def _content_text(content: ResumeContent) -> tuple[str, ...]:

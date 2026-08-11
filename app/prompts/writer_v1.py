@@ -19,7 +19,7 @@ import json
 
 from app.models import EvidenceRecord, ResumeSpaceBudget, ResumeWritingRequest
 
-PROMPT_VERSION: str = "writer_v1.5"
+PROMPT_VERSION: str = "writer_v1.6"
 
 
 # ---------------------------------------------------------------------------
@@ -37,6 +37,7 @@ def render(request: ResumeWritingRequest) -> str:
         [
             _section_identity(request),
             _section_output_format(),
+            _section_repair_feedback(request),
             _section_constraints(request),
             _section_space_budget(request.space_budget),
             _section_evidence(request.selected_evidence),
@@ -71,6 +72,19 @@ def _section_output_format() -> str:
         "IMPORTANT: Do not use LaTeX markup anywhere in the output. "
         "All field values must be plain text only. "
         "LaTeX commands (anything matching \\command) are forbidden."
+    )
+
+
+def _section_repair_feedback(request: ResumeWritingRequest) -> str:
+    if not request.repair_feedback:
+        return "## Retry status\n\nThis is the first writing attempt."
+    issues = "\n".join(f"- {issue}" for issue in request.repair_feedback)
+    return (
+        "## Correction required\n\n"
+        "The previous JSON failed these typed validation checks:\n"
+        f"{issues}\n\n"
+        "Regenerate the complete JSON object and correct only these failures while "
+        "preserving grounded evidence, role relevance, and all hard constraints."
     )
 
 
