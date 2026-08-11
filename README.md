@@ -9,7 +9,7 @@
 [![CI](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml/badge.svg)](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Package manager](https://img.shields.io/badge/package%20manager-uv-DE5FE9)](https://docs.astral.sh/uv/)
-[![Tests](https://img.shields.io/badge/tests-224%20passing-2EA44F)](#verification)
+[![Tests](https://img.shields.io/badge/tests-225%20passing-2EA44F)](#verification)
 
 [Architecture](#architecture) · [Quality gates](#quality-gates) · [Templates](#resume-templates) · [Setup](#local-setup) · [Roadmap](#project-status)
 
@@ -243,6 +243,18 @@ uv run pytest -m live_llm -q
 uv run pytest -m live_vision -q
 ```
 
+Run the fixed AI Engineer benchmark with private candidate inputs:
+
+```bash
+uv run python -m scripts.evaluate \
+  --header-file data/private/candidate_header.json \
+  --evidence-file data/candidate_evidence.json \
+  --template-id deedy_cv_v1
+```
+
+The command stores each JD's artifacts under `outputs/evaluation/artifacts/`
+and writes stable aggregate metrics to `outputs/evaluation/report.json`.
+
 ## Repository layout
 
 ```text
@@ -263,6 +275,7 @@ app/
 templates/                   locked production Jinja2 LaTeX templates
 latex_templates/             attributed design references only
 tests/                       unit, contract, integration, and regression tests
+scripts/evaluate.py          typed live benchmark and JSON report command
 TITAN_PLAN.md                product and engineering source of truth
 memory.md                    current decisions, status, and next action
 ```

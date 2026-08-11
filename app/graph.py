@@ -21,6 +21,7 @@ All collaborators (writer, pipeline) are injected so tests can supply stubs.
 from __future__ import annotations
 
 import uuid
+from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, TypedDict
 
@@ -84,8 +85,8 @@ class _PipelineRunner(Protocol):
         self,
         header: ResumeHeader,
         content: ResumeContent,
-        evidence_records: object,
-        output_directory: object,
+        evidence_records: Iterable[EvidenceRecord],
+        output_directory: Path,
     ) -> DeterministicPipelineResult: ...
 
 
@@ -121,7 +122,7 @@ class ResumeGraphExecutor:
     def __init__(
         self,
         *,
-        writer: _WriterClient,
+        writer: _WriterClient | StructuredResumeWriter,
         pipeline: _PipelineRunner,
         jd_analyzer: _JdAnalyzer | None = None,
         max_repair_cycles: int = 2,

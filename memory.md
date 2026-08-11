@@ -188,6 +188,9 @@ provenance and attribution; they are not used at compilation time.
 - `BenchmarkCorpus` and `BenchmarkJob` strictly validate fixed evaluation input;
   `BenchmarkEvaluator` runs every typed JD through an injected graph executor,
   isolates artifacts by benchmark ID, measures elapsed time, and builds a report.
+- `scripts/evaluate.py` is the live composition root for benchmark execution. It
+  loads private typed header/evidence inputs, composes Gemini 3.6 with the
+  deterministic pipeline, runs the fixed corpus, and persists the JSON report.
 - `README.md` now documents the implemented architecture, deterministic quality
   gates, three production templates, verified local toolchain bootstrap,
   security boundaries, test layers, and capability status. Planned vision,
@@ -196,7 +199,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 224 tests with three live tests deselected.
+The complete non-live suite passes 225 tests with three live tests deselected.
 Live benchmark diagnostics reached the Gemini free-tier limit at exactly twenty
 completion calls. Writer prompt v1.5
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
@@ -229,9 +232,8 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Add the tested `scripts/evaluate.py` composition runner that executes the fixed
-JD corpus and writes the typed report. Then rerun Google on the primary model
-when its daily quota resets and compare its measured artifact against the
+Run `scripts/evaluate.py` on the primary model when its daily quota resets,
+capture the five-JD report, and compare each measured artifact against the
 handmade-resume quality bar.
 
 ## Files Changed Recently
@@ -251,7 +253,9 @@ handmade-resume quality bar.
 - `tests/contract/test_resume_content.py`
 - `tests/integration/test_template_rendering.py`
 - `app/services/evaluation.py`
+- `scripts/evaluate.py`
 - `tests/unit/test_evaluation.py`
+- `tests/contract/test_evaluate_script.py`
 - `README.md`
 - `memory.md`
 
@@ -262,7 +266,7 @@ handmade-resume quality bar.
 
 ## Metrics Snapshot
 
-- Tests passing: 224
+- Tests passing: 225
 - Tests failing: 0
 - Live model calls: provider quota exercised; exact retry count is not persisted
 - Live vision calls: 0
@@ -392,6 +396,8 @@ handmade-resume quality bar.
   adopted atomic, stable JSON persistence for benchmark reports.
 - 2026-08-11: Added strict typed benchmark-corpus validation and an injected,
   deterministic runner with isolated per-JD artifact directories and timing.
+- 2026-08-11: Added a production evaluation command that composes the primary
+  model and deterministic document pipeline from private local inputs.
 
 ## Session Log
 
@@ -526,3 +532,6 @@ handmade-resume quality bar.
 - 2026-08-11: Added the typed benchmark runner. It executes each corpus job with
   stable request and artifact IDs, measures monotonic elapsed time, and returns
   one aggregate report without introducing live calls in CI; 224 tests pass.
+- 2026-08-11: Added `scripts/evaluate.py` as the tested live benchmark entry
+  point and corrected graph collaborator protocols so the real composition is
+  strict-mypy clean. The non-live suite now passes 225 tests.
