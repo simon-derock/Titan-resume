@@ -1,5 +1,6 @@
 """Safe transformation of structured resume content into LaTeX source."""
 
+import math
 import subprocess
 from collections.abc import Sequence
 from pathlib import Path
@@ -65,12 +66,19 @@ class LatexRenderer:
 def _entry_spacing_pt(content: ResumeContent) -> int:
     if content.template_id != "deedy_cv_v1":
         return 5
-    total_bullet_characters = sum(
-        len(bullet.text)
-        for entry in (*content.experience, *content.projects)
+
+    main_entries = (*content.experience, *content.projects)
+    estimated_bullet_lines = sum(
+        max(bullet.target_max_lines, math.ceil(len(bullet.text) / 80))
+        for entry in main_entries
         for bullet in entry.bullets
     )
-    return 2 if total_bullet_characters > 1_400 else 5
+    estimated_main_lines = (2 * len(main_entries)) + estimated_bullet_lines
+    if len(main_entries) >= 8 or estimated_main_lines >= 30:
+        return 0
+    if len(main_entries) >= 5 or estimated_main_lines >= 20:
+        return 2
+    return 4
 
 
 class ProcessRunner(Protocol):

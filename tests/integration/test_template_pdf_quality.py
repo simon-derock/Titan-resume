@@ -201,6 +201,13 @@ def test_deedy_dense_resume_reaches_reviewed_page_fill(
     monkeypatch.setenv("XDG_CACHE_HOME", str(TECTONIC_CACHE_PATH))
 
     def entry(section: str, index: int, text: str) -> ResumeEntry:
+        detail_text = (
+            "Validated the architecture through deterministic quality gates and "
+            "production-oriented delivery controls."
+        )
+        has_distinct_detail = (section == "experience" and index <= 2) or (
+            section == "project" and index <= 3
+        )
         return ResumeEntry(
             element_id=f"{section}.{index}",
             heading=f"{section.title()} {index}",
@@ -213,6 +220,18 @@ def test_deedy_dense_resume_reaches_reviewed_page_fill(
                     text=text,
                     evidence_ids=(EVIDENCE_ID,),
                     target_max_lines=2,
+                ),
+                *(
+                    (
+                        ResumeBullet(
+                            element_id=f"{section}.{index}.detail",
+                            text=detail_text,
+                            evidence_ids=(EVIDENCE_ID,),
+                            target_max_lines=2,
+                        ),
+                    )
+                    if has_distinct_detail
+                    else ()
                 ),
             ),
         )
