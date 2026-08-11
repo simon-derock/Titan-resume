@@ -217,9 +217,7 @@ def test_strategy_does_not_prohibit_terms_present_in_verified_claims() -> None:
         "evidence.project.genai_server",
         source_type="project",
         source_id="project.genai_server",
-    ).model_copy(
-        update={"claim": "Built an Advanced Generative AI Server in Python."}
-    )
+    ).model_copy(update={"claim": "Built an Advanced Generative AI Server in Python."})
     budget = SpacePlanner().plan(
         available_experience_entries=0,
         available_project_entries=1,

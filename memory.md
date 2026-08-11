@@ -176,7 +176,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 216 tests with three live tests deselected.
+The complete non-live suite passes 217 tests with three live tests deselected.
 Live benchmark diagnostics reached the Gemini free-tier limit at exactly twenty
 completion calls. Writer prompt v1.5
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
@@ -209,9 +209,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Run the complete static gate and revalidate the stored Taxmann artifact under
-adaptive spacing. When Gemini quota resets, diagnose and close Google's remaining
-pre-render policy failure, then rerun the five-job benchmark for a final pass rate.
+Validate Google's corrected strategy through the repository's benchmark-only
+Gemini fallback while the primary model quota is exhausted, compile the result,
+then run the complete static gate and push only the green branch tip.
 
 ## Files Changed Recently
 
@@ -238,7 +238,7 @@ pre-render policy failure, then rerun the five-job benchmark for a final pass ra
 
 ## Metrics Snapshot
 
-- Tests passing: 216
+- Tests passing: 217
 - Tests failing: 0
 - Live model calls: 20 (daily quota reached)
 - Live vision calls: 0
@@ -460,3 +460,8 @@ pre-render policy failure, then rerun the five-job benchmark for a final pass ra
   Replaced the rigid limit with a 205-character safety ceiling plus adaptive
   5 pt/2 pt Deedy rhythm at 1,400 total bullet characters. Prompt v1.5 prefers
   160-character bullets while retaining verified rich claims; 216 tests pass.
+- 2026-08-11: Diagnosed Google's writer rejection without another model call:
+  `Generative AI` was simultaneously present in the verified Generative AI
+  Server claim and the strategy's prohibition list. Strategy gaps remain
+  skill-tag based, but `must_not_claim` now excludes terms found verbatim in
+  verified evidence. Google's contradiction is removed; 217 tests pass.

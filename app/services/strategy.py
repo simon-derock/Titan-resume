@@ -1,5 +1,6 @@
 """Grounded deterministic evidence selection for one resume revision."""
 
+import re
 from collections import defaultdict
 
 from app.models import (
@@ -109,6 +110,11 @@ class ResumeStrategyBuilder:
                 if match.requirement_type == "must_have" and match.status != "strong"
             )
         )
+        must_not_claim = tuple(
+            requirement
+            for requirement in unmet_must_haves
+            if not _verified_text_contains(requirement, tuple(allowed_records.values()))
+        )
         return ResumeStrategy(
             target_role=job_description.role,
             selected_experience_evidence_ids=tuple(
@@ -125,7 +131,7 @@ class ResumeStrategyBuilder:
             ),
             omitted_evidence_ids=tuple(sorted(allowed_records.keys() - selected_ids)),
             unmet_must_have_requirements=unmet_must_haves,
-            must_not_claim=unmet_must_haves,
+            must_not_claim=must_not_claim,
         )
 
 
@@ -157,3 +163,17 @@ def _record_rank(
     scores: dict[str, float],
 ) -> tuple[float, float, str]:
     return (-scores[record.evidence_id], -record.confidence, record.evidence_id)
+
+
+def _verified_text_contains(
+    requirement: str,
+    records: tuple[EvidenceRecord, ...],
+) -> bool:
+    protected_term = re.compile(
+        rf"(?<!\w){re.escape(requirement)}(?!\w)",
+        flags=re.IGNORECASE,
+    )
+    return any(
+        protected_term.search(" ".join((record.claim, *record.skills))) is not None
+        for record in records
+    )
