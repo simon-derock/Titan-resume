@@ -176,9 +176,9 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 206 tests with three live tests deselected.
-One live benchmark execution made two bounded writer completion attempts; both
-were rejected before rendering. Live vision calls remain zero. The files changed by the current
+The complete non-live suite passes 207 tests with three live tests deselected.
+Live benchmark diagnostics have made six completion calls; writer responses were
+rejected before rendering. Live vision calls remain zero. The files changed by the current
 quality increment pass focused Ruff checks and formatting. Repository-wide Ruff
 still reports pre-existing issues in committed Gemini/Telegram files and a
 user-owned uncommitted writer change.
@@ -206,9 +206,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Rerun the first sourced AI Engineer benchmark with the Gemini-backed structured
-JD analyzer injected, inspect the writer's first schema/policy failure if any,
-then turn that concrete defect into the next RED regression contract.
+Rerun the first sourced AI Engineer benchmark with the expanded Gemini output
+budget and structured JD analyzer, then inspect the compiled PDF or convert the
+next concrete schema, policy, ATS, or geometry defect into a RED regression.
 
 ## Files Changed Recently
 
@@ -235,9 +235,9 @@ then turn that concrete defect into the next RED regression contract.
 
 ## Metrics Snapshot
 
-- Tests passing: 206
+- Tests passing: 207
 - Tests failing: 0
-- Live model calls: 2
+- Live model calls: 6
 - Live vision calls: 0
 - Compiled resume fixtures: 3 (one per supported template)
 - Golden JD intelligence fixtures: 1
@@ -417,3 +417,6 @@ then turn that concrete defect into the next RED regression contract.
 - 2026-08-11: Added the versioned JSON-only structured-JD extraction prompt and
   provider adapter. The prompt preserves the source hash, forbids invented
   requirements, and requests every typed analyzer field; 206 tests pass.
+- 2026-08-11: Isolated live writer failure to a JSON response truncated under
+  the 4,096-token generation ceiling. Raised the explicit structured-output
+  budget to 16,384 tokens with a regression contract; 207 tests pass.

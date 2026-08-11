@@ -135,6 +135,7 @@ class GeminiCompletionsBackend:
 
     _RETRY_STATUS_CODES: frozenset[int] = frozenset({429, 503})
     _MAX_RETRIES: int = 4
+    _MAX_OUTPUT_TOKENS: int = 16_384
 
     def complete(self, prompt: str) -> object:
         """Call Gemini API and return parsed JSON object.
@@ -159,7 +160,7 @@ class GeminiCompletionsBackend:
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
                         temperature=0.2,
-                        max_output_tokens=4096,
+                        max_output_tokens=self._MAX_OUTPUT_TOKENS,
                         candidate_count=1,
                     ),
                 )
