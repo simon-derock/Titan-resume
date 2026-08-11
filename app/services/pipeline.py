@@ -90,7 +90,10 @@ class DeterministicResumePipeline:
             )
         ).validate(extracted_text)
         geometry = self._geometry_extractor.extract(pdf_path)
-        geometry_report = self._geometry_validator.validate(geometry)
+        geometry_report = self._geometry_validator.validate(
+            geometry,
+            template_id=content.template_id,
+        )
         screenshot_path = self._screenshot_renderer.render_first_page(
             pdf_path, output_directory / "resume.png"
         )

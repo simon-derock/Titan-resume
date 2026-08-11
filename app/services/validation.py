@@ -12,6 +12,7 @@ from app.models import (
     GeometryReport,
     PageGeometry,
     PdfValidationReport,
+    ResumeTemplateId,
     TextBox,
     ValidationIssue,
 )
@@ -25,6 +26,13 @@ class PdfInfoReader(Protocol):
 
 
 PAGE_COUNT_PATTERN = re.compile(r"(?m)^Pages:\s*(\d+)\s*$")
+TWO_COLUMN_SPLIT_RATIOS: dict[ResumeTemplateId, float] = {
+    "deedy_cv_v1": 0.365,
+    "moderncv_two_column_v1": 0.64,
+}
+BODY_SECTION_HEADINGS = frozenset(
+    {"education", "experience", "projects", "skills"}
+)
 
 
 class SubprocessPdfInfoReader:
@@ -97,7 +105,12 @@ class GeometryValidator:
     def __init__(self, *, policy: GeometryPolicy) -> None:
         self._policy = policy
 
-    def validate(self, geometry: PageGeometry) -> GeometryReport:
+    def validate(
+        self,
+        geometry: PageGeometry,
+        *,
+        template_id: ResumeTemplateId | None = None,
+    ) -> GeometryReport:
         left_box = min(geometry.text_boxes, key=lambda box: box.x0)
         right_box = max(geometry.text_boxes, key=lambda box: box.x1)
         top_box = min(geometry.text_boxes, key=lambda box: box.y0)
@@ -139,14 +152,68 @@ class GeometryValidator:
                     expected_value=self._policy.maximum_bottom_margin_pt,
                 )
             )
+        column_bottom_delta = self._column_bottom_delta(
+            geometry,
+            template_id=template_id,
+        )
+        if column_bottom_delta is not None:
+            measured_delta, deeper_box = column_bottom_delta
+            maximum_delta = (
+                geometry.height_pt
+                * self._policy.maximum_column_bottom_delta_ratio
+            )
+            if measured_delta > maximum_delta:
+                issues.append(
+                    self._column_imbalance_issue(
+                        box=deeper_box,
+                        measured_value=measured_delta,
+                        expected_value=maximum_delta,
+                    )
+                )
+        else:
+            measured_delta = None
         return GeometryReport(
             passed=not issues,
             minimum_left_margin_pt=margins["left"],
             minimum_right_margin_pt=margins["right"],
             minimum_top_margin_pt=margins["top"],
             minimum_bottom_margin_pt=margins["bottom"],
+            column_bottom_delta_pt=measured_delta,
             issues=tuple(issues),
         )
+
+    @staticmethod
+    def _column_bottom_delta(
+        geometry: PageGeometry,
+        *,
+        template_id: ResumeTemplateId | None,
+    ) -> tuple[float, TextBox] | None:
+        if template_id not in TWO_COLUMN_SPLIT_RATIOS:
+            return None
+        section_headings = tuple(
+            box
+            for box in geometry.text_boxes
+            if box.text.strip().casefold() in BODY_SECTION_HEADINGS
+        )
+        if not section_headings:
+            return None
+        body_start = min(box.y0 for box in section_headings)
+        split_x = geometry.width_pt * TWO_COLUMN_SPLIT_RATIOS[template_id]
+        body_boxes = tuple(
+            box for box in geometry.text_boxes if box.y0 >= body_start
+        )
+        left_boxes = tuple(
+            box for box in body_boxes if ((box.x0 + box.x1) / 2) < split_x
+        )
+        right_boxes = tuple(
+            box for box in body_boxes if ((box.x0 + box.x1) / 2) >= split_x
+        )
+        if not left_boxes or not right_boxes:
+            return None
+        left_bottom = max(left_boxes, key=lambda box: box.y1)
+        right_bottom = max(right_boxes, key=lambda box: box.y1)
+        deeper_box = max((left_bottom, right_bottom), key=lambda box: box.y1)
+        return abs(left_bottom.y1 - right_bottom.y1), deeper_box
 
     @staticmethod
     def _unsafe_margin_issue(
@@ -178,6 +245,25 @@ class GeometryValidator:
             recommended_action=(
                 "Restore the highest-value omitted evidence before adding filler or "
                 "changing typography."
+            ),
+            measured_value=measured_value,
+            expected_value=expected_value,
+        )
+
+    @staticmethod
+    def _column_imbalance_issue(
+        *, box: TextBox, measured_value: float, expected_value: float
+    ) -> ValidationIssue:
+        return ValidationIssue(
+            issue_id=f"geometry.column_imbalance.{box.element_id}",
+            source="geometry",
+            element_id=box.element_id,
+            issue_type="column_imbalance",
+            severity="high",
+            message="Two-column content ends at visibly different depths.",
+            recommended_action=(
+                "Reallocate grounded detail to the sparse column; do not add filler "
+                "or increase decorative spacing."
             ),
             measured_value=measured_value,
             expected_value=expected_value,

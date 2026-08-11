@@ -303,6 +303,11 @@ class GeometryPolicy(BaseModel):
     minimum_bottom_margin_pt: float = Field(default=20.0, ge=0.0)
     maximum_bottom_margin_pt: float = Field(default=60.0, ge=0.0)
     minimum_horizontal_margin_pt: float = Field(default=22.0, ge=0.0)
+    maximum_column_bottom_delta_ratio: float = Field(
+        default=0.16,
+        ge=0.0,
+        le=1.0,
+    )
 
     @model_validator(mode="after")
     def validate_bottom_margin_range(self) -> Self:
@@ -346,6 +351,7 @@ class GeometryReport(BaseModel):
     minimum_right_margin_pt: float
     minimum_top_margin_pt: float
     minimum_bottom_margin_pt: float
+    column_bottom_delta_pt: float | None = None
     issues: tuple[ValidationIssue, ...] = ()
 
 
