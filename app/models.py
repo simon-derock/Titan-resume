@@ -408,6 +408,48 @@ class BenchmarkEvaluationRecord(BaseModel):
     issue_types: tuple[str, ...] = ()
 
 
+class BenchmarkJob(BaseModel):
+    """One provenance-backed job description in the fixed evaluation corpus."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    benchmark_id: str = Field(min_length=1)
+    platform: Literal["google_careers", "indeed", "linkedin", "wellfound"]
+    source_url: str = Field(pattern=r"^https://")
+    captured_at: date
+    role: str = Field(min_length=1)
+    company: str = Field(min_length=1)
+    seniority: Literal[
+        "intern",
+        "entry",
+        "mid",
+        "senior",
+        "lead",
+        "principal",
+        "unspecified",
+    ]
+    required_skills: tuple[str, ...] = Field(min_length=1)
+    raw_text: str = Field(min_length=80)
+
+
+class BenchmarkCorpus(BaseModel):
+    """Versioned, immutable input set for repeatable resume evaluation."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    schema_version: Literal[1] = 1
+    captured_at: date
+    description: str = Field(min_length=1)
+    jobs: tuple[BenchmarkJob, ...] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_unique_benchmark_ids(self) -> Self:
+        benchmark_ids = tuple(job.benchmark_id for job in self.jobs)
+        if len(set(benchmark_ids)) != len(benchmark_ids):
+            raise ValueError("benchmark IDs must be unique")
+        return self
+
+
 class EvaluationReport(BaseModel):
     """Deterministic aggregate metrics for one benchmark evaluation run."""
 

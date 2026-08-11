@@ -185,6 +185,9 @@ provenance and attribution; they are not used at compilation time.
 - `EvaluationRecordBuilder` converts terminal graph state into measured
   benchmark records, including A4 page fill and verified link count, while
   `EvaluationReportWriter` atomically persists stable newline-terminated JSON.
+- `BenchmarkCorpus` and `BenchmarkJob` strictly validate fixed evaluation input;
+  `BenchmarkEvaluator` runs every typed JD through an injected graph executor,
+  isolates artifacts by benchmark ID, measures elapsed time, and builds a report.
 - `README.md` now documents the implemented architecture, deterministic quality
   gates, three production templates, verified local toolchain bootstrap,
   security boundaries, test layers, and capability status. Planned vision,
@@ -193,7 +196,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 223 tests with three live tests deselected.
+The complete non-live suite passes 224 tests with three live tests deselected.
 Live benchmark diagnostics reached the Gemini free-tier limit at exactly twenty
 completion calls. Writer prompt v1.5
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
@@ -259,7 +262,7 @@ handmade-resume quality bar.
 
 ## Metrics Snapshot
 
-- Tests passing: 223
+- Tests passing: 224
 - Tests failing: 0
 - Live model calls: provider quota exercised; exact retry count is not persisted
 - Live vision calls: 0
@@ -387,6 +390,8 @@ handmade-resume quality bar.
   only in session diagnostics.
 - 2026-08-11: Derived evaluation records directly from terminal graph state and
   adopted atomic, stable JSON persistence for benchmark reports.
+- 2026-08-11: Added strict typed benchmark-corpus validation and an injected,
+  deterministic runner with isolated per-JD artifact directories and timing.
 
 ## Session Log
 
@@ -518,3 +523,6 @@ handmade-resume quality bar.
 - 2026-08-11: Added graph-to-record measurement and atomic JSON report writing.
   A passing artifact now records page count, ATS, geometry, A4 fill, repair
   iterations, elapsed time, issue types, and verified link count; 223 tests pass.
+- 2026-08-11: Added the typed benchmark runner. It executes each corpus job with
+  stable request and artifact IDs, measures monotonic elapsed time, and returns
+  one aggregate report without introducing live calls in CI; 224 tests pass.

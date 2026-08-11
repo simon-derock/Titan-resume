@@ -1,12 +1,22 @@
 """Deterministic aggregation for reproducible resume benchmark reports."""
 
-from collections.abc import Iterable
+from __future__ import annotations
+
+from collections.abc import Callable, Iterable
 from pathlib import Path
 from statistics import fmean
-from typing import Literal, cast
+from time import perf_counter
+from typing import Literal, Protocol, cast
 
 from app.graph import ResumeGraphState
-from app.models import BenchmarkEvaluationRecord, EvaluationReport, ResumeTemplateId
+from app.models import (
+    BenchmarkCorpus,
+    BenchmarkEvaluationRecord,
+    EvaluationReport,
+    EvidenceRecord,
+    ResumeHeader,
+    ResumeTemplateId,
+)
 
 _A4_HEIGHT_PT = 841.8898
 _BenchmarkStatus = Literal[
@@ -25,6 +35,72 @@ _ALLOWED_BENCHMARK_STATUSES: frozenset[str] = frozenset(
         "write_failed",
     }
 )
+
+
+class _GraphExecutor(Protocol):
+    def run(
+        self,
+        *,
+        raw_jd_text: str,
+        header: ResumeHeader,
+        evidence_records: tuple[EvidenceRecord, ...],
+        output_dir: Path,
+        template_id: ResumeTemplateId,
+        request_id: str,
+    ) -> ResumeGraphState: ...
+
+
+class BenchmarkEvaluator:
+    """Run a fixed typed corpus through an injected resume graph executor."""
+
+    def __init__(
+        self,
+        *,
+        executor: _GraphExecutor,
+        clock: Callable[[], float] = perf_counter,
+        record_builder: EvaluationRecordBuilder | None = None,
+        report_builder: EvaluationReportBuilder | None = None,
+    ) -> None:
+        self._executor = executor
+        self._clock = clock
+        self._record_builder = record_builder or EvaluationRecordBuilder()
+        self._report_builder = report_builder or EvaluationReportBuilder()
+
+    def run(
+        self,
+        *,
+        corpus: BenchmarkCorpus,
+        header: ResumeHeader,
+        evidence_records: tuple[EvidenceRecord, ...],
+        output_root: Path,
+        template_id: ResumeTemplateId,
+    ) -> EvaluationReport:
+        records: list[BenchmarkEvaluationRecord] = []
+        for job in corpus.jobs:
+            output_dir = output_root / job.benchmark_id
+            output_dir.mkdir(parents=True, exist_ok=True)
+            started_at = self._clock()
+            state = self._executor.run(
+                raw_jd_text=job.raw_text,
+                header=header,
+                evidence_records=evidence_records,
+                output_dir=output_dir,
+                template_id=template_id,
+                request_id=job.benchmark_id,
+            )
+            elapsed_seconds = max(self._clock() - started_at, 0.0)
+            records.append(
+                self._record_builder.from_graph_state(
+                    benchmark_id=job.benchmark_id,
+                    platform=job.platform,
+                    role=job.role,
+                    company=job.company,
+                    template_id=template_id,
+                    elapsed_seconds=elapsed_seconds,
+                    state=state,
+                )
+            )
+        return self._report_builder.build(records)
 
 
 class EvaluationRecordBuilder:
