@@ -159,11 +159,23 @@ def test_resume_entry_rejects_non_https_url() -> None:
 
 
 @pytest.mark.contract
-def test_resume_bullet_rejects_text_beyond_dense_two_line_ceiling() -> None:
+def test_resume_bullet_allows_dense_text_within_adaptive_layout_ceiling() -> None:
+    bullet = ResumeBullet(
+        element_id="projects.titan.bullet",
+        text="x" * 200,
+        evidence_ids=("project.titan.001",),
+        target_max_lines=2,
+    )
+
+    assert len(bullet.text) == 200
+
+
+@pytest.mark.contract
+def test_resume_bullet_rejects_text_beyond_adaptive_layout_ceiling() -> None:
     with pytest.raises(ValidationError):
         ResumeBullet(
             element_id="projects.titan.bullet",
-            text="x" * 161,
+            text="x" * 206,
             evidence_ids=("project.titan.001",),
             target_max_lines=2,
         )

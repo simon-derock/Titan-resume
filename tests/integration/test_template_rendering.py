@@ -2,7 +2,13 @@ from pathlib import Path
 
 import pytest
 
-from app.models import EvidenceText, ResumeContent, ResumeEntry, ResumeHeader
+from app.models import (
+    EvidenceText,
+    ResumeBullet,
+    ResumeContent,
+    ResumeEntry,
+    ResumeHeader,
+)
 from app.services.rendering import LatexRenderer
 from app.templates import SUPPORTED_TEMPLATE_IDS
 
@@ -144,3 +150,40 @@ def test_templates_render_verified_entry_heading_hyperlink(
 
     source = rendered_path.read_text(encoding="utf-8")
     assert r"\href{https://github.com/alex/titan}{TITAN}" in source
+
+
+@pytest.mark.integration
+def test_deedy_renderer_compacts_spacing_for_dense_bullets(tmp_path: Path) -> None:
+    evidence_id = "project.titan.001"
+    entries = tuple(
+        ResumeEntry(
+            element_id=f"projects.{index}",
+            heading=f"Project {index}",
+            evidence_ids=(evidence_id,),
+            bullets=(
+                ResumeBullet(
+                    element_id=f"projects.{index}.bullet",
+                    text="x" * 140,
+                    evidence_ids=(evidence_id,),
+                    target_max_lines=2,
+                ),
+            ),
+        )
+        for index in range(11)
+    )
+    content = ResumeContent(
+        resume_id="resume.dense_spacing.001",
+        target_role="AI Engineer",
+        projects=entries,
+        template_id="deedy_cv_v1",
+    )
+
+    rendered_path = LatexRenderer().render(
+        ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
+        content,
+        tmp_path / "resume.tex",
+    )
+
+    source = rendered_path.read_text(encoding="utf-8")
+    assert source.count(r"\vspace{2pt}") == len(entries)
+    assert r"\vspace{5pt}" not in source
