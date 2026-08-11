@@ -176,7 +176,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 213 tests with three live tests deselected.
+The complete non-live suite passes 214 tests with three live tests deselected.
 Live benchmark diagnostics have made more than twenty completion calls. Writer prompt v1.3
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
 and geometry because selection omitted education and left 116 pt of bottom
@@ -208,9 +208,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Add and enforce a deterministic physical text-length ceiling for dense bullets,
-then rerun the Taxmann overflow benchmark. Diagnose Google's remaining
-pre-render policy failure from one raw structured response afterward.
+Rerun the Taxmann overflow benchmark with writer prompt v1.4 and the 160-character
+bullet ceiling. Diagnose Google's remaining pre-render policy failure from one
+raw structured response afterward.
 
 ## Files Changed Recently
 
@@ -232,12 +232,12 @@ pre-render policy failure from one raw structured response afterward.
 
 ## Prompt Versions
 
-- `writer_v1.3`
+- `writer_v1.4`
 - `jd_analyzer_v1.0`
 
 ## Metrics Snapshot
 
-- Tests passing: 213
+- Tests passing: 214
 - Tests failing: 0
 - Live model calls: 20+
 - Live vision calls: 0
@@ -450,3 +450,7 @@ pre-render policy failure from one raw structured response afterward.
   revealed Astra's ATS failure was a false match against section words in prose.
   ATS heading detection now uses layout-separated labels; Astra's existing PDF
   passes ATS and geometry without regeneration. The suite passes 213 tests.
+- 2026-08-11: Taxmann still overflowed because bullets physically exceeded the
+  line budget while declaring compliant `target_max_lines`. Added a hard
+  160-character `ResumeBullet` ceiling and prompt v1.4 instruction so physical
+  density no longer depends on model-reported metadata; 214 tests pass.

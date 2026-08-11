@@ -19,7 +19,7 @@ import json
 
 from app.models import EvidenceRecord, ResumeSpaceBudget, ResumeWritingRequest
 
-PROMPT_VERSION: str = "writer_v1.3"
+PROMPT_VERSION: str = "writer_v1.4"
 
 
 # ---------------------------------------------------------------------------
@@ -91,6 +91,7 @@ def _section_constraints(request: ResumeWritingRequest) -> str:
         "its matching section; do not omit selected sources.",
         "- Each entry and bullet evidence_ids list may contain only relevant IDs "
         "from that same section and source.",
+        "- Every bullet text MUST be 160 characters or fewer, including spaces.",
         "- Do not use LaTeX commands in any field value.",
         "- Return only JSON — no prose, no markdown, no other text.",
     ]
@@ -217,7 +218,7 @@ def _section_response_schema(request: ResumeWritingRequest) -> str:
         '      "bullets": [\n'
         "        {\n"
         '          "element_id": "<unique>",\n'
-        '          "text": "<plain-text bullet>",\n'
+        '          "text": "<plain-text bullet, maximum 160 characters>",\n'
         f'          "evidence_ids": [{ids_comment}],\n'
         '          "target_max_lines": 1\n'
         "        }\n"

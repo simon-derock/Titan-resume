@@ -220,7 +220,7 @@ class ResumeBullet(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     element_id: str = Field(min_length=1)
-    text: str = Field(min_length=1)
+    text: str = Field(min_length=1, max_length=160)
     evidence_ids: tuple[str, ...] = Field(min_length=1)
     priority: float = Field(default=0.0, ge=0.0, le=1.0)
     target_max_lines: int = Field(default=3, ge=1, le=3)
