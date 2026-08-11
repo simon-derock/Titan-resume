@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 ## Project Identity
 
@@ -557,3 +557,19 @@ on the primary model when its daily quota resets and capture the five-JD report.
   skills, 6 project links, one page, valid ATS order, safe margins, and 95.53%
   fill. Manual page review identified substantial left/right column imbalance
   as the next quality defect despite the deterministic pass.
+- 2026-08-12: Restored the canonical 243-line Deedy OpenFonts v1.2 source under
+  `latex_templates/` from Debarghya Das's Apache-2.0 repository. The file had
+  been committed as a zero-byte provenance placeholder and is not used by the
+  production renderer.
+- 2026-08-12: A 600-DPI review of the handmade reference confirmed that its
+  density comes from unequal evidence allocation: concise entries retain one
+  bullet while Blackcoat and DEX retain multiple distinct architecture and
+  outcome details. Two-column plans now permit a second grounded bullet, and
+  writer prompt v1.7 explicitly forbids forcing entries into a uniform shape.
+- 2026-08-12: Replaced Deedy's total-character spacing switch with an estimated
+  rendered-line and entry-count policy. Dense layouts use zero inter-entry
+  padding and zero list padding; compiled page-fill tests use verified content
+  detail rather than artificial whitespace. All three templates now suppress
+  optional metadata rows when their fields are absent. The non-live suite
+  passes 231 tests; the remaining primary defect is deterministic two-column
+  balance and richer categorized skills in the left rail.
