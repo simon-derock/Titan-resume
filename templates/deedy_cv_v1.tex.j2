@@ -30,12 +30,18 @@
 {% raw %}\newcommand{\titanmainentry}[4]{
   {\color{subheadings}\bfseries #1}
   {\color{subheadings}\if\relax\detokenize{#2}\relax\else\enspace|\enspace\MakeUppercase{#2}\fi}\\[-1pt]
+  \if\relax\detokenize{#3#4}\relax
+  \else
   {\color{date}\small #3\if\relax\detokenize{#4}\relax\else\enspace|\enspace#4\fi}\\[-2pt]
+  \fi
 }
 \newcommand{\titansideentry}[4]{
   {\color{subheadings}\bfseries #1}\\[-1pt]
   \if\relax\detokenize{#2}\relax\else{\small\MakeUppercase{#2}}\\[-1pt]\fi
+  \if\relax\detokenize{#3#4}\relax
+  \else
   {\color{date}\small #3\if\relax\detokenize{#4}\relax\else\enspace|\enspace#4\fi}\par\vspace{3pt}
+  \fi
 }{% endraw %}
 
 \begin{document}

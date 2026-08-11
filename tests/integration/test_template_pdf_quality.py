@@ -212,7 +212,7 @@ def test_deedy_dense_resume_reaches_reviewed_page_fill(
             element_id=f"{section}.{index}",
             heading=f"{section.title()} {index}",
             subheading="AI Engineer" if section == "experience" else None,
-            date_range="2025-2026" if section == "experience" else None,
+            date_range="2025-2026" if section == "experience" else "2025",
             evidence_ids=(EVIDENCE_ID,),
             bullets=(
                 ResumeBullet(

@@ -20,7 +20,10 @@
 {% raw %}\newcommand{\resumeEntry}[4]{
   \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lr}
     \textbf{#1} & #4 \\
+    \if\relax\detokenize{#2#3}\relax
+    \else
     \textit{#2} & \textit{#3}
+    \fi
   \end{tabular*}\vspace{-3pt}
 }{% endraw %}
 
