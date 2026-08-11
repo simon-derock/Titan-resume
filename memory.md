@@ -176,7 +176,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 211 tests with three live tests deselected.
+The complete non-live suite passes 212 tests with three live tests deselected.
 Live benchmark diagnostics have made fourteen completion calls. Writer prompt v1.3
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
 and geometry because selection omitted education and left 116 pt of bottom
@@ -208,9 +208,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Tune Deedy's entry rhythm to move the validated live benchmark from 90.4% page
-fill into the 93-98% target band without changing safe margins, font size, or
-content; then rerun the complete deterministic pipeline.
+Run the remaining four sourced AI Engineer benchmarks through the grounded
+strategy/writer path, compile each with Deedy, and record pass rate, page fill,
+source coverage, and any new defect as the next RED regression.
 
 ## Files Changed Recently
 
@@ -237,7 +237,7 @@ content; then rerun the complete deterministic pipeline.
 
 ## Metrics Snapshot
 
-- Tests passing: 211
+- Tests passing: 212
 - Tests failing: 0
 - Live model calls: 14
 - Live vision calls: 0
@@ -437,3 +437,7 @@ content; then rerun the complete deterministic pipeline.
   projects, education, and all 6 verified project links on one page. Added
   template-aware ATS ordering for Deedy's physical column extraction; 211 tests
   pass. Remaining measured gap is 80.6 pt bottom whitespace versus 60 pt max.
+- 2026-08-11: Increased Deedy's intentional inter-entry rhythm from 2 pt to 5 pt
+  under a compiled dense-page regression. The exact live benchmark recompiles
+  to one page with ATS and geometry gates passing and a measured 50.75 pt bottom
+  margin (94.0% vertical fill); 212 non-live tests pass.

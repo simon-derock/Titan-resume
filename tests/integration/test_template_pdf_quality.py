@@ -210,19 +210,30 @@ def test_deedy_dense_resume_reaches_reviewed_page_fill(
         )
 
     experience_texts = (
-        "Engineered production agent infrastructure using LangGraph, hybrid retrieval, and FastAPI services.",
-        "Developed an LLM coding copilot that helped engineers write cleaner and faster Python code.",
-        "Built workflow automation for real-time document processing and autonomous agent task execution.",
-        "Created healthcare prediction models using feature engineering and statistical modelling.",
-        "Completed practical training in cybersecurity essentials and network security fundamentals.",
+        "Engineered production agent infrastructure using LangGraph, hybrid "
+        "retrieval, and FastAPI services.",
+        "Developed an LLM coding copilot that helped engineers write cleaner "
+        "and faster Python code.",
+        "Built workflow automation for real-time document processing and "
+        "autonomous agent task execution.",
+        "Created healthcare prediction models using feature engineering and "
+        "statistical modelling.",
+        "Completed practical training in cybersecurity essentials and network "
+        "security fundamentals.",
     )
     project_texts = (
-        "Architected an asynchronous ReAct engine integrating eight agents, vector memory, and model routing.",
-        "Fine-tuned an open model on clinical samples and deployed offline inference to mobile hardware.",
-        "Designed a decoupled multi-agent RAG pipeline with message-bus orchestration and vector retrieval.",
-        "Deployed a headless AI server with embeddings, conversational memory, and local model inference.",
-        "Built a real-time player tracker using detection, Kalman filtering, and assignment optimization.",
-        "Shipped an email classifier as a FastAPI service for automated support-ticket processing.",
+        "Architected an asynchronous ReAct engine integrating eight agents, "
+        "vector memory, and model routing.",
+        "Fine-tuned an open model on clinical samples and deployed offline "
+        "inference to mobile hardware.",
+        "Designed a decoupled multi-agent RAG pipeline with message-bus "
+        "orchestration and vector retrieval.",
+        "Deployed a headless AI server with embeddings, conversational memory, "
+        "and local model inference.",
+        "Built a real-time player tracker using detection, Kalman filtering, "
+        "and assignment optimization.",
+        "Shipped an email classifier as a FastAPI service for automated "
+        "support-ticket processing.",
     )
     content = ResumeContent(
         resume_id="resume.dense.001",
