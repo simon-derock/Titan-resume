@@ -54,9 +54,9 @@ def test_two_column_space_plan_can_retain_complete_verified_inventory(
     assert plan.total_line_limit == 56
     assert plan.reserved_line_count == 56
     assert plan.experience.entry_limit == 5
-    assert plan.experience.bullets_per_entry_limit == 2
+    assert plan.experience.bullets_per_entry_limit == 1
     assert plan.projects.entry_limit == 6
-    assert plan.projects.bullets_per_entry_limit == 2
+    assert plan.projects.bullets_per_entry_limit == 1
 
 
 def test_space_planner_never_allocates_entries_that_do_not_exist() -> None:
