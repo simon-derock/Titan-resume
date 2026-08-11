@@ -227,17 +227,22 @@ user-owned uncommitted writer change.
   correctly rejected by the default geometry policy.
 - The runtime still needs one explicit composition root that constructs both
   the JD analyzer and resume writer from the configured Gemini backend.
+- Aggregate page fill does not detect two-column imbalance. The latest Google
+  Deedy artifact fills 95.53% of the page and passes every deterministic gate,
+  but its skills/education column ends far above the experience/projects column.
 
 ## Current Blocker
 
-No resume-quality engineering blocker. Telegram work is intentionally deferred
-by user direction until generated resume quality reaches the reference bar.
+Gemini 3.6 Flash has exhausted its 20-request free-tier daily allowance, so the
+primary-model five-JD report must wait for quota reset. Offline quality work and
+secondary-model diagnostics remain unblocked. Telegram stays intentionally
+deferred until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Run `scripts/evaluate.py` on the primary model when its daily quota resets,
-capture the five-JD report, and compare each measured artifact against the
-handmade-resume quality bar.
+Define a RED visual-quality contract for Deedy column balance, then add the
+smallest template-aware measurement or layout repair. Run `scripts/evaluate.py`
+on the primary model when its daily quota resets and capture the five-JD report.
 
 ## Files Changed Recently
 
@@ -403,6 +408,8 @@ handmade-resume quality bar.
   model and deterministic document pipeline from private local inputs.
 - 2026-08-11: Required the compiler boundary to resolve relative artifact paths
   before passing Tectonic its working directory and `--outdir`.
+- 2026-08-11: Kept total page fill and per-column visual balance as separate
+  quality dimensions after a 95.53%-filled Deedy page remained visibly skewed.
 
 ## Session Log
 
@@ -545,3 +552,8 @@ handmade-resume quality bar.
   falsely reported as compile failures because relative `--outdir` paths were
   resolved twice. Added a compiler regression and fix; 226 tests pass, and the
   preserved Google source now compiles successfully.
+- 2026-08-11: Reran Google alone through the corrected pipeline on the secondary
+  model. The first attempt passed with 5 experiences, 6 projects, education,
+  skills, 6 project links, one page, valid ATS order, safe margins, and 95.53%
+  fill. Manual page review identified substantial left/right column imbalance
+  as the next quality defect despite the deterministic pass.
