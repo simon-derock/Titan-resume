@@ -327,6 +327,16 @@ def test_writer_prompt_includes_schema_version() -> None:
     )
 
 
+@pytest.mark.contract
+def test_writer_prompt_does_not_request_forbidden_schema_version_field() -> None:
+    """ResumeContent accepts content_version, not request-only schema_version."""
+    mod = _import_prompt_module()
+    rendered = mod.render(_build_minimal_request())
+    assert '"schema_version"' not in rendered
+    assert "schema_version must" not in rendered.lower()
+    assert '"content_version"' in rendered
+
+
 # ---------------------------------------------------------------------------
 # 11. Prompt stability — rendering the same request twice produces the same text
 # ---------------------------------------------------------------------------
