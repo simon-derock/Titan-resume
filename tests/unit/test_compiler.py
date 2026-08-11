@@ -117,6 +117,28 @@ def test_tectonic_compiler_uses_untrusted_cached_mode(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
+def test_tectonic_compiler_resolves_relative_artifact_directories(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    tex_path = Path("outputs/job.alpha/resume.tex")
+    tex_path.parent.mkdir(parents=True)
+    tex_path.write_text(r"\documentclass{article}", encoding="utf-8")
+    runner = InvalidTexRunner()
+
+    LatexCompiler(runner=runner, engine="tectonic").compile(tex_path)
+
+    expected_directory = (tmp_path / "outputs/job.alpha").resolve()
+    assert runner.cwd == expected_directory
+    assert runner.command[-3:] == (
+        "--outdir",
+        str(expected_directory),
+        "resume.tex",
+    )
+
+
+@pytest.mark.unit
 def test_compiler_returns_pdf_path_after_successful_process(tmp_path: Path) -> None:
     tex_path = tmp_path / "resume.tex"
     tex_path.write_text(r"\documentclass{article}", encoding="utf-8")
