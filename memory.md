@@ -175,6 +175,11 @@ provenance and attribution; they are not used at compilation time.
 - `tests/fixtures/jds/ai_engineer_benchmark_v1.json` contains five paraphrased,
   provenance-backed AI Engineer postings from LinkedIn, Indeed, Wellfound, and
   Google Careers spanning entry, mid, and senior expectations.
+- `README.md` now documents the implemented architecture, deterministic quality
+  gates, three production templates, verified local toolchain bootstrap,
+  security boundaries, test layers, and capability status. Planned vision,
+  Telegram polling, and LangGraph HITL work is clearly separated from shipped
+  behavior.
 
 ## Test Status
 
@@ -211,9 +216,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Recompile the final LinkedIn artifact with the corrected Deedy hyperlink macro,
-verify all eleven annotations, run the complete static gate, and push the green
-branch. Rerun Google on the primary model when its daily quota resets.
+Rerun the remaining Google benchmark on the primary model when its daily quota
+resets, compile the accepted artifact, and record its ATS, geometry, hyperlink,
+page-fill, and repair-cycle results against the handmade-resume quality bar.
 
 ## Files Changed Recently
 
@@ -231,6 +236,7 @@ branch. Rerun Google on the primary model when its daily quota resets.
 - `app/prompts/writer_v1.py`
 - `tests/contract/test_resume_content.py`
 - `tests/integration/test_template_rendering.py`
+- `README.md`
 - `memory.md`
 
 ## Prompt Versions
@@ -357,6 +363,10 @@ branch. Rerun Google on the primary model when its daily quota resets.
 - 2026-08-11: Added evidence-verified HTTPS entry links throughout the model,
   writer prompt, provenance validator, and all production templates. Populated
   six verified project destinations in the local candidate vault.
+- 2026-08-11: Replaced the README development stub with an implementation-
+  grounded project presentation. Public documentation distinguishes completed
+  deterministic capabilities from vision, Telegram polling, and checkpointed
+  HITL roadmap work.
 
 ## Session Log
 
@@ -474,3 +484,7 @@ branch. Rerun Google on the primary model when its daily quota resets.
 - 2026-08-11: A compiled URL audit found Deedy uppercased entire `\href`
   expressions, corrupting case-sensitive project destinations. Uppercase is now
   scoped to visible heading text; compiled PDF tests verify the exact target.
+- 2026-08-11: Audited the plan, memory, source, CI, and current tests to publish
+  a production-level README with an architecture diagram, quality-gate and
+  template matrices, reproducible setup, repository map, security model, and
+  honest project-status boundary. The non-live suite remains at 218 passing.
