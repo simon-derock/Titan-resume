@@ -149,7 +149,12 @@ def test_templates_render_verified_entry_heading_hyperlink(
     )
 
     source = rendered_path.read_text(encoding="utf-8")
-    assert r"\href{https://github.com/alex/titan}{TITAN}" in source
+    expected_link = (
+        r"\href{https://github.com/alex/titan}{\MakeUppercase{TITAN}}"
+        if template_id == "deedy_cv_v1"
+        else r"\href{https://github.com/alex/titan}{TITAN}"
+    )
+    assert expected_link in source
 
 
 @pytest.mark.integration

@@ -68,6 +68,8 @@ provenance and attribution; they are not used at compilation time.
 - `ResumeEntry.url` accepts HTTPS destinations only. A rendered entry URL must
   exactly match an `evidence_url` referenced by that entry, preventing the
   writer from inventing or altering project links.
+- Deedy applies uppercase styling only to visible linked headings, never to the
+  `\href` destination, so compiled URL annotations preserve case and underscores.
 - Candidate-controlled LaTeX reserved characters and command prefixes are
   escaped deterministically before template rendering.
 - `LatexRenderer` uses a sandboxed, strict Jinja2 environment and the versioned
@@ -209,9 +211,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Run the complete static gate for targeted writer retry feedback and preserve the
-green branch. When the primary Gemini quota resets, rerun Google and the five-job
-benchmark; retry 2 will now receive the exact sanitized validation defect.
+Recompile the final LinkedIn artifact with the corrected Deedy hyperlink macro,
+verify all eleven annotations, run the complete static gate, and push the green
+branch. Rerun Google on the primary model when its daily quota resets.
 
 ## Files Changed Recently
 
@@ -469,3 +471,6 @@ benchmark; retry 2 will now receive the exact sanitized validation defect.
   are reduced to typed, sanitized codes such as `selected_section_evidence` and
   injected into writer prompt v1.6 for the next bounded attempt. Provider errors
   remain private, and raw invalid model content is never echoed; 218 tests pass.
+- 2026-08-11: A compiled URL audit found Deedy uppercased entire `\href`
+  expressions, corrupting case-sensitive project destinations. Uppercase is now
+  scoped to visible heading text; compiled PDF tests verify the exact target.
