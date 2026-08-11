@@ -27,9 +27,11 @@ from typing import TYPE_CHECKING, Protocol, TypedDict
 from app.models import (
     DeterministicPipelineResult,
     EvidenceRecord,
+    IngestedJobDescription,
     ResumeContent,
     ResumeHeader,
     ResumeTemplateId,
+    StructuredJobDescription,
     ValidationIssue,
 )
 from app.services.writing import ResumeWritingError, StructuredResumeWriter
@@ -87,6 +89,12 @@ class _PipelineRunner(Protocol):
     ) -> DeterministicPipelineResult: ...
 
 
+class _JdAnalyzer(Protocol):
+    """Minimal typed boundary for structured job-description analysis."""
+
+    def analyze(self, document: IngestedJobDescription) -> StructuredJobDescription: ...
+
+
 # ---------------------------------------------------------------------------
 # ResumeGraphExecutor
 # ---------------------------------------------------------------------------
@@ -115,6 +123,7 @@ class ResumeGraphExecutor:
         *,
         writer: _WriterClient,
         pipeline: _PipelineRunner,
+        jd_analyzer: _JdAnalyzer | None = None,
         max_repair_cycles: int = 2,
     ) -> None:
         if not 1 <= max_repair_cycles <= _MAX_REPAIR_CYCLES_HARD_CAP:
@@ -123,6 +132,7 @@ class ResumeGraphExecutor:
             )
         self._writer = writer
         self._pipeline = pipeline
+        self._jd_analyzer = jd_analyzer
         self.max_repair_cycles = max_repair_cycles
 
     def run(
@@ -164,17 +174,20 @@ class ResumeGraphExecutor:
             state["repair_feedback"] = f"JD ingestion failed: {exc}"
             return state
 
-        # Build a minimal StructuredJobDescription from evidence (offline path)
-        # When a real JD analyzer is wired, replace this with analyzer.analyze()
-        from app.models import StructuredJobDescription
-
-        # Derive a minimal role label from the raw text for the offline path.
-        # When a real JD analyzer is injected, it will replace this.
-        _first_line = ingested_jd.raw_text.splitlines()[0].strip()[:120]
-        jd = StructuredJobDescription(
-            role=_first_line or "Engineer",
-            raw_text_hash=ingested_jd.raw_text_hash,
-        )
+        if self._jd_analyzer is not None:
+            try:
+                jd = self._jd_analyzer.analyze(ingested_jd)
+            except Exception as exc:
+                state["status"] = "write_failed"
+                state["repair_feedback"] = f"JD analysis failed: {exc}"
+                return state
+        else:
+            # Deterministic fallback retained for offline callers and tests.
+            first_line = ingested_jd.raw_text.splitlines()[0].strip()[:120]
+            jd = StructuredJobDescription(
+                role=first_line or "Engineer",
+                raw_text_hash=ingested_jd.raw_text_hash,
+            )
 
         evidence_matches = EvidenceMatcher().match(
             job_description=jd,

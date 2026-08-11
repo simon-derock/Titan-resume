@@ -302,9 +302,7 @@ def test_executor_uses_structured_jd_analysis_for_strategy_and_writer(tmp_path) 
     class FakeJdAnalyzer:
         documents: list[IngestedJobDescription] = field(default_factory=list)
 
-        def analyze(
-            self, document: IngestedJobDescription
-        ) -> StructuredJobDescription:
+        def analyze(self, document: IngestedJobDescription) -> StructuredJobDescription:
             self.documents.append(document)
             return StructuredJobDescription(
                 role="AI Software Engineer",
