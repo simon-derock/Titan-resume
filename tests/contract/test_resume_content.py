@@ -156,3 +156,14 @@ def test_resume_entry_rejects_non_https_url() -> None:
             url="javascript:alert(1)",
             evidence_ids=("project.titan.001",),
         )
+
+
+@pytest.mark.contract
+def test_resume_bullet_rejects_text_beyond_dense_two_line_ceiling() -> None:
+    with pytest.raises(ValidationError):
+        ResumeBullet(
+            element_id="projects.titan.bullet",
+            text="x" * 161,
+            evidence_ids=("project.titan.001",),
+            target_max_lines=2,
+        )
