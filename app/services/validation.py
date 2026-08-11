@@ -318,10 +318,9 @@ class AtsTextValidator:
                 issues=(issue,),
             )
 
-        lower_text = extracted_text.lower()
         section_positions: list[int] = []
         for section in self._expected_sections:
-            position = lower_text.find(section.lower())
+            position = _section_heading_position(extracted_text, section)
             if position < 0:
                 issue = ValidationIssue(
                     issue_id=f"ats.section.missing.{section.lower()}",
@@ -347,7 +346,7 @@ class AtsTextValidator:
                 issue_type="reading_order_invalid",
                 severity="fatal",
                 message="Resume sections are not in the configured reading order.",
-                recommended_action="Restore the locked single-column section order.",
+                recommended_action="Restore the configured template section order.",
             )
             return AtsValidationReport(
                 passed=False,
@@ -361,3 +360,12 @@ class AtsTextValidator:
             text_extractable=True,
             reading_order_valid=True,
         )
+
+
+def _section_heading_position(extracted_text: str, section: str) -> int:
+    heading = re.compile(
+        rf"(?im)(?:^[ \t]*|[ \t]{{2,}}){re.escape(section)}"
+        rf"(?=[ \t]*(?:$|[ \t]{{2,}}))"
+    )
+    match = heading.search(extracted_text)
+    return -1 if match is None else match.start()

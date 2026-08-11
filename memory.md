@@ -176,7 +176,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 212 tests with three live tests deselected.
+The complete non-live suite passes 213 tests with three live tests deselected.
 Live benchmark diagnostics have made more than twenty completion calls. Writer prompt v1.3
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
 and geometry because selection omitted education and left 116 pt of bottom
@@ -208,9 +208,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Rerun the two overflowed benchmarks with the one-bullet dense-entry budget, then
-diagnose one raw response from the two pre-render writer failures and convert the
-shared policy defect into the next RED regression.
+Add and enforce a deterministic physical text-length ceiling for dense bullets,
+then rerun the Taxmann overflow benchmark. Diagnose Google's remaining
+pre-render policy failure from one raw structured response afterward.
 
 ## Files Changed Recently
 
@@ -237,7 +237,7 @@ shared policy defect into the next RED regression.
 
 ## Metrics Snapshot
 
-- Tests passing: 212
+- Tests passing: 213
 - Tests failing: 0
 - Live model calls: 20+
 - Live vision calls: 0
@@ -446,3 +446,7 @@ shared policy defect into the next RED regression.
   budget allowed up to 22 bullets; two failed writer policy before rendering.
   Capped rich two-column entries at one dense bullet each to preserve all 11
   entries on exactly one page.
+- 2026-08-11: The density rerun passed Indeed at 40.0 pt bottom margin and
+  revealed Astra's ATS failure was a false match against section words in prose.
+  ATS heading detection now uses layout-separated labels; Astra's existing PDF
+  passes ATS and geometry without regeneration. The suite passes 213 tests.
