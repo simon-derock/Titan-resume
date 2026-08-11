@@ -147,7 +147,7 @@ provenance and attribution; they are not used at compilation time.
   two-column body content.
 - The `compiler_warmup.tex` fixture now covers `tabularx`, `mathpazo`, and
   `helvet` package surface required by the two-column templates.
-- `app/prompts/writer_v1.py` exposes `PROMPT_VERSION = 'writer_v1.1'` and a
+- `app/prompts/writer_v1.py` exposes `PROMPT_VERSION = 'writer_v1.2'` and a
   pure deterministic `render(request)` function that injects: JSON-only
   output constraint, no-LaTeX prohibition, selected evidence IDs and claims,
   space budget ceilings (line/entry/bullet per section), `must_not_claim`
@@ -176,8 +176,8 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 207 tests with three live tests deselected.
-Live benchmark diagnostics have made six completion calls; writer responses were
+The complete non-live suite passes 208 tests with three live tests deselected.
+Live benchmark diagnostics have made ten completion calls; writer responses were
 rejected before rendering. Live vision calls remain zero. The files changed by the current
 quality increment pass focused Ruff checks and formatting. Repository-wide Ruff
 still reports pre-existing issues in committed Gemini/Telegram files and a
@@ -206,9 +206,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Rerun the first sourced AI Engineer benchmark with the expanded Gemini output
-budget and structured JD analyzer, then inspect the compiled PDF or convert the
-next concrete schema, policy, ATS, or geometry defect into a RED regression.
+Rerun the first sourced AI Engineer benchmark with writer prompt v1.2, then
+inspect the compiled PDF or convert the next concrete schema, policy, ATS, or
+geometry defect into a RED regression.
 
 ## Files Changed Recently
 
@@ -230,14 +230,14 @@ next concrete schema, policy, ATS, or geometry defect into a RED regression.
 
 ## Prompt Versions
 
-- `writer_v1.1`
+- `writer_v1.2`
 - `jd_analyzer_v1.0`
 
 ## Metrics Snapshot
 
-- Tests passing: 207
+- Tests passing: 208
 - Tests failing: 0
-- Live model calls: 6
+- Live model calls: 10
 - Live vision calls: 0
 - Compiled resume fixtures: 3 (one per supported template)
 - Golden JD intelligence fixtures: 1
@@ -420,3 +420,6 @@ next concrete schema, policy, ATS, or geometry defect into a RED regression.
 - 2026-08-11: Isolated live writer failure to a JSON response truncated under
   the 4,096-token generation ceiling. Raised the explicit structured-output
   budget to 16,384 tokens with a regression contract; 207 tests pass.
+- 2026-08-11: Removed a contradictory prompt constraint that told Gemini to
+  return request-only `schema_version`, which `ResumeContent` correctly forbids.
+  Writer prompt v1.2 now requires only `content_version`; 208 tests pass.

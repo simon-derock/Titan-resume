@@ -19,7 +19,7 @@ import json
 
 from app.models import EvidenceRecord, ResumeSpaceBudget, ResumeWritingRequest
 
-PROMPT_VERSION: str = "writer_v1.1"
+PROMPT_VERSION: str = "writer_v1.2"
 
 
 # ---------------------------------------------------------------------------
@@ -80,7 +80,7 @@ def _section_constraints(request: ResumeWritingRequest) -> str:
         "",
         f"- target_role MUST be exactly: {request.strategy.target_role!r}",
         f"- template_id MUST be exactly: {request.template_id!r}",
-        f"- schema_version MUST be exactly: {request.schema_version}",
+        "- content_version MUST be exactly: 1",
         "- Every evidence_ids list must contain only the EXACT evidence_id strings "
         "listed as headings in the 'Candidate evidence' section (e.g. "
         '"evidence.exp.titan"). Do NOT use source_id or any other identifier.',
