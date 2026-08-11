@@ -147,7 +147,7 @@ provenance and attribution; they are not used at compilation time.
   two-column body content.
 - The `compiler_warmup.tex` fixture now covers `tabularx`, `mathpazo`, and
   `helvet` package surface required by the two-column templates.
-- `app/prompts/writer_v1.py` exposes `PROMPT_VERSION = 'writer_v1.2'` and a
+- `app/prompts/writer_v1.py` exposes `PROMPT_VERSION = 'writer_v1.3'` and a
   pure deterministic `render(request)` function that injects: JSON-only
   output constraint, no-LaTeX prohibition, selected evidence IDs and claims,
   space budget ceilings (line/entry/bullet per section), `must_not_claim`
@@ -176,8 +176,8 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 209 tests with three live tests deselected.
-Live benchmark diagnostics have made eleven completion calls. Writer prompt v1.2
+The complete non-live suite passes 210 tests with three live tests deselected.
+Live benchmark diagnostics have made twelve completion calls. Writer prompt v1.2
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
 and geometry because selection omitted education and left 116 pt of bottom
 whitespace. Live vision calls remain zero. The files changed by the current
@@ -208,9 +208,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Rerun the first sourced AI Engineer benchmark after capacity-filling selection;
-verify all 5 experiences, 6 projects, education, hyperlinks, one-page status,
-ATS extraction, and the 60 pt maximum bottom-whitespace gate.
+Rerun the first sourced AI Engineer benchmark with writer prompt v1.3 and
+section-source coverage enforcement; verify all 5 experiences, 6 projects,
+education, hyperlinks, one-page status, and bottom-page fill.
 
 ## Files Changed Recently
 
@@ -232,14 +232,14 @@ ATS extraction, and the 60 pt maximum bottom-whitespace gate.
 
 ## Prompt Versions
 
-- `writer_v1.2`
+- `writer_v1.3`
 - `jd_analyzer_v1.0`
 
 ## Metrics Snapshot
 
-- Tests passing: 209
+- Tests passing: 210
 - Tests failing: 0
-- Live model calls: 11
+- Live model calls: 12
 - Live vision calls: 0
 - Compiled resume fixtures: 3 (one per supported template)
 - Golden JD intelligence fixtures: 1
@@ -429,3 +429,7 @@ ATS extraction, and the 60 pt maximum bottom-whitespace gate.
   experiences and five projects but omitted education and left 116 pt unused.
   Changed strategy selection to rank matched evidence first and then fill each
   reviewed section capacity with verified records; 209 tests pass.
+- 2026-08-11: The next live pass selected all 12 records but the model emitted
+  only four experiences and four projects. Writer prompt v1.3 and deterministic
+  policy now require every selected source in its correct section and reject
+  cross-section provenance; 210 tests pass.

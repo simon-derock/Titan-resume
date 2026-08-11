@@ -19,7 +19,7 @@ import json
 
 from app.models import EvidenceRecord, ResumeSpaceBudget, ResumeWritingRequest
 
-PROMPT_VERSION: str = "writer_v1.2"
+PROMPT_VERSION: str = "writer_v1.3"
 
 
 # ---------------------------------------------------------------------------
@@ -87,6 +87,10 @@ def _section_constraints(request: ResumeWritingRequest) -> str:
         "- Do not invent facts, metrics, or skills not present in the evidence.",
         "- An entry url MUST be copied exactly from an evidence_url referenced by "
         "that entry, or set to null when no verified URL exists.",
+        "- Represent every selected experience, project, and education source in "
+        "its matching section; do not omit selected sources.",
+        "- Each entry and bullet evidence_ids list may contain only relevant IDs "
+        "from that same section and source.",
         "- Do not use LaTeX commands in any field value.",
         "- Return only JSON — no prose, no markdown, no other text.",
     ]
@@ -185,15 +189,7 @@ def _section_job_description(request: ResumeWritingRequest) -> str:
 
 
 def _section_response_schema(request: ResumeWritingRequest) -> str:
-    selected_ids = sorted(
-        {
-            *request.strategy.selected_experience_evidence_ids,
-            *request.strategy.selected_project_evidence_ids,
-            *request.strategy.selected_skill_evidence_ids,
-            *request.strategy.selected_education_evidence_ids,
-        }
-    )
-    ids_comment = ", ".join(f'"{eid}"' for eid in selected_ids)
+    ids_comment = '"<one or more exact relevant evidence_id values>"'
     schema = (
         "## Required JSON response schema\n\n"
         "Return exactly this JSON structure (all string values must be plain "

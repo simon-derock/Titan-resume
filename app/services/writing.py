@@ -143,6 +143,7 @@ def _validate_written_content(
         raise _ResumeWritingPolicyError
 
     validate_resume_content_evidence(content, selected_evidence)
+    _validate_selected_section_evidence(content, selected_evidence)
     rendered_text = "\n".join(_content_text(content))
     if any(
         _contains_protected_term(rendered_text, term)
@@ -174,6 +175,45 @@ def _validate_written_content(
         raise _ResumeWritingPolicyError
     if content.summary is not None and space_budget.summary_line_limit == 0:
         raise _ResumeWritingPolicyError
+
+
+def _validate_selected_section_evidence(
+    content: ResumeContent,
+    selected_evidence: tuple[EvidenceRecord, ...],
+) -> None:
+    section_specs = (
+        (
+            content.experience,
+            {"experience", "internship"},
+        ),
+        (content.projects, {"project"}),
+        (content.education, {"education", "certification"}),
+    )
+    records_by_id = {record.evidence_id: record for record in selected_evidence}
+
+    for entries, source_types in section_specs:
+        expected_records = tuple(
+            record for record in selected_evidence if record.source_type in source_types
+        )
+        expected_ids = {record.evidence_id for record in expected_records}
+        expected_sources = {record.source_id for record in expected_records}
+        rendered_ids = {
+            evidence_id
+            for entry in entries
+            for evidence_id in (
+                *entry.evidence_ids,
+                *(eid for bullet in entry.bullets for eid in bullet.evidence_ids),
+            )
+        }
+
+        if not rendered_ids <= expected_ids or not expected_ids <= rendered_ids:
+            raise _ResumeWritingPolicyError
+
+        rendered_sources = {
+            records_by_id[evidence_id].source_id for evidence_id in rendered_ids
+        }
+        if rendered_sources != expected_sources or len(entries) < len(expected_sources):
+            raise _ResumeWritingPolicyError
 
 
 def _validate_section_budget(
