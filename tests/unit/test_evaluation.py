@@ -8,8 +8,8 @@ from app.graph import ResumeGraphState
 from app.models import (
     AtsValidationReport,
     BenchmarkCorpus,
-    BenchmarkJob,
     BenchmarkEvaluationRecord,
+    BenchmarkJob,
     CompileResult,
     DeterministicPipelineResult,
     GeometryReport,

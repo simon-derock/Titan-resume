@@ -77,6 +77,9 @@ provenance and attribution; they are not used at compilation time.
 - `LatexCompiler` uses fixed list arguments, explicitly disables shell escape,
   enforces a timeout, and returns typed success, compile, timeout, or unavailable
   engine results through an injectable process runner.
+- `LatexCompiler` resolves resume source paths before selecting its working and
+  output directories, preventing relative benchmark paths from being duplicated
+  beneath the compiler working directory.
 - The compiler supports explicit pdfLaTeX and Tectonic policies. Tectonic runs
   with `--untrusted` and `--only-cached`; the verified local engine is upstream
   Tectonic 0.16.9 (Linux x86-64 archive SHA-256
@@ -199,7 +202,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 225 tests with three live tests deselected.
+The complete non-live suite passes 226 tests with three live tests deselected.
 Live benchmark diagnostics reached the Gemini free-tier limit at exactly twenty
 completion calls. Writer prompt v1.5
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
@@ -266,7 +269,7 @@ handmade-resume quality bar.
 
 ## Metrics Snapshot
 
-- Tests passing: 225
+- Tests passing: 226
 - Tests failing: 0
 - Live model calls: provider quota exercised; exact retry count is not persisted
 - Live vision calls: 0
@@ -398,6 +401,8 @@ handmade-resume quality bar.
   deterministic runner with isolated per-JD artifact directories and timing.
 - 2026-08-11: Added a production evaluation command that composes the primary
   model and deterministic document pipeline from private local inputs.
+- 2026-08-11: Required the compiler boundary to resolve relative artifact paths
+  before passing Tectonic its working directory and `--outdir`.
 
 ## Session Log
 
@@ -535,3 +540,8 @@ handmade-resume quality bar.
 - 2026-08-11: Added `scripts/evaluate.py` as the tested live benchmark entry
   point and corrected graph collaborator protocols so the real composition is
   strict-mypy clean. The non-live suite now passes 225 tests.
+- 2026-08-11: Ran a secondary Gemini 3.5 diagnostic across all five JDs. Four
+  rich resumes reached rendering with five or six verified links but were
+  falsely reported as compile failures because relative `--outdir` paths were
+  resolved twice. Added a compiler regression and fix; 226 tests pass, and the
+  preserved Google source now compiles successfully.

@@ -114,6 +114,7 @@ class LatexCompiler:
         self._timeout_seconds = timeout_seconds
 
     def compile(self, tex_path: Path) -> CompileResult:
+        tex_path = tex_path.resolve()
         command = self._command(tex_path)
         try:
             process = self._runner.run(
