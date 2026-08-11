@@ -176,9 +176,11 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 208 tests with three live tests deselected.
-Live benchmark diagnostics have made ten completion calls; writer responses were
-rejected before rendering. Live vision calls remain zero. The files changed by the current
+The complete non-live suite passes 209 tests with three live tests deselected.
+Live benchmark diagnostics have made eleven completion calls. Writer prompt v1.2
+produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
+and geometry because selection omitted education and left 116 pt of bottom
+whitespace. Live vision calls remain zero. The files changed by the current
 quality increment pass focused Ruff checks and formatting. Repository-wide Ruff
 still reports pre-existing issues in committed Gemini/Telegram files and a
 user-owned uncommitted writer change.
@@ -206,9 +208,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Rerun the first sourced AI Engineer benchmark with writer prompt v1.2, then
-inspect the compiled PDF or convert the next concrete schema, policy, ATS, or
-geometry defect into a RED regression.
+Rerun the first sourced AI Engineer benchmark after capacity-filling selection;
+verify all 5 experiences, 6 projects, education, hyperlinks, one-page status,
+ATS extraction, and the 60 pt maximum bottom-whitespace gate.
 
 ## Files Changed Recently
 
@@ -235,9 +237,9 @@ geometry defect into a RED regression.
 
 ## Metrics Snapshot
 
-- Tests passing: 208
+- Tests passing: 209
 - Tests failing: 0
-- Live model calls: 10
+- Live model calls: 11
 - Live vision calls: 0
 - Compiled resume fixtures: 3 (one per supported template)
 - Golden JD intelligence fixtures: 1
@@ -423,3 +425,7 @@ geometry defect into a RED regression.
 - 2026-08-11: Removed a contradictory prompt constraint that told Gemini to
   return request-only `schema_version`, which `ResumeContent` correctly forbids.
   Writer prompt v1.2 now requires only `content_version`; 208 tests pass.
+- 2026-08-11: Compiled the first live sourced resume. It contained four
+  experiences and five projects but omitted education and left 116 pt unused.
+  Changed strategy selection to rank matched evidence first and then fill each
+  reviewed section capacity with verified records; 209 tests pass.

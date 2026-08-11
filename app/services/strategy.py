@@ -51,15 +51,11 @@ class ResumeStrategyBuilder:
             for evidence_id in match.evidence_ids:
                 scores[evidence_id] += requirement_weight * match.score
 
-        scored_records = tuple(
-            record
-            for record in allowed_records.values()
-            if scores[record.evidence_id] > 0
-        )
+        candidate_records = tuple(allowed_records.values())
         selected_experience = _select_grouped_records(
             records=tuple(
                 record
-                for record in scored_records
+                for record in candidate_records
                 if record.source_type in {"experience", "internship"}
             ),
             scores=scores,
@@ -68,7 +64,9 @@ class ResumeStrategyBuilder:
         )
         selected_projects = _select_grouped_records(
             records=tuple(
-                record for record in scored_records if record.source_type == "project"
+                record
+                for record in candidate_records
+                if record.source_type == "project"
             ),
             scores=scores,
             source_limit=space_budget.projects.entry_limit,
@@ -76,14 +74,18 @@ class ResumeStrategyBuilder:
         )
         selected_skills = tuple(
             sorted(
-                (record for record in scored_records if record.source_type == "skill"),
+                (
+                    record
+                    for record in candidate_records
+                    if record.source_type == "skill"
+                ),
                 key=lambda record: _record_rank(record, scores),
             )[: space_budget.skills_line_limit]
         )
         selected_education = _select_grouped_records(
             records=tuple(
                 record
-                for record in scored_records
+                for record in candidate_records
                 if record.source_type in {"education", "certification"}
             ),
             scores=scores,
