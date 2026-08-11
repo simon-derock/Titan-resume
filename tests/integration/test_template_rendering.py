@@ -14,6 +14,53 @@ from app.templates import SUPPORTED_TEMPLATE_IDS
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    ("template_id", "empty_metadata_guard"),
+    [
+        ("resume_v1", r"\detokenize{#2#3}"),
+        ("moderncv_two_column_v1", r"\detokenize{#2#3#4}"),
+        ("deedy_cv_v1", r"\detokenize{#3#4}"),
+    ],
+)
+def test_templates_omit_empty_optional_metadata_rows(
+    template_id: str,
+    empty_metadata_guard: str,
+    tmp_path: Path,
+) -> None:
+    """Missing metadata must not create an invisible row or artificial gap."""
+    evidence_id = "project.titan.001"
+    content = ResumeContent(
+        resume_id="resume.optional_metadata.001",
+        target_role="AI Engineer",
+        projects=(
+            ResumeEntry(
+                element_id="projects.titan",
+                heading="TITAN",
+                evidence_ids=(evidence_id,),
+                bullets=(
+                    ResumeBullet(
+                        element_id="projects.titan.bullet",
+                        text="Built a grounded resume compiler.",
+                        evidence_ids=(evidence_id,),
+                        target_max_lines=1,
+                    ),
+                ),
+            ),
+        ),
+        template_id=template_id,
+    )
+
+    rendered_path = LatexRenderer().render(
+        ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
+        content,
+        tmp_path / "resume.tex",
+    )
+
+    source = rendered_path.read_text(encoding="utf-8")
+    assert empty_metadata_guard in source
+
+
+@pytest.mark.integration
 @pytest.mark.security
 @pytest.mark.parametrize("template_id", SUPPORTED_TEMPLATE_IDS)
 def test_selected_template_renders_only_escaped_structured_content(
