@@ -1,3 +1,4 @@
+import subprocess
 from datetime import date
 from pathlib import Path
 
@@ -114,6 +115,13 @@ def test_supported_template_produces_a_safe_extractable_one_page_pdf(
     assert compile_result.pdf_path is not None
     pdf_path = Path(compile_result.pdf_path)
     assert PdfValidator().validate(pdf_path).passed is True
+    url_report = subprocess.run(
+        ("pdfinfo", "-url", str(pdf_path)),
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    assert "https://github.com/alex/titan" in url_report
 
     extracted_text = PdfTextExtractor().extract(pdf_path)
     for expected_text in (
