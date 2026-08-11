@@ -19,8 +19,8 @@ injected at startup.
 from dataclasses import dataclass, field
 from typing import Protocol
 
-from app.models import ResumeWritingRequest
-from app.prompts import writer_v1
+from app.models import JobDescriptionAnalysisRequest, ResumeWritingRequest
+from app.prompts import jd_analyzer_v1, writer_v1
 
 # ---------------------------------------------------------------------------
 # CompletionsBackend — one-method Protocol for any text-generation backend
@@ -101,6 +101,18 @@ class PromptResumeWriterClient:
         return self._backend.complete(prompt)
 
 
+class PromptStructuredJdClient:
+    """Serialize a typed JD analysis request for a completions backend."""
+
+    def __init__(self, *, backend: CompletionsBackend) -> None:
+        self._backend = backend
+
+    def analyze(self, request: JobDescriptionAnalysisRequest) -> object:
+        """Return the backend's raw structured response for schema validation."""
+
+        return self._backend.complete(jd_analyzer_v1.render(request))
+
+
 # ---------------------------------------------------------------------------
 # GeminiCompletionsBackend — live Gemini API adapter
 # ---------------------------------------------------------------------------
@@ -130,12 +142,11 @@ class GeminiCompletionsBackend:
         Retries up to _MAX_RETRIES times on transient 503 / 429 errors
         with exponential backoff (2 s → 4 s → 8 s → 16 s).
         """
-        import json
         import time
 
         from google import genai
         from google.genai import types
-        from google.genai.errors import ServerError, ClientError
+        from google.genai.errors import ClientError, ServerError
 
         client = genai.Client(api_key=self._api_key)
 
@@ -157,7 +168,10 @@ class GeminiCompletionsBackend:
                 return self._extract_first_json_object(cleaned)
             except (ServerError, ClientError) as exc:
                 status = getattr(exc, "status_code", None) or getattr(exc, "code", None)
-                if status in self._RETRY_STATUS_CODES and attempt < self._MAX_RETRIES - 1:
+                if (
+                    status in self._RETRY_STATUS_CODES
+                    and attempt < self._MAX_RETRIES - 1
+                ):
                     wait = 2 ** (attempt + 1)
                     time.sleep(wait)
                     last_exc = exc
@@ -166,8 +180,10 @@ class GeminiCompletionsBackend:
             except Exception as exc:
                 raise RuntimeError(f"Gemini API generation failed: {exc}") from exc
 
-        raise RuntimeError(f"Gemini API generation failed after {self._MAX_RETRIES} retries: {last_exc}") from last_exc
-
+        raise RuntimeError(
+            "Gemini API generation failed after "
+            f"{self._MAX_RETRIES} retries: {last_exc}"
+        ) from last_exc
 
     def _clean_json_text(self, text: str) -> str:
         cleaned = text.strip()
@@ -182,6 +198,7 @@ class GeminiCompletionsBackend:
     def _extract_first_json_object(self, text: str) -> object:
         """Parse the first complete JSON object from text, ignoring trailing garbage."""
         import json
+
         # Try straight parse first (fast path)
         try:
             return json.loads(text)
@@ -192,5 +209,4 @@ class GeminiCompletionsBackend:
                 obj, _ = decoder.raw_decode(text)
                 return obj
             except json.JSONDecodeError:
-                raise exc
-
+                raise exc from None

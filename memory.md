@@ -157,6 +157,8 @@ provenance and attribution; they are not used at compilation time.
   `FakeResumeWriterAdapterClient` (test double), and `PromptResumeWriterClient`
   (real adapter delegating prompt construction to `writer_v1.render()`;
   credentials live in the injected backend, never on the adapter class).
+- `app/prompts/jd_analyzer_v1.py` and `PromptStructuredJdClient` provide the
+  equivalent versioned, JSON-only provider boundary for grounded JD extraction.
 - `app/graph.py` defines `ResumeGraphState` (TypedDict with required keys:
   request_id, raw_jd_text, status, iteration, max_repair_cycles,
   pipeline_result, issues, resume_content, repair_feedback) and
@@ -174,7 +176,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 201 tests with three live tests deselected.
+The complete non-live suite passes 206 tests with three live tests deselected.
 One live benchmark execution made two bounded writer completion attempts; both
 were rejected before rendering. Live vision calls remain zero. The files changed by the current
 quality increment pass focused Ruff checks and formatting. Repository-wide Ruff
@@ -194,8 +196,8 @@ user-owned uncommitted writer change.
   17.4/2.501/14.195 pt against 22/22/18 pt minimums.
 - The current generated resume uses only about 63% of the A4 page and is now
   correctly rejected by the default geometry policy.
-- The graph can consume structured JD analysis, but the Gemini-backed JD client
-  and prompt are not yet wired into the live composition root.
+- The runtime still needs one explicit composition root that constructs both
+  the JD analyzer and resume writer from the configured Gemini backend.
 
 ## Current Blocker
 
@@ -204,9 +206,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Define the Gemini-backed structured-JD prompt/client contract, wire it into the
-live composition path, then rerun the first sourced benchmark through the
-two-column writer and deterministic PDF gates.
+Rerun the first sourced AI Engineer benchmark with the Gemini-backed structured
+JD analyzer injected, inspect the writer's first schema/policy failure if any,
+then turn that concrete defect into the next RED regression contract.
 
 ## Files Changed Recently
 
@@ -229,10 +231,11 @@ two-column writer and deterministic PDF gates.
 ## Prompt Versions
 
 - `writer_v1.1`
+- `jd_analyzer_v1.0`
 
 ## Metrics Snapshot
 
-- Tests passing: 201
+- Tests passing: 206
 - Tests failing: 0
 - Live model calls: 2
 - Live vision calls: 0
@@ -411,3 +414,6 @@ two-column writer and deterministic PDF gates.
   before rendering, exposing that graph orchestration discarded structured JD
   intelligence. Added typed analyzer injection so role and requirement data now
   drive matching and strategy selection; 201 non-live tests pass.
+- 2026-08-11: Added the versioned JSON-only structured-JD extraction prompt and
+  provider adapter. The prompt preserves the source hash, forbids invented
+  requirements, and requests every typed analyzer field; 206 tests pass.
