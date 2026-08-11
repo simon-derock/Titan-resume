@@ -295,6 +295,18 @@ def test_writer_retries_content_that_references_omitted_evidence() -> None:
     assert len(client.requests) == 2
 
 
+def test_writer_retries_content_that_omits_a_selected_section_source() -> None:
+    invalid = valid_response()
+    invalid["projects"] = []
+    service, client = writer([invalid, valid_response()])
+
+    result = write_resume(service)
+
+    assert len(result.projects) == 1
+    assert result.projects[0].evidence_ids == ("evidence.project.evaluation",)
+    assert len(client.requests) == 2
+
+
 @pytest.mark.parametrize(
     "forbidden_text",
     [
