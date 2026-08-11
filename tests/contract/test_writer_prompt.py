@@ -350,3 +350,17 @@ def test_writer_prompt_render_is_deterministic() -> None:
     assert mod.render(request) == mod.render(request), (
         "render() must be deterministic for the same request"
     )
+
+
+@pytest.mark.contract
+def test_writer_prompt_includes_targeted_retry_feedback() -> None:
+    mod = _import_prompt_module()
+    request = _build_minimal_request().model_copy(
+        update={"repair_feedback": ("selected_section_evidence",)}
+    )
+
+    rendered = mod.render(request)
+
+    assert "Correction required" in rendered
+    assert "selected_section_evidence" in rendered
+    assert "regenerate" in rendered.lower()

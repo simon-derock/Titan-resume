@@ -305,6 +305,8 @@ def test_writer_retries_content_that_omits_a_selected_section_source() -> None:
     assert len(result.projects) == 1
     assert result.projects[0].evidence_ids == ("evidence.project.evaluation",)
     assert len(client.requests) == 2
+    assert client.requests[0].repair_feedback == ()
+    assert client.requests[1].repair_feedback == ("selected_section_evidence",)
 
 
 @pytest.mark.parametrize(
