@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -6,6 +7,8 @@ import pytest
 from app.graph import ResumeGraphState
 from app.models import (
     AtsValidationReport,
+    BenchmarkCorpus,
+    BenchmarkJob,
     BenchmarkEvaluationRecord,
     CompileResult,
     DeterministicPipelineResult,
@@ -13,8 +16,10 @@ from app.models import (
     PdfValidationReport,
     ResumeContent,
     ResumeEntry,
+    ResumeHeader,
 )
 from app.services.evaluation import (
+    BenchmarkEvaluator,
     EvaluationRecordBuilder,
     EvaluationReportBuilder,
     EvaluationReportWriter,
@@ -225,3 +230,78 @@ def test_evaluation_report_writer_persists_stable_json(tmp_path: Path) -> None:
     assert payload["schema_version"] == 1
     assert payload["benchmark_count"] == 1
     assert payload["records"][0]["benchmark_id"] == "job.alpha"
+
+
+@pytest.mark.unit
+def test_benchmark_evaluator_runs_each_typed_job_and_builds_a_report(
+    tmp_path: Path,
+) -> None:
+    corpus = BenchmarkCorpus(
+        schema_version=1,
+        captured_at=date(2026, 8, 11),
+        description="Fixed AI Engineer evaluation corpus.",
+        jobs=(
+            BenchmarkJob(
+                benchmark_id="job.beta",
+                platform="wellfound",
+                source_url="https://example.com/beta",
+                captured_at=date(2026, 8, 11),
+                role="AI Engineer",
+                company="Beta",
+                seniority="entry",
+                required_skills=("Python", "RAG", "FastAPI"),
+                raw_text="B" * 100,
+            ),
+            BenchmarkJob(
+                benchmark_id="job.alpha",
+                platform="google_careers",
+                source_url="https://example.com/alpha",
+                captured_at=date(2026, 8, 11),
+                role="Software Engineer III, GenAI",
+                company="Alpha",
+                seniority="mid",
+                required_skills=("Python", "LLMs", "Agentic AI"),
+                raw_text="A" * 100,
+            ),
+        ),
+    )
+
+    class FakeExecutor:
+        def __init__(self) -> None:
+            self.calls: list[dict[str, object]] = []
+
+        def run(self, **kwargs: object) -> ResumeGraphState:
+            self.calls.append(kwargs)
+            return {
+                "request_id": str(kwargs["request_id"]),
+                "raw_jd_text": str(kwargs["raw_jd_text"]),
+                "status": "write_failed",
+                "iteration": 1,
+                "max_repair_cycles": 2,
+                "pipeline_result": None,
+                "issues": (),
+                "resume_content": None,
+                "repair_feedback": "provider unavailable",
+            }
+
+    clock_values = iter((10.0, 11.5, 20.0, 22.5))
+    executor = FakeExecutor()
+    evaluator = BenchmarkEvaluator(executor=executor, clock=lambda: next(clock_values))
+
+    report = evaluator.run(
+        corpus=corpus,
+        header=ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
+        evidence_records=(),
+        output_root=tmp_path,
+        template_id="deedy_cv_v1",
+    )
+
+    assert len(executor.calls) == 2
+    assert executor.calls[0]["request_id"] == "job.beta"
+    assert executor.calls[0]["output_dir"] == tmp_path / "job.beta"
+    assert report.benchmark_count == 2
+    assert report.average_elapsed_seconds == 2.0
+    assert tuple(record.benchmark_id for record in report.records) == (
+        "job.alpha",
+        "job.beta",
+    )
