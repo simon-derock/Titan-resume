@@ -1,9 +1,126 @@
 """Deterministic aggregation for reproducible resume benchmark reports."""
 
 from collections.abc import Iterable
+from pathlib import Path
 from statistics import fmean
+from typing import Literal, cast
 
-from app.models import BenchmarkEvaluationRecord, EvaluationReport
+from app.graph import ResumeGraphState
+from app.models import BenchmarkEvaluationRecord, EvaluationReport, ResumeTemplateId
+
+_A4_HEIGHT_PT = 841.8898
+_BenchmarkStatus = Literal[
+    "passed",
+    "validation_failed",
+    "compile_failed",
+    "needs_review",
+    "write_failed",
+]
+_ALLOWED_BENCHMARK_STATUSES: frozenset[str] = frozenset(
+    {
+        "passed",
+        "validation_failed",
+        "compile_failed",
+        "needs_review",
+        "write_failed",
+    }
+)
+
+
+class EvaluationRecordBuilder:
+    """Measure one terminal graph state without reopening its PDF artifacts."""
+
+    def from_graph_state(
+        self,
+        *,
+        benchmark_id: str,
+        platform: str,
+        role: str,
+        company: str,
+        template_id: ResumeTemplateId,
+        elapsed_seconds: float,
+        state: ResumeGraphState,
+    ) -> BenchmarkEvaluationRecord:
+        status_value = state["status"]
+        if status_value not in _ALLOWED_BENCHMARK_STATUSES:
+            raise ValueError(f"unsupported benchmark status: {status_value}")
+        status = cast(_BenchmarkStatus, status_value)
+
+        pipeline_result = state.get("pipeline_result")
+        page_report = pipeline_result.page_report if pipeline_result else None
+        ats_report = pipeline_result.ats_report if pipeline_result else None
+        geometry_report = pipeline_result.geometry_report if pipeline_result else None
+        issues = state.get("issues", ())
+        content = state.get("resume_content")
+
+        linked_entry_count = 0
+        if content is not None:
+            linked_entry_count = sum(
+                entry.url is not None
+                for entry in (
+                    *content.experience,
+                    *content.projects,
+                    *content.education,
+                )
+            )
+
+        return BenchmarkEvaluationRecord(
+            benchmark_id=benchmark_id,
+            platform=platform,
+            role=role,
+            company=company,
+            template_id=template_id,
+            status=status,
+            passed=bool(
+                status == "passed"
+                and pipeline_result is not None
+                and pipeline_result.passed
+            ),
+            compile_success=bool(
+                pipeline_result is not None and pipeline_result.compile_result.success
+            ),
+            exactly_one_page=bool(
+                page_report is not None
+                and page_report.passed
+                and page_report.page_count == 1
+            ),
+            ats_text_extractable=bool(
+                ats_report is not None and ats_report.text_extractable
+            ),
+            ats_reading_order_valid=bool(
+                ats_report is not None and ats_report.reading_order_valid
+            ),
+            geometry_passed=bool(
+                geometry_report is not None and geometry_report.passed
+            ),
+            unsupported_claim_count=sum(
+                issue.source == "provenance" or issue.issue_type == "unsupported_claim"
+                for issue in issues
+            ),
+            repair_iterations=max(state.get("iteration", 0) - 1, 0),
+            elapsed_seconds=elapsed_seconds,
+            page_fill_percent=_page_fill_percent(
+                geometry_report.minimum_bottom_margin_pt
+                if geometry_report is not None
+                else None
+            ),
+            linked_entry_count=linked_entry_count,
+            issue_types=tuple(sorted({issue.issue_type for issue in issues})),
+        )
+
+
+class EvaluationReportWriter:
+    """Persist one report as stable, newline-terminated JSON."""
+
+    def write(self, report: EvaluationReport, output_path: Path) -> Path:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary_path = output_path.with_suffix(f"{output_path.suffix}.tmp")
+        temporary_path.write_text(
+            f"{report.model_dump_json(indent=2)}\n",
+            encoding="utf-8",
+        )
+        temporary_path.replace(output_path)
+        return output_path
 
 
 class EvaluationReportBuilder:
@@ -77,3 +194,10 @@ def _unsupported_claim_rate(
 
 def _mean(values: Iterable[int | float]) -> float:
     return round(fmean(values), 4)
+
+
+def _page_fill_percent(bottom_margin_pt: float | None) -> float | None:
+    if bottom_margin_pt is None:
+        return None
+    measured = (_A4_HEIGHT_PT - bottom_margin_pt) / _A4_HEIGHT_PT * 100.0
+    return round(min(max(measured, 0.0), 100.0), 2)

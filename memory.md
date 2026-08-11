@@ -182,6 +182,9 @@ provenance and attribution; they are not used at compilation time.
 - `EvaluationReportBuilder` aggregates typed per-JD outcomes into deterministic
   pass, compile, one-page, ATS, geometry, unsupported-claim, repair, latency,
   and page-fill metrics in stable benchmark-ID order.
+- `EvaluationRecordBuilder` converts terminal graph state into measured
+  benchmark records, including A4 page fill and verified link count, while
+  `EvaluationReportWriter` atomically persists stable newline-terminated JSON.
 - `README.md` now documents the implemented architecture, deterministic quality
   gates, three production templates, verified local toolchain bootstrap,
   security boundaries, test layers, and capability status. Planned vision,
@@ -190,7 +193,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 221 tests with three live tests deselected.
+The complete non-live suite passes 223 tests with three live tests deselected.
 Live benchmark diagnostics reached the Gemini free-tier limit at exactly twenty
 completion calls. Writer prompt v1.5
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
@@ -223,9 +226,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Add tested graph-state conversion and JSON persistence for benchmark records.
-Then rerun Google on the primary model when its daily quota resets and record
-its ATS, geometry, hyperlink, page-fill, and repair-cycle results against the
+Add the tested `scripts/evaluate.py` composition runner that executes the fixed
+JD corpus and writes the typed report. Then rerun Google on the primary model
+when its daily quota resets and compare its measured artifact against the
 handmade-resume quality bar.
 
 ## Files Changed Recently
@@ -256,7 +259,7 @@ handmade-resume quality bar.
 
 ## Metrics Snapshot
 
-- Tests passing: 221
+- Tests passing: 223
 - Tests failing: 0
 - Live model calls: provider quota exercised; exact retry count is not persisted
 - Live vision calls: 0
@@ -382,6 +385,8 @@ handmade-resume quality bar.
 - 2026-08-11: Defined deterministic evaluation records and aggregate metrics so
   benchmark quality claims can be serialized and reproduced instead of living
   only in session diagnostics.
+- 2026-08-11: Derived evaluation records directly from terminal graph state and
+  adopted atomic, stable JSON persistence for benchmark reports.
 
 ## Session Log
 
@@ -510,3 +515,6 @@ handmade-resume quality bar.
 - 2026-08-11: Added the first evaluation-report slice with typed per-JD records,
   stable ordering, and aggregate one-page, ATS, geometry, provenance, repair,
   latency, and page-fill metrics. The non-live suite now passes 221 tests.
+- 2026-08-11: Added graph-to-record measurement and atomic JSON report writing.
+  A passing artifact now records page count, ATS, geometry, A4 fill, repair
+  iterations, elapsed time, issue types, and verified link count; 223 tests pass.
