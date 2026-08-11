@@ -41,6 +41,31 @@ def test_ats_validator_accepts_extractable_text_in_logical_order() -> None:
 
 
 @pytest.mark.unit
+def test_ats_validator_ignores_section_words_inside_resume_prose() -> None:
+    extracted_text = "\n".join(
+        (
+            "SUMMARY",
+            "AI engineer delivering projects with production experience and rigor.",
+            "EXPERIENCE",
+            "Built reliable agent services.",
+            "PROJECTS",
+            "Grounded resume compiler.",
+            "SKILLS",
+            "Python, LangGraph",
+            "EDUCATION",
+            "B.Tech Artificial Intelligence",
+        )
+    )
+
+    report = AtsTextValidator(expected_sections=EXPECTED_SECTIONS).validate(
+        extracted_text
+    )
+
+    assert report.passed is True
+    assert report.reading_order_valid is True
+
+
+@pytest.mark.unit
 def test_ats_validator_rejects_blank_extracted_text() -> None:
     report = AtsTextValidator(expected_sections=EXPECTED_SECTIONS).validate(" \n\t")
 
