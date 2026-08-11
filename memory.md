@@ -159,6 +159,10 @@ provenance and attribution; they are not used at compilation time.
   `FakeResumeWriterAdapterClient` (test double), and `PromptResumeWriterClient`
   (real adapter delegating prompt construction to `writer_v1.render()`;
   credentials live in the injected backend, never on the adapter class).
+- `GeminiCompletionsBackend` honors explicit provider retry windows for transient
+  429/503 responses, rounds fractional delays up, retains exponential fallback,
+  and caps each sleep at 60 seconds so a valid rate-limit window does not become
+  a false writer failure.
 - `app/prompts/jd_analyzer_v1.py` and `PromptStructuredJdClient` provide the
   equivalent versioned, JSON-only provider boundary for grounded JD extraction.
 - `app/graph.py` defines `ResumeGraphState` (TypedDict with required keys:
@@ -183,7 +187,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 218 tests with three live tests deselected.
+The complete non-live suite passes 219 tests with three live tests deselected.
 Live benchmark diagnostics reached the Gemini free-tier limit at exactly twenty
 completion calls. Writer prompt v1.5
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
@@ -246,9 +250,9 @@ page-fill, and repair-cycle results against the handmade-resume quality bar.
 
 ## Metrics Snapshot
 
-- Tests passing: 218
+- Tests passing: 219
 - Tests failing: 0
-- Live model calls: 20 (daily quota reached)
+- Live model calls: provider quota exercised; exact retry count is not persisted
 - Live vision calls: 0
 - Compiled resume fixtures: 3 (one per supported template)
 - Golden JD intelligence fixtures: 1
@@ -367,6 +371,8 @@ page-fill, and repair-cycle results against the handmade-resume quality bar.
   grounded project presentation. Public documentation distinguishes completed
   deterministic capabilities from vision, Telegram polling, and checkpointed
   HITL roadmap work.
+- 2026-08-11: Required Gemini retries to honor the provider's explicit rate-
+  limit window instead of exhausting a shorter fixed backoff sequence.
 
 ## Session Log
 
@@ -488,3 +494,7 @@ page-fill, and repair-cycle results against the handmade-resume quality bar.
   a production-level README with an architecture diagram, quality-gate and
   template matrices, reproducible setup, repository map, security model, and
   honest project-status boundary. The non-live suite remains at 218 passing.
+- 2026-08-11: Reran the Google benchmark and isolated false writer failures to
+  Gemini's 20-request rate window: the API requested waits of 13–28 seconds,
+  while the backend retried after only 2/4/8 seconds. Added a provider-delay
+  contract and implementation; the non-live suite now passes 219 tests.

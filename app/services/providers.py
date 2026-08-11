@@ -16,6 +16,8 @@ the adapter class; they are owned by the backend implementation that is
 injected at startup.
 """
 
+import math
+import re
 from dataclasses import dataclass, field
 from typing import Protocol
 
@@ -136,12 +138,18 @@ class GeminiCompletionsBackend:
     _RETRY_STATUS_CODES: frozenset[int] = frozenset({429, 503})
     _MAX_RETRIES: int = 4
     _MAX_OUTPUT_TOKENS: int = 16_384
+    _MAX_RETRY_SLEEP_SECONDS: int = 60
+    _RETRY_DELAY_PATTERN = re.compile(
+        r"\bretry\s+in\s+(?P<seconds>\d+(?:\.\d+)?)s\b",
+        flags=re.IGNORECASE,
+    )
 
     def complete(self, prompt: str) -> object:
         """Call Gemini API and return parsed JSON object.
 
-        Retries up to _MAX_RETRIES times on transient 503 / 429 errors
-        with exponential backoff (2 s → 4 s → 8 s → 16 s).
+        Retries up to _MAX_RETRIES times on transient 503 / 429 errors.
+        Provider-supplied retry windows take precedence over the exponential
+        fallback and are capped at 60 seconds per attempt.
         """
         import time
 
@@ -173,7 +181,10 @@ class GeminiCompletionsBackend:
                     status in self._RETRY_STATUS_CODES
                     and attempt < self._MAX_RETRIES - 1
                 ):
-                    wait = 2 ** (attempt + 1)
+                    wait = self._retry_delay_seconds(
+                        exc,
+                        fallback_seconds=2 ** (attempt + 1),
+                    )
                     time.sleep(wait)
                     last_exc = exc
                     continue
@@ -185,6 +196,26 @@ class GeminiCompletionsBackend:
             "Gemini API generation failed after "
             f"{self._MAX_RETRIES} retries: {last_exc}"
         ) from last_exc
+
+    def _retry_delay_seconds(
+        self,
+        exc: object,
+        *,
+        fallback_seconds: int,
+    ) -> int:
+        message = getattr(exc, "message", None)
+        if not isinstance(message, str):
+            return fallback_seconds
+
+        match = self._RETRY_DELAY_PATTERN.search(message)
+        if match is None:
+            return fallback_seconds
+
+        requested_seconds = math.ceil(float(match.group("seconds")))
+        return min(
+            max(requested_seconds, fallback_seconds),
+            self._MAX_RETRY_SLEEP_SECONDS,
+        )
 
     def _clean_json_text(self, text: str) -> str:
         cleaned = text.strip()

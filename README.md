@@ -9,7 +9,7 @@
 [![CI](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml/badge.svg)](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Package manager](https://img.shields.io/badge/package%20manager-uv-DE5FE9)](https://docs.astral.sh/uv/)
-[![Tests](https://img.shields.io/badge/tests-218%20passing-2EA44F)](#verification)
+[![Tests](https://img.shields.io/badge/tests-219%20passing-2EA44F)](#verification)
 
 [Architecture](#architecture) · [Quality gates](#quality-gates) · [Templates](#resume-templates) · [Setup](#local-setup) · [Roadmap](#project-status)
 
