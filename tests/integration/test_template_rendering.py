@@ -190,5 +190,45 @@ def test_deedy_renderer_compacts_spacing_for_dense_bullets(tmp_path: Path) -> No
     )
 
     source = rendered_path.read_text(encoding="utf-8")
-    assert source.count(r"\vspace{2pt}") == len(entries)
+    assert source.count(r"\vspace{0pt}") == len(entries)
+    assert r"itemsep=0pt,topsep=0pt" in source
+    assert r"\vspace{2pt}" not in source
+    assert r"\vspace{5pt}" not in source
+
+
+@pytest.mark.integration
+def test_deedy_renderer_compacts_many_short_entries(tmp_path: Path) -> None:
+    """Entry count must prevent loose rhythm even when bullets are concise."""
+    evidence_id = "project.titan.001"
+    entries = tuple(
+        ResumeEntry(
+            element_id=f"projects.{index}",
+            heading=f"Project {index}",
+            evidence_ids=(evidence_id,),
+            bullets=(
+                ResumeBullet(
+                    element_id=f"projects.{index}.bullet",
+                    text="Shipped grounded AI tooling.",
+                    evidence_ids=(evidence_id,),
+                    target_max_lines=1,
+                ),
+            ),
+        )
+        for index in range(11)
+    )
+    content = ResumeContent(
+        resume_id="resume.many_short_entries.001",
+        target_role="AI Engineer",
+        projects=entries,
+        template_id="deedy_cv_v1",
+    )
+
+    rendered_path = LatexRenderer().render(
+        ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
+        content,
+        tmp_path / "resume.tex",
+    )
+
+    source = rendered_path.read_text(encoding="utf-8")
+    assert source.count(r"\vspace{0pt}") == len(entries)
     assert r"\vspace{5pt}" not in source
