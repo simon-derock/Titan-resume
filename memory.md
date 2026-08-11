@@ -179,6 +179,9 @@ provenance and attribution; they are not used at compilation time.
 - `tests/fixtures/jds/ai_engineer_benchmark_v1.json` contains five paraphrased,
   provenance-backed AI Engineer postings from LinkedIn, Indeed, Wellfound, and
   Google Careers spanning entry, mid, and senior expectations.
+- `EvaluationReportBuilder` aggregates typed per-JD outcomes into deterministic
+  pass, compile, one-page, ATS, geometry, unsupported-claim, repair, latency,
+  and page-fill metrics in stable benchmark-ID order.
 - `README.md` now documents the implemented architecture, deterministic quality
   gates, three production templates, verified local toolchain bootstrap,
   security boundaries, test layers, and capability status. Planned vision,
@@ -187,7 +190,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 219 tests with three live tests deselected.
+The complete non-live suite passes 221 tests with three live tests deselected.
 Live benchmark diagnostics reached the Gemini free-tier limit at exactly twenty
 completion calls. Writer prompt v1.5
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
@@ -220,9 +223,10 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Rerun the remaining Google benchmark on the primary model when its daily quota
-resets, compile the accepted artifact, and record its ATS, geometry, hyperlink,
-page-fill, and repair-cycle results against the handmade-resume quality bar.
+Add tested graph-state conversion and JSON persistence for benchmark records.
+Then rerun Google on the primary model when its daily quota resets and record
+its ATS, geometry, hyperlink, page-fill, and repair-cycle results against the
+handmade-resume quality bar.
 
 ## Files Changed Recently
 
@@ -240,6 +244,8 @@ page-fill, and repair-cycle results against the handmade-resume quality bar.
 - `app/prompts/writer_v1.py`
 - `tests/contract/test_resume_content.py`
 - `tests/integration/test_template_rendering.py`
+- `app/services/evaluation.py`
+- `tests/unit/test_evaluation.py`
 - `README.md`
 - `memory.md`
 
@@ -250,7 +256,7 @@ page-fill, and repair-cycle results against the handmade-resume quality bar.
 
 ## Metrics Snapshot
 
-- Tests passing: 219
+- Tests passing: 221
 - Tests failing: 0
 - Live model calls: provider quota exercised; exact retry count is not persisted
 - Live vision calls: 0
@@ -373,6 +379,9 @@ page-fill, and repair-cycle results against the handmade-resume quality bar.
   HITL roadmap work.
 - 2026-08-11: Required Gemini retries to honor the provider's explicit rate-
   limit window instead of exhausting a shorter fixed backoff sequence.
+- 2026-08-11: Defined deterministic evaluation records and aggregate metrics so
+  benchmark quality claims can be serialized and reproduced instead of living
+  only in session diagnostics.
 
 ## Session Log
 
@@ -498,3 +507,6 @@ page-fill, and repair-cycle results against the handmade-resume quality bar.
   Gemini's 20-request rate window: the API requested waits of 13–28 seconds,
   while the backend retried after only 2/4/8 seconds. Added a provider-delay
   contract and implementation; the non-live suite now passes 219 tests.
+- 2026-08-11: Added the first evaluation-report slice with typed per-JD records,
+  stable ordering, and aggregate one-page, ATS, geometry, provenance, repair,
+  latency, and page-fill metrics. The non-live suite now passes 221 tests.

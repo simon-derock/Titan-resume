@@ -377,6 +377,62 @@ class DeterministicPipelineResult(BaseModel):
     issues: tuple[ValidationIssue, ...] = ()
 
 
+class BenchmarkEvaluationRecord(BaseModel):
+    """Measured quality outcome for one fixed job-description benchmark."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    benchmark_id: str = Field(min_length=1)
+    platform: str = Field(min_length=1)
+    role: str = Field(min_length=1)
+    company: str = ""
+    template_id: ResumeTemplateId
+    status: Literal[
+        "passed",
+        "validation_failed",
+        "compile_failed",
+        "needs_review",
+        "write_failed",
+    ]
+    passed: bool
+    compile_success: bool
+    exactly_one_page: bool
+    ats_text_extractable: bool
+    ats_reading_order_valid: bool
+    geometry_passed: bool
+    unsupported_claim_count: int = Field(ge=0)
+    repair_iterations: int = Field(ge=0, le=3)
+    elapsed_seconds: float = Field(ge=0.0)
+    page_fill_percent: float | None = Field(default=None, ge=0.0, le=100.0)
+    linked_entry_count: int = Field(default=0, ge=0)
+    issue_types: tuple[str, ...] = ()
+
+
+class EvaluationReport(BaseModel):
+    """Deterministic aggregate metrics for one benchmark evaluation run."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    schema_version: Literal[1] = 1
+    benchmark_count: int = Field(ge=1)
+    passed_count: int = Field(ge=0)
+    pass_rate_percent: float = Field(ge=0.0, le=100.0)
+    compile_success_rate_percent: float = Field(ge=0.0, le=100.0)
+    exactly_one_page_rate_percent: float = Field(ge=0.0, le=100.0)
+    ats_text_extraction_rate_percent: float = Field(ge=0.0, le=100.0)
+    ats_reading_order_rate_percent: float = Field(ge=0.0, le=100.0)
+    geometry_pass_rate_percent: float = Field(ge=0.0, le=100.0)
+    unsupported_claim_rate_percent: float = Field(ge=0.0, le=100.0)
+    average_repair_iterations: float = Field(ge=0.0)
+    average_elapsed_seconds: float = Field(ge=0.0)
+    average_page_fill_percent: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=100.0,
+    )
+    records: tuple[BenchmarkEvaluationRecord, ...] = Field(min_length=1)
+
+
 class ResumeEntry(BaseModel):
     """A role, project, or education entry containing grounded bullets."""
 
