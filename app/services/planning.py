@@ -77,7 +77,7 @@ def _policy_for_template(template_id: ResumeTemplateId) -> SpacePlanningPolicy:
         project_line_limit=24,
         skills_line_limit=5,
         experience_entry_limit=5,
-        experience_bullets_per_entry_limit=2,
+        experience_bullets_per_entry_limit=1,
         project_entry_limit=6,
-        project_bullets_per_entry_limit=2,
+        project_bullets_per_entry_limit=1,
     )

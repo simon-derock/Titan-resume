@@ -177,7 +177,7 @@ provenance and attribution; they are not used at compilation time.
 ## Test Status
 
 The complete non-live suite passes 212 tests with three live tests deselected.
-Live benchmark diagnostics have made fourteen completion calls. Writer prompt v1.3
+Live benchmark diagnostics have made more than twenty completion calls. Writer prompt v1.3
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
 and geometry because selection omitted education and left 116 pt of bottom
 whitespace. Live vision calls remain zero. The files changed by the current
@@ -208,9 +208,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Run the remaining four sourced AI Engineer benchmarks through the grounded
-strategy/writer path, compile each with Deedy, and record pass rate, page fill,
-source coverage, and any new defect as the next RED regression.
+Rerun the two overflowed benchmarks with the one-bullet dense-entry budget, then
+diagnose one raw response from the two pre-render writer failures and convert the
+shared policy defect into the next RED regression.
 
 ## Files Changed Recently
 
@@ -239,7 +239,7 @@ source coverage, and any new defect as the next RED regression.
 
 - Tests passing: 212
 - Tests failing: 0
-- Live model calls: 14
+- Live model calls: 20+
 - Live vision calls: 0
 - Compiled resume fixtures: 3 (one per supported template)
 - Golden JD intelligence fixtures: 1
@@ -441,3 +441,8 @@ source coverage, and any new defect as the next RED regression.
   under a compiled dense-page regression. The exact live benchmark recompiles
   to one page with ATS and geometry gates passing and a measured 50.75 pt bottom
   margin (94.0% vertical fill); 212 non-live tests pass.
+- 2026-08-11: Ran the remaining four sourced benchmarks. Two retained full
+  5/6/1 coverage and six links but overflowed because the reviewed two-column
+  budget allowed up to 22 bullets; two failed writer policy before rendering.
+  Capped rich two-column entries at one dense bullet each to preserve all 11
+  entries on exactly one page.
