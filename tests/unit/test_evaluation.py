@@ -1,7 +1,24 @@
+import json
+from pathlib import Path
+
 import pytest
 
-from app.models import BenchmarkEvaluationRecord
-from app.services.evaluation import EvaluationReportBuilder
+from app.graph import ResumeGraphState
+from app.models import (
+    AtsValidationReport,
+    BenchmarkEvaluationRecord,
+    CompileResult,
+    DeterministicPipelineResult,
+    GeometryReport,
+    PdfValidationReport,
+    ResumeContent,
+    ResumeEntry,
+)
+from app.services.evaluation import (
+    EvaluationRecordBuilder,
+    EvaluationReportBuilder,
+    EvaluationReportWriter,
+)
 
 
 def _record(
@@ -98,3 +115,113 @@ def test_evaluation_report_aggregates_reproducible_quality_metrics() -> None:
 def test_evaluation_report_rejects_an_empty_benchmark_run() -> None:
     with pytest.raises(ValueError, match="at least one benchmark record"):
         EvaluationReportBuilder().build(())
+
+
+@pytest.mark.unit
+def test_evaluation_record_measures_a_terminal_graph_result() -> None:
+    content = ResumeContent(
+        resume_id="resume.google.001",
+        target_role="Software Engineer III, GenAI",
+        template_id="deedy_cv_v1",
+        projects=(
+            ResumeEntry(
+                element_id="projects.xphil",
+                heading="XPHIL",
+                url="https://example.com/xphil",
+                evidence_ids=("evidence.project.xphil",),
+            ),
+        ),
+    )
+    pipeline_result = DeterministicPipelineResult(
+        status="passed",
+        passed=True,
+        tex_path="outputs/google/resume.tex",
+        pdf_path="outputs/google/resume.pdf",
+        screenshot_path="outputs/google/resume.png",
+        compile_result=CompileResult(
+            success=True,
+            exit_code=0,
+            pdf_path="outputs/google/resume.pdf",
+            log="",
+        ),
+        page_report=PdfValidationReport(passed=True, page_count=1),
+        ats_report=AtsValidationReport(
+            passed=True,
+            text_extractable=True,
+            reading_order_valid=True,
+        ),
+        geometry_report=GeometryReport(
+            passed=True,
+            minimum_left_margin_pt=28.0,
+            minimum_right_margin_pt=28.0,
+            minimum_top_margin_pt=24.0,
+            minimum_bottom_margin_pt=50.75,
+        ),
+    )
+    state: ResumeGraphState = {
+        "request_id": "google_software_engineer_iii_genai",
+        "raw_jd_text": "Google GenAI role",
+        "status": "passed",
+        "iteration": 2,
+        "max_repair_cycles": 2,
+        "pipeline_result": pipeline_result,
+        "issues": (),
+        "resume_content": content,
+        "repair_feedback": None,
+    }
+
+    record = EvaluationRecordBuilder().from_graph_state(
+        benchmark_id="google_software_engineer_iii_genai",
+        platform="google_careers",
+        role="Software Engineer III, GenAI",
+        company="Google Cloud",
+        template_id="deedy_cv_v1",
+        elapsed_seconds=42.25,
+        state=state,
+    )
+
+    assert record.passed is True
+    assert record.compile_success is True
+    assert record.exactly_one_page is True
+    assert record.ats_text_extractable is True
+    assert record.ats_reading_order_valid is True
+    assert record.geometry_passed is True
+    assert record.unsupported_claim_count == 0
+    assert record.repair_iterations == 1
+    assert record.elapsed_seconds == 42.25
+    assert record.page_fill_percent == 93.97
+    assert record.linked_entry_count == 1
+
+
+@pytest.mark.unit
+def test_evaluation_report_writer_persists_stable_json(tmp_path: Path) -> None:
+    report = EvaluationReportBuilder().build(
+        (
+            _record(
+                benchmark_id="job.alpha",
+                status="passed",
+                passed=True,
+                compile_success=True,
+                exactly_one_page=True,
+                ats_text_extractable=True,
+                ats_reading_order_valid=True,
+                geometry_passed=True,
+                unsupported_claim_count=0,
+                repair_iterations=0,
+                elapsed_seconds=12.5,
+                page_fill_percent=95.0,
+            ),
+        )
+    )
+
+    output_path = EvaluationReportWriter().write(
+        report,
+        tmp_path / "nested" / "evaluation.json",
+    )
+
+    assert output_path.is_file()
+    assert output_path.read_text(encoding="utf-8").endswith("\n")
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == 1
+    assert payload["benchmark_count"] == 1
+    assert payload["records"][0]["benchmark_id"] == "job.alpha"
