@@ -244,3 +244,76 @@ def test_strategy_maps_skill_and_education_evidence_to_their_sections() -> None:
 
     assert strategy.selected_skill_evidence_ids == (skill_record.evidence_id,)
     assert strategy.selected_education_evidence_ids == (education_record.evidence_id,)
+
+
+def test_strategy_fills_open_template_capacity_after_relevance_ranking() -> None:
+    """Unmatched verified history fills remaining space without outranking matches."""
+    matched_experience = evidence(
+        "evidence.experience.matched",
+        source_id="experience.matched",
+    )
+    unmatched_experience = evidence(
+        "evidence.experience.unmatched",
+        source_id="experience.unmatched",
+    )
+    matched_project = evidence(
+        "evidence.project.matched",
+        source_type="project",
+        source_id="project.matched",
+    )
+    unmatched_project = evidence(
+        "evidence.project.unmatched",
+        source_type="project",
+        source_id="project.unmatched",
+    )
+    education_record = evidence(
+        "evidence.education.degree",
+        source_type="education",
+        source_id="education.degree",
+    )
+    records = (
+        unmatched_experience,
+        unmatched_project,
+        education_record,
+        matched_experience,
+        matched_project,
+    )
+    budget = SpacePlanner(
+        policy=SpacePlanningPolicy(
+            experience_entry_limit=2,
+            project_entry_limit=2,
+        )
+    ).plan(
+        available_experience_entries=2,
+        available_project_entries=2,
+        available_education_entries=1,
+    )
+
+    strategy = ResumeStrategyBuilder().build(
+        job_description=job(),
+        evidence_matches=(
+            match(
+                "LangGraph",
+                requirement_type="must_have",
+                evidence_ids=(matched_experience.evidence_id,),
+            ),
+            match(
+                "Python",
+                requirement_type="preferred",
+                evidence_ids=(matched_project.evidence_id,),
+            ),
+        ),
+        evidence_records=records,
+        space_budget=budget,
+    )
+
+    assert strategy.selected_experience_evidence_ids == (
+        matched_experience.evidence_id,
+        unmatched_experience.evidence_id,
+    )
+    assert strategy.selected_project_evidence_ids == (
+        matched_project.evidence_id,
+        unmatched_project.evidence_id,
+    )
+    assert strategy.selected_education_evidence_ids == (education_record.evidence_id,)
+    assert strategy.omitted_evidence_ids == ()
