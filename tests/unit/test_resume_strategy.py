@@ -212,6 +212,38 @@ def test_strategy_carries_partial_and_missing_must_haves_as_gaps() -> None:
     assert strategy.must_not_claim == ("LangGraph", "Kubernetes")
 
 
+def test_strategy_does_not_prohibit_terms_present_in_verified_claims() -> None:
+    verified_project = evidence(
+        "evidence.project.genai_server",
+        source_type="project",
+        source_id="project.genai_server",
+    ).model_copy(
+        update={"claim": "Built an Advanced Generative AI Server in Python."}
+    )
+    budget = SpacePlanner().plan(
+        available_experience_entries=0,
+        available_project_entries=1,
+        available_education_entries=0,
+    )
+
+    strategy = ResumeStrategyBuilder().build(
+        job_description=job(),
+        evidence_matches=(
+            match(
+                "Generative AI",
+                requirement_type="must_have",
+                status="missing",
+                score=0.0,
+            ),
+        ),
+        evidence_records=(verified_project,),
+        space_budget=budget,
+    )
+
+    assert strategy.unmet_must_have_requirements == ("Generative AI",)
+    assert strategy.must_not_claim == ()
+
+
 def test_strategy_maps_skill_and_education_evidence_to_their_sections() -> None:
     skill_record = evidence(
         "evidence.skill.python",
