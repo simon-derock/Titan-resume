@@ -1,8 +1,10 @@
 from pathlib import Path
+from datetime import date
 
 import pytest
 
 from app.models import (
+    EvidenceRecord,
     EvidenceText,
     GeometryPolicy,
     ResumeBullet,
@@ -10,6 +12,7 @@ from app.models import (
     ResumeEntry,
     ResumeHeader,
 )
+from app.services.pipeline import DeterministicResumePipeline
 from app.services.rendering import LatexCompiler, LatexRenderer
 from app.services.validation import (
     GeometryValidator,
@@ -128,3 +131,52 @@ def test_supported_template_produces_a_safe_extractable_one_page_pdf(
         policy=GeometryPolicy(maximum_bottom_margin_pt=geometry.height_pt)
     ).validate(geometry)
     assert geometry_report.passed is True, geometry_report.issues
+
+
+@pytest.mark.integration
+@pytest.mark.compiler
+@pytest.mark.skipif(not TECTONIC_PATH.is_file(), reason="Tectonic is not installed")
+def test_deedy_pipeline_validates_its_physical_column_reading_order(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("XDG_CACHE_HOME", str(TECTONIC_CACHE_PATH))
+    content = representative_content("deedy_cv_v1")
+    evidence = EvidenceRecord(
+        evidence_id=EVIDENCE_ID,
+        source_type="project",
+        source_id="project.titan",
+        claim="Built a deterministic resume compiler with evidence validation.",
+        evidence_url="https://github.com/alex/titan",
+        confidence=1.0,
+        allowed_for_resume=True,
+        last_verified_at=date(2026, 8, 11),
+    )
+    pipeline = DeterministicResumePipeline(
+        compiler=LatexCompiler(
+            executable=str(TECTONIC_PATH),
+            engine="tectonic",
+            timeout_seconds=120.0,
+        ),
+        expected_sections=(
+            "summary",
+            "experience",
+            "projects",
+            "skills",
+            "education",
+        ),
+        geometry_validator=GeometryValidator(
+            policy=GeometryPolicy(maximum_bottom_margin_pt=842.0)
+        ),
+    )
+
+    result = pipeline.run(
+        ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
+        content,
+        (evidence,),
+        tmp_path,
+    )
+
+    assert result.ats_report is not None
+    assert result.ats_report.reading_order_valid is True
+    assert result.passed is True
