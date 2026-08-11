@@ -176,8 +176,9 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 214 tests with three live tests deselected.
-Live benchmark diagnostics have made more than twenty completion calls. Writer prompt v1.3
+The complete non-live suite passes 216 tests with three live tests deselected.
+Live benchmark diagnostics reached the Gemini free-tier limit at exactly twenty
+completion calls. Writer prompt v1.5
 produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
 and geometry because selection omitted education and left 116 pt of bottom
 whitespace. Live vision calls remain zero. The files changed by the current
@@ -208,9 +209,9 @@ by user direction until generated resume quality reaches the reference bar.
 
 ## Next Exact Action
 
-Rerun the Taxmann overflow benchmark with writer prompt v1.4 and the 160-character
-bullet ceiling. Diagnose Google's remaining pre-render policy failure from one
-raw structured response afterward.
+Run the complete static gate and revalidate the stored Taxmann artifact under
+adaptive spacing. When Gemini quota resets, diagnose and close Google's remaining
+pre-render policy failure, then rerun the five-job benchmark for a final pass rate.
 
 ## Files Changed Recently
 
@@ -232,14 +233,14 @@ raw structured response afterward.
 
 ## Prompt Versions
 
-- `writer_v1.4`
+- `writer_v1.5`
 - `jd_analyzer_v1.0`
 
 ## Metrics Snapshot
 
-- Tests passing: 214
+- Tests passing: 216
 - Tests failing: 0
-- Live model calls: 20+
+- Live model calls: 20 (daily quota reached)
 - Live vision calls: 0
 - Compiled resume fixtures: 3 (one per supported template)
 - Golden JD intelligence fixtures: 1
@@ -454,3 +455,8 @@ raw structured response afterward.
   line budget while declaring compliant `target_max_lines`. Added a hard
   160-character `ResumeBullet` ceiling and prompt v1.4 instruction so physical
   density no longer depends on model-reported metadata; 214 tests pass.
+- 2026-08-11: Recompiled Taxmann's exact accepted content with 2 pt entry rhythm;
+  it became one page with all geometry gates passing at 37.6 pt bottom margin.
+  Replaced the rigid limit with a 205-character safety ceiling plus adaptive
+  5 pt/2 pt Deedy rhythm at 1,400 total bullet characters. Prompt v1.5 prefers
+  160-character bullets while retaining verified rich claims; 216 tests pass.

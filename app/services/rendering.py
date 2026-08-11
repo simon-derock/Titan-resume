@@ -53,9 +53,24 @@ class LatexRenderer:
 
         profile = get_template_profile(content.template_id)
         template = self._environment.get_template(profile.template_file)
-        source = template.render(header=header, resume=content)
+        source = template.render(
+            header=header,
+            resume=content,
+            entry_spacing_pt=_entry_spacing_pt(content),
+        )
         output_path.write_text(source, encoding="utf-8")
         return output_path
+
+
+def _entry_spacing_pt(content: ResumeContent) -> int:
+    if content.template_id != "deedy_cv_v1":
+        return 5
+    total_bullet_characters = sum(
+        len(bullet.text)
+        for entry in (*content.experience, *content.projects)
+        for bullet in entry.bullets
+    )
+    return 2 if total_bullet_characters > 1_400 else 5
 
 
 class ProcessRunner(Protocol):
