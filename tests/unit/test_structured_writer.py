@@ -247,6 +247,24 @@ def test_writer_sends_only_strategy_selected_evidence() -> None:
     assert "evidence.omitted.private" not in client.requests[0].model_dump_json()
 
 
+def test_writer_preserves_external_geometry_repair_feedback() -> None:
+    service, client = writer([valid_response()])
+
+    service.write(
+        job_description=job_description(),
+        strategy=strategy(),
+        space_budget=space_budget(),
+        evidence_records=evidence_records(),
+        repair_feedback=(
+            "column_imbalance: Reallocate grounded detail to the sparse column.",
+        ),
+    )
+
+    assert client.requests[0].repair_feedback == (
+        "column_imbalance: Reallocate grounded detail to the sparse column.",
+    )
+
+
 def test_writer_enforces_the_requested_template() -> None:
     wrong_template = valid_response()
     requested_template = {

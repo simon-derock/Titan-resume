@@ -481,6 +481,10 @@ def test_executor_validation_failure_triggers_repair_within_budget(
     assert state["status"] == "passed"
     assert state["iteration"] == 2
     assert len(writer.calls) == 2
+    assert writer.calls[0].repair_feedback == ()
+    assert writer.calls[1].repair_feedback == (
+        "unsafe_margin: Left margin 10pt is below minimum 22pt",
+    )
 
 
 # ---------------------------------------------------------------------------
