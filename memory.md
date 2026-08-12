@@ -204,7 +204,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 248 tests with three live tests deselected.
+The complete non-live suite passes 249 tests with three live tests deselected.
 The reviewed live Gemini 3.6 artifact is exactly one A4 page, exposes ATS text
 in valid per-column order, embeds every font, contains eleven verified links,
 and passes all geometry gates. Live vision calls remain zero. The files changed
@@ -608,3 +608,8 @@ on the primary model when its daily quota resets and capture the five-JD report.
   prose-claim parsing for experience and project subtext. The non-live suite
   passes 248 tests; the Gemini provider was rate-limited during the attempted
   fresh live run before JD analysis, so no new live artifact was produced.
+- 2026-08-12: Populated the local private evidence vault with explicit
+  organization, title, employment type, dates, locations, and descriptions for
+  all five experiences, six projects, and education. Added a post-writer
+  metadata normalizer so the model may rewrite descriptions but cannot alter
+  verified structural fields or links. The non-live suite passes 249 tests.
