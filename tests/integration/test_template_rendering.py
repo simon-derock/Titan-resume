@@ -279,3 +279,35 @@ def test_deedy_renderer_compacts_many_short_entries(tmp_path: Path) -> None:
     source = rendered_path.read_text(encoding="utf-8")
     assert source.count(r"\vspace{0pt}") == len(entries)
     assert r"\vspace{5pt}" not in source
+
+
+@pytest.mark.integration
+def test_deedy_renderer_formats_skill_rail_headings_and_rows(tmp_path: Path) -> None:
+    evidence_id = "project.titan.001"
+    content = ResumeContent(
+        resume_id="resume.skill_rail_rendering.001",
+        target_role="AI Engineer",
+        skills=(
+            EvidenceText(
+                element_id="skills.engineering.heading",
+                text="Engineering",
+                evidence_ids=(evidence_id,),
+            ),
+            EvidenceText(
+                element_id="skills.engineering.01",
+                text="Python | FastAPI",
+                evidence_ids=(evidence_id,),
+            ),
+        ),
+        template_id="deedy_cv_v1",
+    )
+
+    rendered_path = LatexRenderer().render(
+        ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
+        content,
+        tmp_path / "resume.tex",
+    )
+
+    source = rendered_path.read_text(encoding="utf-8")
+    assert r"\titanSkillGroup{Engineering}" in source
+    assert r"Python \textbullet{} FastAPI" in source

@@ -66,21 +66,24 @@ def test_deedy_skill_rail_groups_only_verified_skills() -> None:
         job_description=jd,
     )
 
-    assert tuple(item.element_id for item in enriched.skills) == (
-        "skills.engineering",
-        "skills.agentic_ai",
-        "skills.model_training_research",
+    element_ids = tuple(item.element_id for item in enriched.skills)
+    assert "skills.engineering.heading" in element_ids
+    assert "skills.agentic_ai.heading" in element_ids
+    assert "skills.model_training_research.heading" in element_ids
+    assert len(enriched.skills) > 6
+    headings = tuple(
+        item.text for item in enriched.skills if item.element_id.endswith(".heading")
     )
-    assert enriched.skills[0].text.startswith("Engineering: Python")
-    assert "FastAPI" in enriched.skills[0].text
-    assert enriched.skills[1].text.startswith("LLM & Agentic AI: LangGraph")
-    assert "RAG" in enriched.skills[1].text
-    assert "PyTorch" in enriched.skills[2].text
-    assert "QDoRA" in enriched.skills[2].text
-    assert "OpenCV" in enriched.skills[2].text
-    assert enriched.skills[0].evidence_ids == (engineering_id,)
-    assert enriched.skills[2].evidence_ids == (research_id,)
-    rendered = "\n".join(item.text for item in enriched.skills)
+    assert headings == (
+        "Engineering",
+        "LLM & Agentic AI",
+        "Model Training & Research",
+    )
+    tag_rows = tuple(
+        item for item in enriched.skills if not item.element_id.endswith(".heading")
+    )
+    assert all(len(item.text) <= 28 for item in tag_rows)
+    rendered = "\n".join(item.text for item in tag_rows)
     expected_skills = (
         "FastAPI",
         "Python",
@@ -92,6 +95,12 @@ def test_deedy_skill_rail_groups_only_verified_skills() -> None:
     )
     for skill in expected_skills:
         assert rendered.count(skill) == 1
+    assert next(
+        item for item in tag_rows if "FastAPI" in item.text
+    ).evidence_ids == (engineering_id,)
+    assert next(
+        item for item in tag_rows if "PyTorch" in item.text
+    ).evidence_ids == (research_id,)
     assert "Generic AI skills" not in rendered
 
 
