@@ -2,6 +2,7 @@ from datetime import date
 
 import pytest
 
+from app.graph import _default_content_requirements
 from app.models import (
     EvidenceMatch,
     EvidenceRecord,
@@ -12,7 +13,6 @@ from app.services.manifest import (
     ContentManifestError,
     ResumeContentManifestBuilder,
 )
-from app.graph import _default_content_requirements
 
 
 def _record(

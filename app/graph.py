@@ -216,12 +216,12 @@ class ResumeGraphExecutor:
             template_id=template_id,
         )
         if requirements is None:
-            requirements = ResumeContentRequirements(
-                project_count=min(
-                    5,
-                    space_budget.projects.entry_limit,
-                    _source_count(evidence_records, source_types={"project"}),
-                )
+            requirements = _default_content_requirements(
+                template_id=template_id,
+                available_projects=_source_count(
+                    evidence_records, source_types={"project"}
+                ),
+                available_skills=_skill_inventory_count(evidence_records),
             )
         try:
             manifest = ResumeContentManifestBuilder().build(
@@ -384,12 +384,60 @@ def _validate_manifest_capacity(
             len(manifest.education_source_ids),
             space_budget.education.entry_limit,
         ),
+        (
+            "skills",
+            len(manifest.skill_names),
+            _skill_capacity(space_budget=space_budget),
+        ),
     )
     for section, requested, capacity in capacities:
         if requested > capacity:
             raise ContentManifestError(
                 f"requested {requested} {section} but template capacity is {capacity}"
             )
+
+
+def _default_content_requirements(
+    *,
+    template_id: ResumeTemplateId,
+    available_projects: int,
+    available_skills: int | None = None,
+) -> ResumeContentRequirements:
+    skill_count = _skill_capacity_for_template(template_id)
+    if available_skills is not None:
+        skill_count = min(skill_count, available_skills)
+    return ResumeContentRequirements(
+        project_count=min(5, available_projects),
+        skill_count=skill_count,
+    )
+
+
+def _skill_capacity(*, space_budget: ResumeSpaceBudget) -> int:
+    if space_budget.projects.entry_limit >= 6:
+        return 40
+    if space_budget.projects.entry_limit >= 3:
+        return 32
+    return 24
+
+
+def _skill_capacity_for_template(template_id: ResumeTemplateId) -> int:
+    if template_id == "deedy_cv_v1":
+        return 40
+    if template_id == "moderncv_two_column_v1":
+        return 32
+    return 24
+
+
+def _skill_inventory_count(evidence_records: tuple[EvidenceRecord, ...]) -> int:
+    return len(
+        {
+            skill.casefold()
+            for record in evidence_records
+            if record.allowed_for_resume
+            for skill in record.skills
+            if skill.strip()
+        }
+    )
 
 
 def _apply_content_manifest(
