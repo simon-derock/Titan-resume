@@ -197,7 +197,8 @@ def test_templates_render_verified_entry_heading_hyperlink(
 
     source = rendered_path.read_text(encoding="utf-8")
     expected_link = (
-        r"\href{https://github.com/alex/titan}{\MakeUppercase{TITAN}}"
+        r"\href{https://github.com/alex/titan}{\underline{\MakeUppercase{TITAN}}"
+        r"\textsuperscript{\tiny\,[link]}}"
         if template_id == "deedy_cv_v1"
         else r"\href{https://github.com/alex/titan}{TITAN}"
     )
