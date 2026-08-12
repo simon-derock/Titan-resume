@@ -82,7 +82,7 @@ def test_deedy_skill_rail_groups_only_verified_skills() -> None:
     tag_rows = tuple(
         item for item in enriched.skills if not item.element_id.endswith(".heading")
     )
-    assert all(len(item.text) <= 28 for item in tag_rows)
+    assert all(len(item.text) <= 23 for item in tag_rows)
     rendered = "\n".join(item.text for item in tag_rows)
     expected_skills = (
         "FastAPI",
