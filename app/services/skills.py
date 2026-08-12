@@ -57,6 +57,8 @@ _RESEARCH_MARKERS = (
     "computer vision",
 )
 
+_SKILL_ROW_CHARACTER_LIMIT = 28
+
 
 def build_verified_skill_rail(
     *,
@@ -121,11 +123,26 @@ def build_verified_skill_rail(
         )
         rail.append(
             EvidenceText(
-                element_id=f"skills.{category}",
-                text=f"{label}: {', '.join(display for _, display, _ in ranked)}",
+                element_id=f"skills.{category}.heading",
+                text=label,
                 evidence_ids=evidence_ids,
             )
         )
+        for row_index, row in enumerate(_pack_skill_rows(ranked), start=1):
+            row_evidence_ids = tuple(
+                dict.fromkeys(
+                    evidence_id
+                    for _, _, supporters in row
+                    for evidence_id in supporters
+                )
+            )
+            rail.append(
+                EvidenceText(
+                    element_id=f"skills.{category}.{row_index:02d}",
+                    text=" | ".join(display for _, display, _ in row),
+                    evidence_ids=row_evidence_ids,
+                )
+            )
 
     return content.model_copy(update={"skills": tuple(rail)})
 
@@ -144,3 +161,24 @@ def _priority_rank(skill: str, priority_terms: tuple[str, ...]) -> int:
         normalized == term or normalized in term or term in normalized
         for term in priority_terms
     ) else 1
+
+
+def _pack_skill_rows(
+    skills: list[tuple[str, str, list[str]]],
+) -> tuple[tuple[tuple[str, str, list[str]], ...], ...]:
+    rows: list[list[tuple[str, str, list[str]]]] = []
+    current: list[tuple[str, str, list[str]]] = []
+    current_length = 0
+    for skill in skills:
+        separator_length = 3 if current else 0
+        proposed_length = current_length + separator_length + len(skill[1])
+        if current and proposed_length > _SKILL_ROW_CHARACTER_LIMIT:
+            rows.append(current)
+            current = []
+            current_length = 0
+            separator_length = 0
+        current.append(skill)
+        current_length += separator_length + len(skill[1])
+    if current:
+        rows.append(current)
+    return tuple(tuple(row) for row in rows)

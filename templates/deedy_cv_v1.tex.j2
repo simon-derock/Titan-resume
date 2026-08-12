@@ -42,6 +42,9 @@
   \else
   {\color{date}\small #3\if\relax\detokenize{#4}\relax\else\enspace|\enspace#4\fi}\par\vspace{3pt}
   \fi
+}
+\newcommand{\titanSkillGroup}[1]{
+  \vspace{1pt}{\color{subheadings}\bfseries\MakeUppercase{#1}}\par\vspace{1pt}
 }{% endraw %}
 
 \begin{document}
@@ -53,7 +56,8 @@
 \begin{minipage}[t]{0.33\textwidth}
 {% if resume.skills %}\section{Skills}
 {% for skill_line in resume.skills %}% TITAN-ELEMENT: {{ skill_line.element_id }}
-{{ skill_line.text | latex }}{% if not loop.last %}\\[1pt]{% endif %}
+{% if skill_line.element_id.endswith('.heading') %}\titanSkillGroup{ {{- skill_line.text | latex -}} }
+{% else %}{{ skill_line.text | skill_tags }}\par{% endif %}
 {% endfor %}{% endif %}
 
 {% if resume.education %}\section{Education}

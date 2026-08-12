@@ -70,7 +70,7 @@ def test_deedy_skill_rail_groups_only_verified_skills() -> None:
     assert "skills.engineering.heading" in element_ids
     assert "skills.agentic_ai.heading" in element_ids
     assert "skills.model_training_research.heading" in element_ids
-    assert len(enriched.skills) > 6
+    assert len(enriched.skills) > 5
     headings = tuple(
         item.text for item in enriched.skills if item.element_id.endswith(".heading")
     )

@@ -32,6 +32,14 @@ def escape_latex(text: str) -> str:
     return "".join(LATEX_ESCAPES.get(character, character) for character in text)
 
 
+def format_skill_tags(text: str) -> str:
+    """Escape verified skill tags and render a controlled visual separator."""
+
+    return r" \textbullet{} ".join(
+        escape_latex(tag.strip()) for tag in text.split("|")
+    )
+
+
 DEFAULT_TEMPLATE_DIRECTORY = Path(__file__).resolve().parents[2] / "templates"
 
 
@@ -46,6 +54,7 @@ class LatexRenderer:
             keep_trailing_newline=True,
         )
         self._environment.filters["latex"] = escape_latex
+        self._environment.filters["skill_tags"] = format_skill_tags
 
     def render(
         self, header: ResumeHeader, content: ResumeContent, output_path: Path
