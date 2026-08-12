@@ -67,6 +67,7 @@ class StructuredResumeWriter:
         space_budget: ResumeSpaceBudget,
         evidence_records: tuple[EvidenceRecord, ...],
         template_id: ResumeTemplateId = "resume_v1",
+        repair_feedback: tuple[str, ...] = (),
     ) -> ResumeContent:
         """Return validated structured content or one sanitized typed failure."""
 
@@ -97,6 +98,7 @@ class StructuredResumeWriter:
             space_budget=space_budget,
             selected_evidence=selected_evidence,
             template_id=template_id,
+            repair_feedback=repair_feedback,
         )
         for _ in range(self._max_attempts):
             try:
@@ -121,7 +123,13 @@ class StructuredResumeWriter:
             except _ResumeWritingPolicyError as exc:
                 feedback = (exc.code,)
 
-            request = request.model_copy(update={"repair_feedback": feedback})
+            request = request.model_copy(
+                update={
+                    "repair_feedback": tuple(
+                        dict.fromkeys((*repair_feedback, *feedback))
+                    )
+                }
+            )
 
         raise ResumeWritingError(attempts=self._max_attempts) from None
 

@@ -219,7 +219,7 @@ class ResumeGraphExecutor:
         # Step 2 — write → compile → validate loop
         # ------------------------------------------------------------------ #
         max_total = self.max_repair_cycles + 1  # first attempt + repairs
-        repair_feedback: str | None = None
+        repair_feedback: tuple[str, ...] = ()
 
         for attempt in range(1, max_total + 1):
             state["iteration"] = attempt
@@ -231,6 +231,7 @@ class ResumeGraphExecutor:
                 space_budget=space_budget,
                 selected_evidence=_selected_evidence(strategy, evidence_records),
                 template_id=template_id,
+                repair_feedback=repair_feedback,
             )
 
             # Write -------------------------------------------------------- #
@@ -242,6 +243,7 @@ class ResumeGraphExecutor:
                         space_budget=space_budget,
                         evidence_records=evidence_records,
                         template_id=template_id,
+                        repair_feedback=repair_feedback,
                     )
                 else:
                     raw = self._writer.write(request)
@@ -287,8 +289,8 @@ class ResumeGraphExecutor:
                 return state
 
             # Validation failure — build repair feedback ------------------- #
-            repair_feedback = _build_repair_feedback(pipeline_result)
-            state["repair_feedback"] = repair_feedback
+            repair_feedback = _repair_feedback_items(pipeline_result)
+            state["repair_feedback"] = _build_repair_feedback(pipeline_result)
 
             if attempt >= max_total:
                 break
@@ -348,3 +350,11 @@ def _build_repair_feedback(result: DeterministicPipelineResult) -> str:
         )
     parts = [f"- {issue.issue_type}: {issue.message}" for issue in result.issues[:5]]
     return "Fix the following validation issues in the next draft:\n" + "\n".join(parts)
+
+
+def _repair_feedback_items(
+    result: DeterministicPipelineResult,
+) -> tuple[str, ...]:
+    return tuple(
+        f"{issue.issue_type}: {issue.message}" for issue in result.issues[:5]
+    )
