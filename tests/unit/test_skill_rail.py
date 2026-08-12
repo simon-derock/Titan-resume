@@ -81,7 +81,16 @@ def test_deedy_skill_rail_groups_only_verified_skills() -> None:
     assert enriched.skills[0].evidence_ids == (engineering_id,)
     assert enriched.skills[2].evidence_ids == (research_id,)
     rendered = "\n".join(item.text for item in enriched.skills)
-    for skill in ("FastAPI", "Python", "LangGraph", "RAG", "PyTorch", "QDoRA", "OpenCV"):
+    expected_skills = (
+        "FastAPI",
+        "Python",
+        "LangGraph",
+        "RAG",
+        "PyTorch",
+        "QDoRA",
+        "OpenCV",
+    )
+    for skill in expected_skills:
         assert rendered.count(skill) == 1
     assert "Generic AI skills" not in rendered
 
