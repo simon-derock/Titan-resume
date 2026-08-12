@@ -15,7 +15,7 @@ def test_evidence_record_preserves_structural_resume_fields() -> None:
         organization="Example Labs",
         title="AI Agent Intern",
         employment_type="internship",
-        date_range="Jun 2025 – Aug 2025",
+        date_range="Jun 2025 - Aug 2025",
         location="Coimbatore",
         description="Built and shipped a verified AI workflow.",
         skills=("Python",),
@@ -27,6 +27,6 @@ def test_evidence_record_preserves_structural_resume_fields() -> None:
     assert record.organization == "Example Labs"
     assert record.title == "AI Agent Intern"
     assert record.employment_type == "internship"
-    assert record.date_range == "Jun 2025 – Aug 2025"
+    assert record.date_range == "Jun 2025 - Aug 2025"
     assert record.location == "Coimbatore"
     assert record.description == "Built and shipped a verified AI workflow."
