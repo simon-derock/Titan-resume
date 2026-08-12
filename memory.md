@@ -597,5 +597,8 @@ on the primary model when its daily quota resets and capture the five-JD report.
   evidence or template capacity fail instead of silently omitting content.
   Added the handmade PDF's missing skill inventory to the local private vault;
   it now contains 121 unique verified skills. Default output uses a template-fit
-  selection (40 for Deedy, 32 for ModernCV, 24 for single-column) while callers
-  may request another feasible count. The non-live suite passes 247 tests.
+  selection (80 for Deedy, 32 for ModernCV, 24 for single-column) while callers
+  may request another feasible count. A real-evidence Deedy fixture with five
+  experiences, five projects, and 80 skills compiles to one page with a 3.30 pt
+  column-bottom difference and 40.73 pt bottom margin. The non-live suite
+  remains green.
