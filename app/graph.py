@@ -297,11 +297,16 @@ class ResumeGraphExecutor:
                 state["repair_feedback"] = f"Writer error: {exc}"
                 return state
 
+            from app.services.metadata import apply_verified_entry_metadata
             from app.services.skills import (
                 build_verified_project_stacks,
                 build_verified_skill_rail,
             )
 
+            content = apply_verified_entry_metadata(
+                content=content,
+                evidence_records=evidence_records,
+            )
             content = build_verified_project_stacks(
                 content=content,
                 evidence_records=evidence_records,
