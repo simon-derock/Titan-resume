@@ -9,7 +9,7 @@
 [![CI](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml/badge.svg)](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Package manager](https://img.shields.io/badge/package%20manager-uv-DE5FE9)](https://docs.astral.sh/uv/)
-[![Tests](https://img.shields.io/badge/tests-226%20passing-2EA44F)](#verification)
+[![Tests](https://img.shields.io/badge/tests-246%20passing-2EA44F)](#verification)
 
 [Architecture](#architecture) · [Quality gates](#quality-gates) · [Templates](#resume-templates) · [Setup](#local-setup) · [Roadmap](#project-status)
 
@@ -22,6 +22,8 @@ constrained document-compilation problem:
 
 - every claim must trace to verified candidate evidence;
 - content is planned against a template-aware physical space budget;
+- a deterministic content manifest fixes experience coverage and requested
+  project/skill counts before the model writes prose;
 - the model returns typed JSON, never raw LaTeX;
 - a locked Jinja2 template produces the document source;
 - Tectonic compiles the PDF in restricted mode; and
@@ -48,6 +50,7 @@ the artifact recruiters and ATS systems actually receive: the compiled PDF.
 | ATS compatibility | Extracted text, required sections, and template-aware reading order are validated. |
 | Safe layout | PDF text boxes are measured against explicit top, bottom, and horizontal margin policies. |
 | Rich targeting | Structured JD requirements drive evidence ranking, strategy, and content selection. |
+| Inventory coverage | All verified experiences are mandatory; projects and skills use exact manifest counts. |
 | Controlled generation | Pydantic schemas, line budgets, entry limits, and claim policies constrain model output. |
 | Recoverable failures | Validation defects are converted into targeted feedback inside a bounded repair loop. |
 | Secure rendering | Candidate text is escaped, Jinja runs in a sandbox, and Tectonic runs cache-only and untrusted. |
@@ -92,6 +95,7 @@ document generation.
 ```text
 StructuredJobDescription
   → evidence matches
+  → deterministic content manifest (counts and source slots)
   → ResumeStrategy
   → ResumeSpaceBudget
   → ResumeContent (validated JSON)
@@ -120,6 +124,34 @@ A resume is accepted only when all implemented hard gates pass.
 Deterministic measurements always outrank model advice. Future vision output is
 advisory and will not be allowed to override page, provenance, ATS, or geometry
 failures.
+
+### Content manifest
+
+The writer does not decide which history disappears. Before model generation,
+TITAN creates a manifest containing every verified experience and education
+source, a JD-ranked project selection, and a verified skill inventory. The
+default policy keeps all experiences, selects up to five projects, and carries
+the complete verified skill inventory. Callers can request exact project or
+skill counts with `ResumeContentRequirements`; a request larger than verified
+evidence or the selected template's physical capacity fails explicitly instead
+of silently dropping content.
+
+```python
+from app.models import ResumeContentRequirements
+
+state = executor.run(
+    raw_jd_text=jd_text,
+    header=header,
+    evidence_records=evidence,
+    output_dir=Path("output"),
+    template_id="deedy_cv_v1",
+    requirements=ResumeContentRequirements(project_count=5, skill_count=40),
+)
+```
+
+Descriptions, bullets, ordering, and skill grouping remain JD-tailored; source
+identity, evidence grounding, hyperlinks, and manifest counts are deterministic
+constraints.
 
 ## Resume templates
 
