@@ -204,7 +204,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 243 tests with three live tests deselected.
+The complete non-live suite passes 247 tests with three live tests deselected.
 The reviewed live Gemini 3.6 artifact is exactly one A4 page, exposes ATS text
 in valid per-column order, embeds every font, contains eleven verified links,
 and passes all geometry gates. Live vision calls remain zero. The files changed
@@ -590,3 +590,12 @@ on the primary model when its daily quota resets and capture the five-JD report.
   reference. Poppler interleaves two-column text globally, so ATS validation now
   verifies each physical column's logical order independently. The exact saved
   artifact passes the corrected validator; the non-live suite passes 243 tests.
+- 2026-08-12: Added a deterministic content manifest. All verified experiences
+  and education sources are mandatory; projects default to five and explicit
+  project counts are exact; skills are JD-ranked from the complete verified
+  inventory and explicit skill counts are exact. Requests exceeding verified
+  evidence or template capacity fail instead of silently omitting content.
+  Added the handmade PDF's missing skill inventory to the local private vault;
+  it now contains 121 unique verified skills. Default output uses a template-fit
+  selection (40 for Deedy, 32 for ModernCV, 24 for single-column) while callers
+  may request another feasible count. The non-live suite passes 247 tests.

@@ -9,7 +9,7 @@
 [![CI](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml/badge.svg)](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Package manager](https://img.shields.io/badge/package%20manager-uv-DE5FE9)](https://docs.astral.sh/uv/)
-[![Tests](https://img.shields.io/badge/tests-246%20passing-2EA44F)](#verification)
+[![Tests](https://img.shields.io/badge/tests-247%20passing-2EA44F)](#verification)
 
 [Architecture](#architecture) · [Quality gates](#quality-gates) · [Templates](#resume-templates) · [Setup](#local-setup) · [Roadmap](#project-status)
 
@@ -130,11 +130,11 @@ failures.
 The writer does not decide which history disappears. Before model generation,
 TITAN creates a manifest containing every verified experience and education
 source, a JD-ranked project selection, and a verified skill inventory. The
-default policy keeps all experiences, selects up to five projects, and carries
-the complete verified skill inventory. Callers can request exact project or
-skill counts with `ResumeContentRequirements`; a request larger than verified
-evidence or the selected template's physical capacity fails explicitly instead
-of silently dropping content.
+default policy keeps all experiences, selects up to five projects, and chooses a
+template-fit JD-ranked slice from the complete verified skill inventory. Callers
+can request exact project or skill counts with `ResumeContentRequirements`; a
+request larger than verified evidence or the selected template's physical
+capacity fails explicitly instead of silently dropping content.
 
 ```python
 from app.models import ResumeContentRequirements
