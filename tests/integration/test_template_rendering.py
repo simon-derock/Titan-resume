@@ -312,3 +312,31 @@ def test_deedy_renderer_formats_skill_rail_headings_and_rows(tmp_path: Path) -> 
     source = rendered_path.read_text(encoding="utf-8")
     assert r"\titanSkillGroup{Engineering}" in source
     assert r"Python \textbullet{} FastAPI" in source
+
+
+@pytest.mark.integration
+def test_deedy_renderer_formats_verified_project_stack_tags(tmp_path: Path) -> None:
+    evidence_id = "project.titan.001"
+    content = ResumeContent(
+        resume_id="resume.project_stack_rendering.001",
+        target_role="AI Engineer",
+        projects=(
+            ResumeEntry(
+                element_id="projects.titan",
+                heading="TITAN",
+                subheading="Python | LangGraph | FastAPI",
+                evidence_ids=(evidence_id,),
+            ),
+        ),
+        template_id="deedy_cv_v1",
+    )
+
+    rendered_path = LatexRenderer().render(
+        ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
+        content,
+        tmp_path / "resume.tex",
+    )
+
+    source = rendered_path.read_text(encoding="utf-8")
+    assert r"Python \textbullet{} LangGraph \textbullet{} FastAPI" in source
+    assert "Python | LangGraph | FastAPI" not in source
