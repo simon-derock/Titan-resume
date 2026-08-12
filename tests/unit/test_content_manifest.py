@@ -161,4 +161,4 @@ def test_default_requirements_keep_a_template_fit_skill_selection() -> None:
     )
 
     assert requirements.project_count == 5
-    assert requirements.skill_count == 40
+    assert requirements.skill_count == 80
