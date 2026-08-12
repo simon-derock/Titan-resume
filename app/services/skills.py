@@ -57,7 +57,7 @@ _RESEARCH_MARKERS = (
     "computer vision",
 )
 
-_SKILL_ROW_CHARACTER_LIMIT = 28
+_SKILL_ROW_CHARACTER_LIMIT = 23
 
 
 def build_verified_skill_rail(
