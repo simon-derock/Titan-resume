@@ -46,7 +46,7 @@ def test_renderer_neutralizes_latex_command_injection() -> None:
 
 @pytest.mark.unit
 def test_renderer_maps_resume_unicode_to_supported_latex_glyphs() -> None:
-    escaped = escape_latex("Aug 2025 – May 2026 — ₹8,000…")
+    escaped = escape_latex("Aug 2025 \u2013 May 2026 \u2014 \u20b98,000\u2026")
 
     assert escaped == r"Aug 2025 -- May 2026 --- INR~8,000\ldots{}"
 

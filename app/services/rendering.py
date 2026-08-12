@@ -23,6 +23,10 @@ LATEX_ESCAPES = {
     "}": r"\}",
     "~": r"\textasciitilde{}",
     "^": r"\textasciicircum{}",
+    "\u2013": "--",
+    "\u2014": "---",
+    "\u20b9": "INR~",
+    "\u2026": r"\ldots{}",
 }
 
 
