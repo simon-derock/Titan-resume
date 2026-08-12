@@ -414,7 +414,7 @@ def _default_content_requirements(
 
 def _skill_capacity(*, space_budget: ResumeSpaceBudget) -> int:
     if space_budget.projects.entry_limit >= 6:
-        return 40
+        return 80
     if space_budget.projects.entry_limit >= 3:
         return 32
     return 24
@@ -422,7 +422,7 @@ def _skill_capacity(*, space_budget: ResumeSpaceBudget) -> int:
 
 def _skill_capacity_for_template(template_id: ResumeTemplateId) -> int:
     if template_id == "deedy_cv_v1":
-        return 40
+        return 80
     if template_id == "moderncv_two_column_v1":
         return 32
     return 24
