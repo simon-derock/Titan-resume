@@ -79,7 +79,7 @@
 
 {% if resume.projects %}\section{Projects}
 {% for entry in resume.projects %}% TITAN-ELEMENT: {{ entry.element_id }}
-\titanmainentry{%- if entry.url %}{\href{ {{- entry.url | latex -}} }{\underline{\MakeUppercase{ {{- entry.heading | latex -}} }}\textsuperscript{\tiny\,[link]}}}{% else %}{\MakeUppercase{ {{- entry.heading | latex -}} }}{% endif %}{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }
+\titanmainentry{%- if entry.url %}{\href{ {{- entry.url | latex -}} }{\underline{\MakeUppercase{ {{- entry.heading | latex -}} }}\textsuperscript{\tiny\,[link]}}}{% else %}{\MakeUppercase{ {{- entry.heading | latex -}} }}{% endif %}{ {{- (entry.subheading or "") | skill_tags -}} }{ {{- (entry.date_range or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }
 {% if entry.bullets %}\begin{itemize}
 {% for bullet in entry.bullets %}% TITAN-ELEMENT: {{ bullet.element_id }}
 \item {{ bullet.text | latex }}
