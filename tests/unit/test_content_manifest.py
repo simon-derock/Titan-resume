@@ -12,6 +12,7 @@ from app.services.manifest import (
     ContentManifestError,
     ResumeContentManifestBuilder,
 )
+from app.graph import _default_content_requirements
 
 
 def _record(
@@ -150,3 +151,14 @@ def test_manifest_rejects_counts_beyond_verified_inventory(
             evidence_records=records,
             requirements=requirements,
         )
+
+
+@pytest.mark.unit
+def test_default_requirements_keep_a_template_fit_skill_selection() -> None:
+    requirements = _default_content_requirements(
+        template_id="deedy_cv_v1",
+        available_projects=10,
+    )
+
+    assert requirements.project_count == 5
+    assert requirements.skill_count == 40
