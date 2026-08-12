@@ -261,8 +261,16 @@ class ResumeGraphExecutor:
                 state["repair_feedback"] = f"Writer error: {exc}"
                 return state
 
-            from app.services.skills import build_verified_skill_rail
+            from app.services.skills import (
+                build_verified_project_stacks,
+                build_verified_skill_rail,
+            )
 
+            content = build_verified_project_stacks(
+                content=content,
+                evidence_records=evidence_records,
+                job_description=jd,
+            )
             content = build_verified_skill_rail(
                 content=content,
                 evidence_records=evidence_records,

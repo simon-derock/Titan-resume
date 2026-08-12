@@ -58,6 +58,7 @@ _RESEARCH_MARKERS = (
 )
 
 _SKILL_ROW_CHARACTER_LIMIT = 23
+_PROJECT_STACK_CHARACTER_LIMIT = 72
 
 
 def build_verified_skill_rail(
@@ -145,6 +146,96 @@ def build_verified_skill_rail(
             )
 
     return content.model_copy(update={"skills": tuple(rail)})
+
+
+def build_verified_project_stacks(
+    *,
+    content: ResumeContent,
+    evidence_records: Iterable[EvidenceRecord],
+    job_description: StructuredJobDescription,
+) -> ResumeContent:
+    """Replace generic Deedy project metadata with verified technology tags."""
+
+    if content.template_id != "deedy_cv_v1":
+        return content
+
+    records_by_id = {
+        record.evidence_id: record
+        for record in evidence_records
+        if record.allowed_for_resume and record.source_type == "project"
+    }
+    priority_terms = tuple(
+        term.casefold()
+        for term in (
+            *job_description.must_have_skills,
+            *job_description.preferred_skills,
+            *job_description.keywords,
+        )
+        if term.strip()
+    )
+    projects = tuple(
+        _enrich_project_entry(
+            project,
+            records_by_id=records_by_id,
+            priority_terms=priority_terms,
+        )
+        for project in content.projects
+    )
+    return content.model_copy(update={"projects": projects})
+
+
+def _enrich_project_entry(
+    project: object,
+    *,
+    records_by_id: dict[str, EvidenceRecord],
+    priority_terms: tuple[str, ...],
+) -> object:
+    from app.models import ResumeEntry
+
+    if not isinstance(project, ResumeEntry):
+        return project
+    records = tuple(
+        records_by_id[evidence_id]
+        for evidence_id in project.evidence_ids
+        if evidence_id in records_by_id
+    )
+    if not records:
+        return project
+
+    unique_skills = tuple(
+        dict.fromkeys(skill for record in records for skill in record.skills)
+    )
+    ranked_skills = tuple(
+        sorted(
+            enumerate(unique_skills),
+            key=lambda item: (_priority_rank(item[1], priority_terms), item[0]),
+        )
+    )
+    stack = _bounded_project_stack(tuple(skill for _, skill in ranked_skills))
+    date_range = project.date_range
+    if date_range is not None and not any(
+        date_range.casefold() in record.claim.casefold() for record in records
+    ):
+        date_range = None
+    return project.model_copy(
+        update={
+            "subheading": stack or project.subheading,
+            "date_range": date_range,
+        }
+    )
+
+
+def _bounded_project_stack(skills: tuple[str, ...]) -> str:
+    selected: list[str] = []
+    current_length = 0
+    for skill in skills:
+        separator_length = 3 if selected else 0
+        proposed_length = current_length + separator_length + len(skill)
+        if selected and proposed_length > _PROJECT_STACK_CHARACTER_LIMIT:
+            break
+        selected.append(skill)
+        current_length = proposed_length
+    return " | ".join(selected)
 
 
 def _skill_category(skill: str) -> str:
