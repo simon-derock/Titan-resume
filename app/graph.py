@@ -30,7 +30,11 @@ from app.models import (
     EvidenceRecord,
     IngestedJobDescription,
     ResumeContent,
+    ResumeContentManifest,
+    ResumeContentRequirements,
     ResumeHeader,
+    ResumeSpaceBudget,
+    ResumeStrategy,
     ResumeTemplateId,
     StructuredJobDescription,
     ValidationIssue,
@@ -145,6 +149,7 @@ class ResumeGraphExecutor:
         output_dir: Path,
         template_id: ResumeTemplateId = "resume_v1",
         request_id: str | None = None,
+        requirements: ResumeContentRequirements | None = None,
     ) -> ResumeGraphState:
         """Execute the full generation loop and return the terminal state."""
 
@@ -164,6 +169,10 @@ class ResumeGraphExecutor:
         # Step 1 — offline intelligence (deterministic, no LLM)
         # ------------------------------------------------------------------ #
         from app.services.jd import JobDescriptionIngester
+        from app.services.manifest import (
+            ContentManifestError,
+            ResumeContentManifestBuilder,
+        )
         from app.services.matching import EvidenceMatcher
         from app.services.planning import SpacePlanner
         from app.services.strategy import ResumeStrategyBuilder
@@ -206,12 +215,37 @@ class ResumeGraphExecutor:
             ),
             template_id=template_id,
         )
+        if requirements is None:
+            requirements = ResumeContentRequirements(
+                project_count=min(
+                    5,
+                    space_budget.projects.entry_limit,
+                    _source_count(evidence_records, source_types={"project"}),
+                )
+            )
+        try:
+            manifest = ResumeContentManifestBuilder().build(
+                job_description=jd,
+                evidence_matches=evidence_matches,
+                evidence_records=evidence_records,
+                requirements=requirements,
+            )
+            _validate_manifest_capacity(manifest, space_budget)
+        except ContentManifestError as exc:
+            state["status"] = "write_failed"
+            state["repair_feedback"] = str(exc)
+            return state
+        except ValueError as exc:
+            state["status"] = "write_failed"
+            state["repair_feedback"] = f"content manifest infeasible: {exc}"
+            return state
         strategy = ResumeStrategyBuilder().build(
             job_description=jd,
             evidence_matches=evidence_matches,
             evidence_records=evidence_records,
             space_budget=space_budget,
         )
+        strategy = _apply_content_manifest(strategy, manifest, evidence_records)
 
         from app.models import ResumeWritingRequest
 
@@ -230,6 +264,7 @@ class ResumeGraphExecutor:
                 strategy=strategy.model_copy(update={"omitted_evidence_ids": ()}),
                 space_budget=space_budget,
                 selected_evidence=_selected_evidence(strategy, evidence_records),
+                content_manifest=manifest,
                 template_id=template_id,
                 repair_feedback=repair_feedback,
             )
@@ -244,6 +279,7 @@ class ResumeGraphExecutor:
                         evidence_records=evidence_records,
                         template_id=template_id,
                         repair_feedback=repair_feedback,
+                        content_manifest=manifest,
                     )
                 else:
                     raw = self._writer.write(request)
@@ -326,6 +362,94 @@ def _source_count(
     )
 
 
+def _validate_manifest_capacity(
+    manifest: ResumeContentManifest,
+    space_budget: ResumeSpaceBudget,
+) -> None:
+    from app.services.manifest import ContentManifestError
+
+    capacities = (
+        (
+            "experience",
+            len(manifest.experience_source_ids),
+            space_budget.experience.entry_limit,
+        ),
+        (
+            "projects",
+            len(manifest.project_source_ids),
+            space_budget.projects.entry_limit,
+        ),
+        (
+            "education",
+            len(manifest.education_source_ids),
+            space_budget.education.entry_limit,
+        ),
+    )
+    for section, requested, capacity in capacities:
+        if requested > capacity:
+            raise ContentManifestError(
+                f"requested {requested} {section} but template capacity is {capacity}"
+            )
+
+
+def _apply_content_manifest(
+    strategy: ResumeStrategy,
+    manifest: ResumeContentManifest,
+    evidence_records: tuple[EvidenceRecord, ...],
+) -> ResumeStrategy:
+    allowed = tuple(record for record in evidence_records if record.allowed_for_resume)
+    experience_ids = _evidence_ids_for_sources(
+        allowed, manifest.experience_source_ids, {"experience", "internship"}
+    )
+    project_ids = _evidence_ids_for_sources(
+        allowed, manifest.project_source_ids, {"project"}
+    )
+    education_ids = _evidence_ids_for_sources(
+        allowed, manifest.education_source_ids, {"education", "certification"}
+    )
+    skill_names = {skill.casefold() for skill in manifest.skill_names}
+    skill_ids = tuple(
+        record.evidence_id
+        for record in allowed
+        if record.source_type == "skill"
+        and any(skill.casefold() in skill_names for skill in record.skills)
+    )
+    selected_ids = {
+        *experience_ids,
+        *project_ids,
+        *education_ids,
+        *skill_ids,
+    }
+    return strategy.model_copy(
+        update={
+            "selected_experience_evidence_ids": experience_ids,
+            "selected_project_evidence_ids": project_ids,
+            "selected_skill_evidence_ids": skill_ids,
+            "selected_education_evidence_ids": education_ids,
+            "omitted_evidence_ids": tuple(
+                sorted(
+                    record.evidence_id
+                    for record in allowed
+                    if record.evidence_id not in selected_ids
+                )
+            ),
+        }
+    )
+
+
+def _evidence_ids_for_sources(
+    records: tuple[EvidenceRecord, ...],
+    source_ids: tuple[str, ...],
+    source_types: set[str],
+) -> tuple[str, ...]:
+    wanted = set(source_ids)
+    return tuple(
+        record.evidence_id
+        for record in records
+        if record.source_id in wanted and record.source_type in source_types
+    )
+
+
 def _selected_evidence(
     strategy: object,
     evidence_records: tuple[EvidenceRecord, ...],
@@ -363,6 +487,4 @@ def _build_repair_feedback(result: DeterministicPipelineResult) -> str:
 def _repair_feedback_items(
     result: DeterministicPipelineResult,
 ) -> tuple[str, ...]:
-    return tuple(
-        f"{issue.issue_type}: {issue.message}" for issue in result.issues[:5]
-    )
+    return tuple(f"{issue.issue_type}: {issue.message}" for issue in result.issues[:5])

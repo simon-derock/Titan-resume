@@ -40,6 +40,7 @@ def render(request: ResumeWritingRequest) -> str:
             _section_repair_feedback(request),
             _section_constraints(request),
             _section_space_budget(request.space_budget),
+            _section_content_manifest(request),
             _section_evidence(request.selected_evidence),
             _section_must_not_claim(request),
             _section_job_description(request),
@@ -142,6 +143,29 @@ def _section_space_budget(budget: ResumeSpaceBudget) -> str:
         "section line limit minus the entry heading lines (2 per entry).",
     ]
     return "\n".join(lines)
+
+
+def _section_content_manifest(request: ResumeWritingRequest) -> str:
+    manifest = request.content_manifest
+    if manifest is None:
+        return (
+            "## Content manifest\n\n"
+            "No explicit inventory counts were requested for this revision."
+        )
+    skills = ", ".join(manifest.skill_names) or "(none)"
+    return (
+        "## Content manifest (mandatory — never omit or add slots)\n\n"
+        f"- Experience sources: {len(manifest.experience_source_ids)} — "
+        f"{', '.join(manifest.experience_source_ids) or '(none)'}\n"
+        f"- Project sources: {len(manifest.project_source_ids)} — "
+        f"{', '.join(manifest.project_source_ids) or '(none)'}\n"
+        f"- Education sources: {len(manifest.education_source_ids)} — "
+        f"{', '.join(manifest.education_source_ids) or '(none)'}\n"
+        f"- Exact verified skill count: {len(manifest.skill_names)} — {skills}\n"
+        "Every listed experience, project, education item, and skill must be "
+        "represented. Rewrite descriptions for the JD, but do not change these "
+        "counts or source identities."
+    )
 
 
 def _section_evidence(records: tuple[EvidenceRecord, ...]) -> str:

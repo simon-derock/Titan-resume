@@ -189,6 +189,26 @@ class ResumeStrategy(BaseModel):
     must_not_claim: tuple[str, ...] = ()
 
 
+class ResumeContentRequirements(BaseModel):
+    """User-controlled inventory counts for one resume revision."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    project_count: int = Field(default=5, ge=0)
+    skill_count: int | None = Field(default=None, ge=0)
+
+
+class ResumeContentManifest(BaseModel):
+    """Deterministic source and skill slots that the writer must preserve."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    experience_source_ids: tuple[str, ...]
+    project_source_ids: tuple[str, ...]
+    skill_names: tuple[str, ...]
+    education_source_ids: tuple[str, ...]
+
+
 class ResumeWritingRequest(BaseModel):
     """Grounded, space-bounded input exposed to a resume writing provider."""
 
@@ -198,6 +218,7 @@ class ResumeWritingRequest(BaseModel):
     strategy: ResumeStrategy
     space_budget: ResumeSpaceBudget
     selected_evidence: tuple[EvidenceRecord, ...]
+    content_manifest: ResumeContentManifest | None = None
     template_id: ResumeTemplateId = "resume_v1"
     repair_feedback: tuple[str, ...] = ()
     schema_version: Literal[1] = 1

@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from app.models import (
     EvidenceRecord,
     ResumeContent,
+    ResumeContentManifest,
     ResumeEntry,
     ResumeSpaceBudget,
     ResumeStrategy,
@@ -68,6 +69,7 @@ class StructuredResumeWriter:
         evidence_records: tuple[EvidenceRecord, ...],
         template_id: ResumeTemplateId = "resume_v1",
         repair_feedback: tuple[str, ...] = (),
+        content_manifest: ResumeContentManifest | None = None,
     ) -> ResumeContent:
         """Return validated structured content or one sanitized typed failure."""
 
@@ -97,6 +99,7 @@ class StructuredResumeWriter:
             strategy=provider_strategy,
             space_budget=space_budget,
             selected_evidence=selected_evidence,
+            content_manifest=content_manifest,
             template_id=template_id,
             repair_feedback=repair_feedback,
         )
@@ -114,6 +117,7 @@ class StructuredResumeWriter:
                     space_budget=space_budget,
                     selected_evidence=selected_evidence,
                     template_id=template_id,
+                    content_manifest=content_manifest,
                 )
                 return content
             except ValidationError as exc:
@@ -150,14 +154,24 @@ def _validate_written_content(
     space_budget: ResumeSpaceBudget,
     selected_evidence: tuple[EvidenceRecord, ...],
     template_id: ResumeTemplateId,
+    content_manifest: ResumeContentManifest | None,
 ) -> None:
-    if content.target_role != strategy.target_role:
+    target_clean = content.target_role.strip().lower()
+    strategy_clean = strategy.target_role.strip().lower()
+    if (
+        target_clean != strategy_clean
+        and target_clean not in strategy_clean
+        and strategy_clean not in target_clean
+    ):
         raise _ResumeWritingPolicyError("target_role")
+
     if content.template_id != template_id:
         raise _ResumeWritingPolicyError("template_id")
 
     validate_resume_content_evidence(content, selected_evidence)
     _validate_selected_section_evidence(content, selected_evidence)
+    if content_manifest is not None:
+        _validate_content_manifest(content, content_manifest, selected_evidence)
     rendered_text = "\n".join(_content_text(content))
     if any(
         _contains_protected_term(rendered_text, term)
@@ -228,6 +242,38 @@ def _validate_selected_section_evidence(
         }
         if rendered_sources != expected_sources or len(entries) < len(expected_sources):
             raise _ResumeWritingPolicyError("selected_section_evidence")
+
+
+def _validate_content_manifest(
+    content: ResumeContent,
+    manifest: ResumeContentManifest,
+    selected_evidence: tuple[EvidenceRecord, ...],
+) -> None:
+    records_by_id = {record.evidence_id: record for record in selected_evidence}
+
+    def rendered_source_ids(entries: tuple[ResumeEntry, ...]) -> set[str]:
+        return {
+            records_by_id[evidence_id].source_id
+            for entry in entries
+            for evidence_id in entry.evidence_ids
+            if evidence_id in records_by_id
+        }
+
+    expected_sections = (
+        (content.experience, set(manifest.experience_source_ids)),
+        (content.projects, set(manifest.project_source_ids)),
+        (content.education, set(manifest.education_source_ids)),
+    )
+    if any(
+        rendered_source_ids(entries) != expected_sources
+        or len(entries) != len(expected_sources)
+        for entries, expected_sources in expected_sections
+    ):
+        raise _ResumeWritingPolicyError("content_manifest_sections")
+
+    rendered_skills = "\n".join(skill.text for skill in content.skills).casefold()
+    if any(skill.casefold() not in rendered_skills for skill in manifest.skill_names):
+        raise _ResumeWritingPolicyError("content_manifest_skills")
 
 
 def _validate_section_budget(

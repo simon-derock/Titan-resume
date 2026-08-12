@@ -66,6 +66,7 @@ def build_verified_skill_rail(
     content: ResumeContent,
     evidence_records: Iterable[EvidenceRecord],
     job_description: StructuredJobDescription,
+    selected_skill_names: tuple[str, ...] | None = None,
 ) -> ResumeContent:
     """Replace Deedy's generated skill prose with categorized verified tags."""
 
@@ -73,11 +74,18 @@ def build_verified_skill_rail(
         return content
 
     records = tuple(record for record in evidence_records if record.allowed_for_resume)
+    selected_keys = (
+        None
+        if selected_skill_names is None
+        else {skill.casefold() for skill in selected_skill_names}
+    )
     skill_support: dict[str, tuple[str, list[str]]] = {}
     for record in records:
         for skill in record.skills:
             key = skill.strip().casefold()
             if not key:
+                continue
+            if selected_keys is not None and key not in selected_keys:
                 continue
             if key not in skill_support:
                 skill_support[key] = (skill.strip(), [])
@@ -117,9 +125,7 @@ def build_verified_skill_rail(
         )
         evidence_ids = tuple(
             dict.fromkeys(
-                evidence_id
-                for _, _, supporters in ranked
-                for evidence_id in supporters
+                evidence_id for _, _, supporters in ranked for evidence_id in supporters
             )
         )
         rail.append(
@@ -248,10 +254,14 @@ def _skill_category(skill: str) -> str:
 
 def _priority_rank(skill: str, priority_terms: tuple[str, ...]) -> int:
     normalized = skill.casefold()
-    return 0 if any(
-        normalized == term or normalized in term or term in normalized
-        for term in priority_terms
-    ) else 1
+    return (
+        0
+        if any(
+            normalized == term or normalized in term or term in normalized
+            for term in priority_terms
+        )
+        else 1
+    )
 
 
 def _pack_skill_rows(
