@@ -45,6 +45,13 @@ def test_renderer_neutralizes_latex_command_injection() -> None:
 
 
 @pytest.mark.unit
+def test_renderer_maps_resume_unicode_to_supported_latex_glyphs() -> None:
+    escaped = escape_latex("Aug 2025 – May 2026 — ₹8,000…")
+
+    assert escaped == r"Aug 2025 -- May 2026 --- INR~8,000\ldots{}"
+
+
+@pytest.mark.unit
 def test_screenshot_renderer_returns_explicit_failure_for_raster_error(
     tmp_path: Path,
 ) -> None:
