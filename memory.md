@@ -99,7 +99,9 @@ provenance and attribution; they are not used at compilation time.
   page dimensions and deterministic word-level boxes, rejecting tool, schema,
   empty-page, and malformed-coordinate failures explicitly.
 - `PdfTextExtractor` uses first-page layout mode, while `AtsTextValidator`
-  rejects blank text, missing sections, and non-logical section order.
+  rejects blank text and missing sections. Single-column templates require one
+  global section order; Deedy validates the independently interleaved left and
+  right column orders produced by Poppler.
 - `DeterministicResumePipeline` validates provenance, renders, compiles, applies
   page/ATS/geometry gates, renders the preview, and returns one typed artifact
   result. Compile and page failures stop downstream work.
@@ -152,7 +154,7 @@ provenance and attribution; they are not used at compilation time.
   two-column body content.
 - The `compiler_warmup.tex` fixture now covers `tabularx`, `mathpazo`, and
   `helvet` package surface required by the two-column templates.
-- `app/prompts/writer_v1.py` exposes `PROMPT_VERSION = 'writer_v1.3'` and a
+- `app/prompts/writer_v1.py` exposes `PROMPT_VERSION = 'writer_v1.7'` and a
   pure deterministic `render(request)` function that injects: JSON-only
   output constraint, no-LaTeX prohibition, selected evidence IDs and claims,
   space budget ceilings (line/entry/bullet per section), `must_not_claim`
@@ -202,15 +204,13 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 226 tests with three live tests deselected.
-Live benchmark diagnostics reached the Gemini free-tier limit at exactly twenty
-completion calls. Writer prompt v1.5
-produced the first policy-valid compiled benchmark PDF; it correctly failed ATS
-and geometry because selection omitted education and left 116 pt of bottom
-whitespace. Live vision calls remain zero. The files changed by the current
-quality increment pass focused Ruff checks and formatting. Repository-wide Ruff
-still reports pre-existing issues in committed Gemini/Telegram files and a
-user-owned uncommitted writer change.
+The complete non-live suite passes 243 tests with three live tests deselected.
+The reviewed live Gemini 3.6 artifact is exactly one A4 page, exposes ATS text
+in valid per-column order, embeds every font, contains eleven verified links,
+and passes all geometry gates. Live vision calls remain zero. The files changed
+by the current quality increment pass focused Ruff checks and formatting. A
+user-owned uncommitted writer change and private `.env`, evidence, and output
+artifacts remain intentionally outside commits.
 
 ## Known Issues
 
@@ -573,3 +573,20 @@ on the primary model when its daily quota resets and capture the five-JD report.
   optional metadata rows when their fields are absent. The non-live suite
   passes 231 tests; the remaining primary defect is deterministic two-column
   balance and richer categorized skills in the left rail.
+- 2026-08-12: Established the handmade resume as a reproducible 600-DPI visual
+  milestone. Its measured column-bottom difference is 116.4 pt. Added a
+  template-aware 16% page-height balance gate, evidence-weighted repair advice,
+  and verified three-group Deedy skill rails. The old generated Google artifact
+  fails at 550.4 pt, while the controlled real-evidence artifact passes at
+  100.14 pt without filler.
+- 2026-08-12: Added verified project technology stacks, compact tag separators,
+  visible linked-project affordances, and deterministic Unicode-to-LaTeX glyph
+  normalization. The controlled artifact remains one page with all five
+  experiences, six projects, education, and eleven working links.
+- 2026-08-12: Ran Gemini 3.6 against the sourced Spiral Kite AI Engineer
+  benchmark and reviewed the output at 600 DPI. The live artifact passes page,
+  geometry, font, hyperlink, and evidence-richness inspection with a 51.49 pt
+  bottom margin and 78.62 pt column-bottom difference, tighter than the handmade
+  reference. Poppler interleaves two-column text globally, so ATS validation now
+  verifies each physical column's logical order independently. The exact saved
+  artifact passes the corrected validator; the non-live suite passes 243 tests.
