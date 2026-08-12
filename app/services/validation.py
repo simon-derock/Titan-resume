@@ -384,8 +384,14 @@ class PdfTextExtractor:
 class AtsTextValidator:
     """Validate extracted text presence and configured section order."""
 
-    def __init__(self, *, expected_sections: tuple[str, ...]) -> None:
+    def __init__(
+        self,
+        *,
+        expected_sections: tuple[str, ...],
+        column_section_orders: tuple[tuple[str, ...], ...] = (),
+    ) -> None:
         self._expected_sections = expected_sections
+        self._column_section_orders = column_section_orders
 
     def validate(self, extracted_text: str) -> AtsValidationReport:
         if not extracted_text.strip():
@@ -424,7 +430,13 @@ class AtsTextValidator:
                 )
             section_positions.append(position)
 
-        reading_order_valid = section_positions == sorted(section_positions)
+        if self._column_section_orders:
+            reading_order_valid = all(
+                _sections_in_order(extracted_text, order)
+                for order in self._column_section_orders
+            )
+        else:
+            reading_order_valid = section_positions == sorted(section_positions)
         if not reading_order_valid:
             issue = ValidationIssue(
                 issue_id="ats.section.reading_order",
@@ -455,3 +467,12 @@ def _section_heading_position(extracted_text: str, section: str) -> int:
     )
     match = heading.search(extracted_text)
     return -1 if match is None else match.start()
+
+
+def _sections_in_order(extracted_text: str, sections: tuple[str, ...]) -> bool:
+    positions = tuple(
+        _section_heading_position(extracted_text, section) for section in sections
+    )
+    return all(position >= 0 for position in positions) and positions == tuple(
+        sorted(positions)
+    )

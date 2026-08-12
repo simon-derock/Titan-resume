@@ -87,7 +87,11 @@ class DeterministicResumePipeline:
             expected_sections=_ats_section_order(
                 self._expected_sections,
                 template_id=content.template_id,
-            )
+            ),
+            column_section_orders=_ats_column_section_orders(
+                self._expected_sections,
+                template_id=content.template_id,
+            ),
         ).validate(extracted_text)
         geometry = self._geometry_extractor.extract(pdf_path)
         geometry_report = self._geometry_validator.validate(
@@ -134,4 +138,22 @@ def _ats_section_order(
                 section.casefold(), len(physical_order)
             ),
         )
+    )
+
+
+def _ats_column_section_orders(
+    expected_sections: tuple[str, ...],
+    *,
+    template_id: str,
+) -> tuple[tuple[str, ...], ...]:
+    if template_id != "deedy_cv_v1":
+        return ()
+    expected = {section.casefold(): section for section in expected_sections}
+    orders = (
+        ("summary", "skills", "education"),
+        ("summary", "experience", "projects"),
+    )
+    return tuple(
+        tuple(expected[section] for section in order if section in expected)
+        for order in orders
     )
