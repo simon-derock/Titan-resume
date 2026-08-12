@@ -181,6 +181,18 @@ def _section_evidence(records: tuple[EvidenceRecord, ...]) -> str:
         lines.append(f"### evidence_id: {record.evidence_id}")
         lines.append(f"- source_type: {record.source_type}")
         lines.append(f"- source_id: {record.source_id}")
+        if record.organization:
+            lines.append(f"- organization: {record.organization}")
+        if record.title:
+            lines.append(f"- title: {record.title}")
+        if record.employment_type:
+            lines.append(f"- employment_type: {record.employment_type}")
+        if record.date_range:
+            lines.append(f"- date_range: {record.date_range}")
+        if record.location:
+            lines.append(f"- location: {record.location}")
+        if record.description:
+            lines.append(f"- description: {record.description}")
         lines.append(f"- claim: {record.claim}")
         if record.skills:
             lines.append(f"- skills: {', '.join(record.skills)}")

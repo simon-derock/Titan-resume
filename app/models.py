@@ -35,6 +35,17 @@ class EvidenceRecord(BaseModel):
     ]
     source_id: str = Field(min_length=1)
     claim: str = Field(min_length=1)
+    organization: str | None = None
+    title: str | None = None
+    employment_type: (
+        Literal[
+            "full_time", "part_time", "internship", "contract", "education", "project"
+        ]
+        | None
+    ) = None
+    date_range: str | None = None
+    location: str | None = None
+    description: str | None = None
     skills: tuple[str, ...] = ()
     metrics: dict[str, int | float] = Field(default_factory=dict)
     evidence_url: str | None = None
