@@ -271,10 +271,6 @@ def _validate_content_manifest(
     ):
         raise _ResumeWritingPolicyError("content_manifest_sections")
 
-    rendered_skills = "\n".join(skill.text for skill in content.skills).casefold()
-    if any(skill.casefold() not in rendered_skills for skill in manifest.skill_names):
-        raise _ResumeWritingPolicyError("content_manifest_skills")
-
 
 def _validate_section_budget(
     entries: tuple[ResumeEntry, ...],

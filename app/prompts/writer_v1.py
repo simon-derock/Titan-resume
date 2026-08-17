@@ -162,9 +162,9 @@ def _section_content_manifest(request: ResumeWritingRequest) -> str:
         f"- Education sources: {len(manifest.education_source_ids)} — "
         f"{', '.join(manifest.education_source_ids) or '(none)'}\n"
         f"- Exact verified skill count: {len(manifest.skill_names)} — {skills}\n"
-        "Every listed experience, project, education item, and skill must be "
-        "represented. Rewrite descriptions for the JD, but do not change these "
-        "counts or source identities."
+        "Every listed experience, project, and education item must be represented. "
+        "The verified skill rail is populated deterministically after writing; "
+        "do not invent or omit evidence while rewriting descriptions for the JD."
     )
 
 
