@@ -38,7 +38,9 @@ def test_verified_entry_metadata_replaces_model_structural_fields() -> None:
         ),
     )
 
-    enriched = apply_verified_entry_metadata(content=content, evidence_records=(record,))
+    enriched = apply_verified_entry_metadata(
+        content=content, evidence_records=(record,)
+    )
 
     entry = enriched.experience[0]
     assert entry.heading == "Example Labs"
