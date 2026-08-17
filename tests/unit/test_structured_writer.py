@@ -6,6 +6,7 @@ import pytest
 
 from app.models import (
     EvidenceRecord,
+    ResumeContentManifest,
     ResumeSpaceBudget,
     ResumeStrategy,
     ResumeWritingRequest,
@@ -245,6 +246,27 @@ def test_writer_sends_only_strategy_selected_evidence() -> None:
         "evidence.skill.python",
     )
     assert "evidence.omitted.private" not in client.requests[0].model_dump_json()
+
+
+def test_writer_does_not_require_model_to_emit_deterministic_skill_rail() -> None:
+    manifest = ResumeContentManifest(
+        experience_source_ids=("experience.blackcoat",),
+        project_source_ids=("project.titan",),
+        skill_names=("Python", "FastAPI"),
+        education_source_ids=("education.degree",),
+    )
+    service, client = writer([valid_response()], max_attempts=1)
+
+    result = service.write(
+        job_description=job_description(),
+        strategy=strategy(),
+        space_budget=space_budget(),
+        evidence_records=evidence_records(),
+        content_manifest=manifest,
+    )
+
+    assert result.resume_id == "resume.example.ai_engineer.001"
+    assert len(client.requests) == 1
 
 
 def test_writer_preserves_external_geometry_repair_feedback() -> None:
