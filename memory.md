@@ -204,7 +204,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 249 tests with three live tests deselected.
+The complete non-live suite passes 250 tests with three live tests deselected.
 The reviewed live Gemini 3.6 artifact is exactly one A4 page, exposes ATS text
 in valid per-column order, embeds every font, contains eleven verified links,
 and passes all geometry gates. Live vision calls remain zero. The files changed
@@ -613,3 +613,7 @@ on the primary model when its daily quota resets and capture the five-JD report.
   all five experiences, six projects, and education. Added a post-writer
   metadata normalizer so the model may rewrite descriptions but cannot alter
   verified structural fields or links. The non-live suite passes 249 tests.
+- 2026-08-17: Decoupled deterministic skill-rail generation from the model's
+  JSON response. The writer now validates structural entry coverage while the
+  post-writer skill rail supplies the exact verified skill count. This removes
+  an unnecessary 80-skill output burden; the non-live suite passes 250 tests.

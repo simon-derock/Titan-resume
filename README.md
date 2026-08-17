@@ -9,7 +9,7 @@
 [![CI](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml/badge.svg)](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Package manager](https://img.shields.io/badge/package%20manager-uv-DE5FE9)](https://docs.astral.sh/uv/)
-[![Tests](https://img.shields.io/badge/tests-249%20passing-2EA44F)](#verification)
+[![Tests](https://img.shields.io/badge/tests-250%20passing-2EA44F)](#verification)
 
 [Architecture](#architecture) · [Quality gates](#quality-gates) · [Templates](#resume-templates) · [Setup](#local-setup) · [Roadmap](#project-status)
 
@@ -157,7 +157,9 @@ constraints. Evidence can also carry explicit organization, title, employment
 type, date range, location, and description fields; these structural facts are
 shown to the writer instead of being inferred from an unstructured claim.
 After writing, verified metadata is reapplied deterministically to entry
-headings, subheadings, dates, locations, and links.
+headings, subheadings, dates, locations, and links. Skill rails are generated
+after model writing, so large verified inventories do not consume the model's
+structured-output budget.
 
 ## Resume templates
 
