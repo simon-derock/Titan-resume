@@ -572,7 +572,11 @@ def test_executor_writer_failure_sets_failed_status(tmp_path) -> None:
 
     evidence_id = "evidence.experience.titan"
 
-    writer = FakeWriter(responses=[ResumeWritingError(attempts=2)])
+    writer = FakeWriter(
+        responses=[
+            ResumeWritingError(attempts=2, failure_codes=("provider_error",))
+        ]
+    )
     pipeline = FakePipeline(results=[])
 
     exc = g.ResumeGraphExecutor(writer=writer, pipeline=pipeline)
@@ -595,3 +599,4 @@ def test_executor_writer_failure_sets_failed_status(tmp_path) -> None:
     )
 
     assert state["status"] == "write_failed"
+    assert state["repair_feedback"] == "writer_failed:provider_error"
