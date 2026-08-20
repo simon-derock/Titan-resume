@@ -39,6 +39,7 @@ from app.models import (
     StructuredJobDescription,
     ValidationIssue,
 )
+from app.services.jd import JobDescriptionAnalysisError
 from app.services.writing import ResumeWritingError, StructuredResumeWriter
 
 if TYPE_CHECKING:
@@ -187,6 +188,15 @@ class ResumeGraphExecutor:
         if self._jd_analyzer is not None:
             try:
                 jd = self._jd_analyzer.analyze(ingested_jd)
+            except JobDescriptionAnalysisError as exc:
+                state["status"] = "write_failed"
+                if exc.failure_codes:
+                    state["repair_feedback"] = "jd_analysis_failed:" + ",".join(
+                        exc.failure_codes
+                    )
+                else:
+                    state["repair_feedback"] = str(exc)
+                return state
             except Exception as exc:
                 state["status"] = "write_failed"
                 state["repair_feedback"] = f"JD analysis failed: {exc}"

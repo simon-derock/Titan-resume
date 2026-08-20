@@ -21,8 +21,9 @@ class JobDescriptionIngestionError(ValueError):
 class JobDescriptionAnalysisError(RuntimeError):
     """Raised after bounded structured-analysis attempts are exhausted."""
 
-    def __init__(self, *, attempts: int) -> None:
+    def __init__(self, *, attempts: int, failure_codes: tuple[str, ...] = ()) -> None:
         self.attempts = attempts
+        self.failure_codes = failure_codes
         super().__init__(f"structured JD analysis failed after {attempts} attempts")
 
 
@@ -60,10 +61,12 @@ class StructuredJobDescriptionAnalyzer:
             raw_text=document.raw_text,
             raw_text_hash=document.raw_text_hash,
         )
+        failure_codes: list[str] = []
         for _ in range(self._max_attempts):
             try:
                 response = self._client.analyze(request)
             except Exception:
+                failure_codes.append("provider_error")
                 continue
 
             try:
@@ -72,9 +75,13 @@ class StructuredJobDescriptionAnalyzer:
                     expected_hash=document.raw_text_hash,
                 )
             except (ValidationError, _ForeignSourceHashError):
+                failure_codes.append("schema_or_source_error")
                 continue
 
-        raise JobDescriptionAnalysisError(attempts=self._max_attempts) from None
+        raise JobDescriptionAnalysisError(
+            attempts=self._max_attempts,
+            failure_codes=tuple(dict.fromkeys(failure_codes)),
+        ) from None
 
 
 class JobDescriptionIngester:
