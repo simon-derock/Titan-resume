@@ -204,7 +204,7 @@ provenance and attribution; they are not used at compilation time.
 
 ## Test Status
 
-The complete non-live suite passes 250 tests with three live tests deselected.
+The complete non-live suite passes 254 tests with three live tests deselected.
 The reviewed live Gemini 3.6 artifact is exactly one A4 page, exposes ATS text
 in valid per-column order, embeds every font, contains eleven verified links,
 and passes all geometry gates. Live vision calls remain zero. The files changed
@@ -617,3 +617,9 @@ on the primary model when its daily quota resets and capture the five-JD report.
   JSON response. The writer now validates structural entry coverage while the
   post-writer skill rail supplies the exact verified skill count. This removes
   an unnecessary 80-skill output burden; the non-live suite passes 250 tests.
+- 2026-08-20: Added `FallbackCompletionsBackend` for ordered provider failover
+  and sanitized failure codes for both resume writing and JD analysis. Graph
+  state now distinguishes provider exhaustion from schema/policy failures
+  without exposing raw API errors. No Mistral/Cohere credentials are currently
+  present in the private `.env`, so the next live run still requires those keys
+  before fallback can be exercised. The non-live suite passes 254 tests.

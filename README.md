@@ -9,7 +9,7 @@
 [![CI](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml/badge.svg)](https://github.com/simon-derock/Titan-resume/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Package manager](https://img.shields.io/badge/package%20manager-uv-DE5FE9)](https://docs.astral.sh/uv/)
-[![Tests](https://img.shields.io/badge/tests-250%20passing-2EA44F)](#verification)
+[![Tests](https://img.shields.io/badge/tests-254%20passing-2EA44F)](#verification)
 
 [Architecture](#architecture) · [Quality gates](#quality-gates) · [Templates](#resume-templates) · [Setup](#local-setup) · [Roadmap](#project-status)
 
@@ -137,6 +137,12 @@ use smaller measured caps. Callers
 can request exact project or skill counts with `ResumeContentRequirements`; a
 request larger than verified evidence or the selected template's physical
 capacity fails explicitly instead of silently dropping content.
+
+Provider adapters are composable through `FallbackCompletionsBackend`: an
+injected Gemini backend can be followed by Mistral, Cohere, or another backend
+implementing the same `complete(prompt)` contract. Provider and JD-analysis
+exhaustion exposes only sanitized codes in graph state; raw API errors and
+credentials never leave the backend boundary.
 
 ```python
 from app.models import ResumeContentRequirements
