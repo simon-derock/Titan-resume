@@ -508,6 +508,20 @@ def test_writer_returns_a_sanitized_failure_after_retry_exhaustion() -> None:
     assert len(client.requests) == 2
 
 
+def test_writer_error_exposes_sanitized_failure_codes() -> None:
+    service, _ = writer(
+        [RuntimeError("provider quota secret"), RuntimeError("another secret")],
+        max_attempts=2,
+    )
+
+    with pytest.raises(ResumeWritingError) as raised:
+        write_resume(service)
+
+    assert raised.value.attempts == 2
+    assert raised.value.failure_codes == ("provider_error",)
+    assert "provider quota secret" not in str(raised.value)
+
+
 @pytest.mark.parametrize("max_attempts", [0, 4])
 def test_writer_rejects_an_unbounded_retry_policy(max_attempts: int) -> None:
     with pytest.raises(

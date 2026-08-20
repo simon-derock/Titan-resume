@@ -130,6 +130,38 @@ def test_provider_adapter_module_exposes_prompt_adapter() -> None:
     assert callable(PromptResumeWriterClient)
 
 
+@pytest.mark.contract
+def test_fallback_backend_uses_next_provider_after_failure() -> None:
+    from app.services.providers import FallbackCompletionsBackend
+
+    class BrokenBackend:
+        def complete(self, prompt: str) -> object:
+            raise RuntimeError("private provider failure")
+
+    class WorkingBackend:
+        def complete(self, prompt: str) -> object:
+            return {"ok": True}
+
+    backend = FallbackCompletionsBackend(backends=(BrokenBackend(), WorkingBackend()))
+
+    assert backend.complete("prompt") == {"ok": True}
+
+
+@pytest.mark.contract
+def test_fallback_backend_reports_only_sanitized_failure_when_all_fail() -> None:
+    from app.services.providers import FallbackCompletionsBackend
+
+    class BrokenBackend:
+        def complete(self, prompt: str) -> object:
+            raise RuntimeError("private provider failure")
+
+    backend = FallbackCompletionsBackend(backends=(BrokenBackend(), BrokenBackend()))
+
+    with pytest.raises(RuntimeError, match="all completion providers failed") as raised:
+        backend.complete("prompt")
+    assert "private provider failure" not in str(raised.value)
+
+
 # ---------------------------------------------------------------------------
 # 2. FakeResumeWriterAdapterClient satisfies the StructuredResumeWriterClient protocol
 # ---------------------------------------------------------------------------
