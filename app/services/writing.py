@@ -23,8 +23,9 @@ from app.models import (
 class ResumeWritingError(RuntimeError):
     """Raised after bounded structured-writing attempts are exhausted."""
 
-    def __init__(self, *, attempts: int) -> None:
+    def __init__(self, *, attempts: int, failure_codes: tuple[str, ...] = ()) -> None:
         self.attempts = attempts
+        self.failure_codes = failure_codes
         super().__init__(f"structured resume writing failed after {attempts} attempts")
 
 
@@ -103,10 +104,12 @@ class StructuredResumeWriter:
             template_id=template_id,
             repair_feedback=repair_feedback,
         )
+        failure_codes: list[str] = []
         for _ in range(self._max_attempts):
             try:
                 response = self._client.write(request)
             except Exception:
+                failure_codes.append("provider_error")
                 continue
 
             try:
@@ -121,10 +124,13 @@ class StructuredResumeWriter:
                 )
                 return content
             except ValidationError as exc:
+                failure_codes.append("schema_error")
                 feedback = _schema_feedback(exc)
             except UnknownEvidenceError:
+                failure_codes.append("evidence_provenance")
                 feedback = ("evidence_provenance",)
             except _ResumeWritingPolicyError as exc:
+                failure_codes.append(exc.code)
                 feedback = (exc.code,)
 
             request = request.model_copy(
@@ -135,7 +141,10 @@ class StructuredResumeWriter:
                 }
             )
 
-        raise ResumeWritingError(attempts=self._max_attempts) from None
+        raise ResumeWritingError(
+            attempts=self._max_attempts,
+            failure_codes=tuple(dict.fromkeys(failure_codes)),
+        ) from None
 
 
 def _selected_evidence_ids(strategy: ResumeStrategy) -> set[str]:

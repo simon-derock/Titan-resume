@@ -47,6 +47,23 @@ class CompletionsBackend(Protocol):
         ...
 
 
+class FallbackCompletionsBackend:
+    """Try injected completion providers in order without leaking exceptions."""
+
+    def __init__(self, *, backends: tuple[CompletionsBackend, ...]) -> None:
+        if not backends:
+            raise ValueError("at least one completion backend is required")
+        self._backends = backends
+
+    def complete(self, prompt: str) -> object:
+        for backend in self._backends:
+            try:
+                return backend.complete(prompt)
+            except Exception:
+                continue
+        raise RuntimeError("all completion providers failed") from None
+
+
 # ---------------------------------------------------------------------------
 # FakeResumeWriterAdapterClient — deterministic test double
 # ---------------------------------------------------------------------------
