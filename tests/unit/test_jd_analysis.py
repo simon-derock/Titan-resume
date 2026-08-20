@@ -149,6 +149,20 @@ def test_jd_analyzer_returns_a_sanitized_typed_failure_after_retry_exhaustion() 
     assert len(client.requests) == 2
 
 
+def test_jd_analysis_error_exposes_sanitized_failure_codes() -> None:
+    client = FakeStructuredJdClient(
+        responses=[RuntimeError("provider secret"), RuntimeError("second secret")]
+    )
+
+    with pytest.raises(JobDescriptionAnalysisError) as captured:
+        StructuredJobDescriptionAnalyzer(client=client, max_attempts=2).analyze(
+            ingested_jd()
+        )
+
+    assert captured.value.failure_codes == ("provider_error",)
+    assert "provider secret" not in str(captured.value)
+
+
 @pytest.mark.parametrize("max_attempts", [0, 4])
 def test_jd_analyzer_rejects_an_unbounded_retry_policy(max_attempts: int) -> None:
     with pytest.raises(
