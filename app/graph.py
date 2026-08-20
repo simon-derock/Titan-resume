@@ -290,7 +290,12 @@ class ResumeGraphExecutor:
                     )
             except ResumeWritingError as exc:
                 state["status"] = "write_failed"
-                state["repair_feedback"] = str(exc)
+                if exc.failure_codes:
+                    state["repair_feedback"] = "writer_failed:" + ",".join(
+                        exc.failure_codes
+                    )
+                else:
+                    state["repair_feedback"] = str(exc)
                 return state
             except Exception as exc:
                 state["status"] = "write_failed"
