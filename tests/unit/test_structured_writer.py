@@ -436,7 +436,7 @@ def test_writer_rejects_skills_line_overflow() -> None:
     invalid = valid_response()
     skills = invalid["skills"]
     assert isinstance(skills, list)
-    invalid["skills"] = [*skills, *skills, *skills, *skills, *skills]
+    invalid["skills"] = [*skills, *skills, *skills, *skills, *skills, *skills]
     service, client = writer([invalid, valid_response()])
 
     result = write_resume(service)

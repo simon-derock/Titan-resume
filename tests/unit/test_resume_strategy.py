@@ -137,12 +137,12 @@ def test_strategy_applies_source_and_bullet_caps_deterministically() -> None:
 
     assert strategy.selected_experience_evidence_ids == tuple(
         f"evidence.experience.{source_index}.{bullet_index}"
-        for source_index in range(1, 4)
-        for bullet_index in range(1, 4)
+        for source_index in range(1, 5)
+        for bullet_index in range(1, 3)
     )
     assert strategy.selected_project_evidence_ids == tuple(
         f"evidence.project.{source_index}.{bullet_index}"
-        for source_index in range(1, 4)
+        for source_index in range(1, 5)
         for bullet_index in range(1, 3)
     )
 

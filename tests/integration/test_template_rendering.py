@@ -200,9 +200,57 @@ def test_templates_render_verified_entry_heading_hyperlink(
         r"\href{https://github.com/alex/titan}{\underline{\MakeUppercase{TITAN}}"
         r"\textsuperscript{\tiny\,[link]}}"
         if template_id == "deedy_cv_v1"
-        else r"\href{https://github.com/alex/titan}{TITAN}"
+        else (
+            r"\titanProjectLink{https://github.com/alex/titan}{TITAN}"
+            if template_id == "resume_v1"
+            else r"\href{https://github.com/alex/titan}{TITAN}"
+        )
     )
     assert expected_link in source
+
+
+@pytest.mark.integration
+def test_resume_template_gives_project_links_a_visible_marker_and_spacing(
+    tmp_path: Path,
+) -> None:
+    """Projects are the portfolio proof section and need a legible link affordance."""
+    evidence_id = "project.titan.001"
+    content = ResumeContent(
+        resume_id="resume.project_visual_rhythm.001",
+        target_role="AI Engineer",
+        projects=(
+            ResumeEntry(
+                element_id="projects.titan",
+                heading="TITAN",
+                url="https://github.com/alex/titan",
+                evidence_ids=(evidence_id,),
+                bullets=(
+                    ResumeBullet(
+                        element_id="projects.titan.bullet",
+                        text="Built a grounded resume compiler.",
+                        evidence_ids=(evidence_id,),
+                        target_max_lines=1,
+                    ),
+                ),
+            ),
+        ),
+        template_id="resume_v1",
+    )
+
+    rendered_path = LatexRenderer().render(
+        ResumeHeader(name="Alex Morgan", headline="AI Engineer"),
+        content,
+        tmp_path / "resume.tex",
+    )
+
+    source = rendered_path.read_text(encoding="utf-8")
+    assert r"\newcommand{\titanProjectLink}" in source
+    assert r"\titanProjectLink{https://github.com/alex/titan}{TITAN}" in source
+    assert r"\raisebox{0.35ex}{\fontfamily{phv}\fontsize{6}{6}\selectfont\textbar{}link}" in source
+    assert r"\titlespacing*{\section}{0pt}{5pt}{5pt}" in source
+    assert r"itemsep=0pt, topsep=2pt" in source
+    assert r"\vspace{1pt}" in source
+    assert r"\renewcommand{\familydefault}{\sfdefault}" in source
 
 
 @pytest.mark.integration

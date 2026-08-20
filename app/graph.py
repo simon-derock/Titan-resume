@@ -426,8 +426,9 @@ def _default_content_requirements(
     skill_count = _skill_capacity_for_template(template_id)
     if available_skills is not None:
         skill_count = min(skill_count, available_skills)
+    project_limit = 6 if template_id == "resume_v1" else 5
     return ResumeContentRequirements(
-        project_count=min(5, available_projects),
+        project_count=min(project_limit, available_projects),
         skill_count=skill_count,
     )
 
@@ -443,9 +444,7 @@ def _skill_capacity(*, space_budget: ResumeSpaceBudget) -> int:
 def _skill_capacity_for_template(template_id: ResumeTemplateId) -> int:
     if template_id == "deedy_cv_v1":
         return 80
-    if template_id == "moderncv_two_column_v1":
-        return 32
-    return 24
+    return 32
 
 
 def _skill_inventory_count(evidence_records: tuple[EvidenceRecord, ...]) -> int:

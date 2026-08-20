@@ -130,10 +130,11 @@ failures.
 The writer does not decide which history disappears. Before model generation,
 TITAN creates a manifest containing every verified experience and education
 source, a JD-ranked project selection, and a verified skill inventory. The
-default policy keeps all experiences, selects up to five projects, and chooses a
+default policy keeps all experiences, selects up to six projects for the rich
+single-column `resume_v1` layout (five for the other templates), and chooses a
 template-fit JD-ranked slice from the complete verified skill inventory. Deedy
-defaults to 80 skills, matching the reviewed handmade density; other templates
-use smaller measured caps. Callers
+defaults to 80 skills, matching the reviewed handmade density; `resume_v1` and
+ModernCV default to 32. Callers
 can request exact project or skill counts with `ResumeContentRequirements`; a
 request larger than verified evidence or the selected template's physical
 capacity fails explicitly instead of silently dropping content.

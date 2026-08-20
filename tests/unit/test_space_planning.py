@@ -12,11 +12,11 @@ def test_default_space_plan_stays_within_the_locked_page_budget() -> None:
         available_education_entries=1,
     )
 
-    assert plan.total_line_limit == 47
-    assert plan.reserved_line_count == 47
+    assert plan.total_line_limit == 56
+    assert plan.reserved_line_count == 56
     assert plan.header_line_limit == 3
     assert plan.summary_line_limit == 2
-    assert plan.skills_line_limit == 4
+    assert plan.skills_line_limit == 5
 
 
 def test_space_planner_caps_entries_and_bullets_under_large_inventory() -> None:
@@ -26,12 +26,12 @@ def test_space_planner_caps_entries_and_bullets_under_large_inventory() -> None:
         available_education_entries=1_000,
     )
 
-    assert plan.experience.entry_limit == 3
-    assert plan.experience.bullets_per_entry_limit == 3
-    assert plan.experience.line_limit == 18
-    assert plan.projects.entry_limit == 3
+    assert plan.experience.entry_limit == 5
+    assert plan.experience.bullets_per_entry_limit == 2
+    assert plan.experience.line_limit == 20
+    assert plan.projects.entry_limit == 6
     assert plan.projects.bullets_per_entry_limit == 2
-    assert plan.projects.line_limit == 18
+    assert plan.projects.line_limit == 24
     assert plan.education.entry_limit == 1
     assert plan.education.bullets_per_entry_limit == 0
     assert plan.education.line_limit == 2

@@ -162,3 +162,14 @@ def test_default_requirements_keep_a_template_fit_skill_selection() -> None:
 
     assert requirements.project_count == 5
     assert requirements.skill_count == 80
+
+
+@pytest.mark.unit
+def test_default_single_column_requirements_retain_all_verified_projects() -> None:
+    requirements = _default_content_requirements(
+        template_id="resume_v1",
+        available_projects=6,
+    )
+
+    assert requirements.project_count == 6
+    assert requirements.skill_count == 32

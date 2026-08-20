@@ -10,12 +10,13 @@
 \usepackage{titlesec}
 \usepackage{xcolor}
 
+\renewcommand{\familydefault}{\sfdefault}
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0pt}
-\setlist[itemize]{leftmargin=0.16in, itemsep=0pt, topsep=1pt, parsep=0pt}
+\setlist[itemize]{leftmargin=0.16in, itemsep=0pt, topsep=2pt, parsep=0pt}
 \titleformat{\section}{\large\bfseries}{}{0pt}{}[\vspace{-3pt}\titlerule]
-\titlespacing*{\section}{0pt}{5pt}{3pt}
+\titlespacing*{\section}{0pt}{5pt}{5pt}
 
 {% raw %}\newcommand{\resumeEntry}[4]{
   \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lr}
@@ -24,8 +25,12 @@
     \else
     \textit{#2} & \textit{#3}
     \fi
-  \end{tabular*}\vspace{-3pt}
-}{% endraw %}
+  \end{tabular*}\vspace{0pt}
+}
+\newcommand{\titanProjectLink}[2]{
+  \href{#1}{\textbf{#2}}\hspace{0.2em}\raisebox{0.35ex}{\fontfamily{phv}\fontsize{6}{6}\selectfont\textbar{}link}
+}
+{% endraw %}
 
 \begin{document}
 \fontsize{9.5}{11}\selectfont
@@ -49,8 +54,8 @@
 \section{Projects}
 {% for entry in resume.projects %}
 % TITAN-ELEMENT: {{ entry.element_id }}
-\resumeEntry{%- if entry.url %}{\href{ {{- entry.url | latex -}} }{ {{- entry.heading | latex -}} }}{% else %}{ {{- entry.heading | latex -}} }{% endif %}{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }
-{% if entry.bullets %}\begin{itemize}
+\resumeEntry{%- if entry.url %}{\titanProjectLink{ {{- entry.url | latex -}} }{ {{- entry.heading | latex -}} }}{% else %}{\textbf{ {{- entry.heading | latex -}} }}{% endif %}{ {{- (entry.subheading or "") | latex -}} }{ {{- (entry.location or "") | latex -}} }{ {{- (entry.date_range or "") | latex -}} }
+{% if entry.bullets %}\vspace{1pt}\begin{itemize}
 {% for bullet in entry.bullets %}% TITAN-ELEMENT: {{ bullet.element_id }}
 \item {{ bullet.text | latex }}
 {% endfor %}\end{itemize}

@@ -99,7 +99,7 @@ def test_deedy_project_stack_preserves_evidence_supported_date() -> None:
 
 
 @pytest.mark.unit
-def test_project_stack_leaves_non_deedy_templates_unchanged() -> None:
+def test_project_stack_enriches_single_column_templates_too() -> None:
     evidence_id = "evidence.project.dex"
     content = ResumeContent(
         resume_id="resume.project_stack.single_column.001",
@@ -124,4 +124,7 @@ def test_project_stack_leaves_non_deedy_templates_unchanged() -> None:
         ),
     )
 
-    assert enriched is content
+    assert enriched is not content
+    assert enriched.projects[0].subheading == (
+        "Python | Qdrant | Jina Embeddings | Cerebras | Groq | Mistral"
+    )

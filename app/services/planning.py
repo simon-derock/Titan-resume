@@ -69,8 +69,6 @@ class SpacePlanner:
 
 
 def _policy_for_template(template_id: ResumeTemplateId) -> SpacePlanningPolicy:
-    if template_id == "resume_v1":
-        return SpacePlanningPolicy()
     return SpacePlanningPolicy(
         total_line_limit=56,
         experience_line_limit=20,

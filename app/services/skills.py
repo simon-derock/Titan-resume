@@ -160,10 +160,7 @@ def build_verified_project_stacks(
     evidence_records: Iterable[EvidenceRecord],
     job_description: StructuredJobDescription,
 ) -> ResumeContent:
-    """Replace generic Deedy project metadata with verified technology tags."""
-
-    if content.template_id != "deedy_cv_v1":
-        return content
+    """Replace generic project metadata with verified technology tags."""
 
     records_by_id = {
         record.evidence_id: record
