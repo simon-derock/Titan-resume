@@ -246,7 +246,7 @@ def test_resume_template_gives_project_links_a_visible_marker_and_spacing(
     source = rendered_path.read_text(encoding="utf-8")
     assert r"\newcommand{\titanProjectLink}" in source
     assert r"\titanProjectLink{https://github.com/alex/titan}{TITAN}" in source
-    assert r"\raisebox{0.35ex}{\fontfamily{phv}\fontsize{6}{6}\selectfont\ensuremath{\leftrightarrow}}" in source
+    assert r"\raisebox{0.35ex}{\fontfamily{phv}\fontsize{6}{6}\selectfont\textless{}\kern-0.25em\textgreater{}}" in source
     assert r"\titlespacing*{\section}{0pt}{5pt}{5pt}" in source
     assert r"itemsep=0pt, topsep=2pt" in source
     assert r"\end{tabular*}\vspace{1pt}" in source
