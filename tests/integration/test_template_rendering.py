@@ -249,8 +249,9 @@ def test_resume_template_gives_project_links_a_visible_marker_and_spacing(
     assert r"\raisebox{0.35ex}{\fontfamily{phv}\fontsize{6}{6}\selectfont\textbar{}link}" in source
     assert r"\titlespacing*{\section}{0pt}{5pt}{5pt}" in source
     assert r"itemsep=0pt, topsep=2pt" in source
-    assert r"\vspace{1pt}" in source
+    assert r"\end{tabular*}\vspace{1pt}" in source
     assert r"\renewcommand{\familydefault}{\sfdefault}" in source
+    assert r"\fontsize{9.5}{11}\selectfont" in source
 
 
 @pytest.mark.integration
